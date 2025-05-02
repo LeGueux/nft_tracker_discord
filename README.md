@@ -63,7 +63,7 @@ ALIVE_PING_INTERVAL=10
 ### 4. Lancez le bot
 
 ```bash
-npm start
+node index.js
 ```
 
 Le bot démarrera et commencera à écouter les événements de transfert NFT. Si le mode **TEST** est activé, le bot enverra un maximum de 3 notifications avant de s'arrêter.
