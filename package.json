@@ -1,0 +1,9 @@
+{
+  "name": "nft-discord-bot",
+  "type": "module",
+  "dependencies": {
+    "discord.js": "^14.0.0",
+    "ethers": "^6.0.0",
+    "dotenv": "^16.0.0"
+  }
+}
