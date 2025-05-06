@@ -1,8 +1,16 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import { buildSaleNFTEmbed } from "./embeds.js";
 import { getNFTData } from "./nft-utils.js";
-import { IS_TEST_MODE, ALIVE_PING_INTERVAL } from "./config.js";
+import {
+  IS_TEST_MODE,
+  ALIVE_PING_INTERVAL,
+  COMETH_API_INTERVAL,
+} from "./config.js";
 import { sendStatusMessage } from "./error-handler.js";
+import {
+  callComethApiForLastListings,
+  callComethApiForLastSales,
+} from "./cometh-api.js";
 
 export const discordClient = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -14,11 +22,11 @@ export function getThreadIdForToken(from) {
       return process.env.THREAD_ID_FRANCK;
     case process.env.NICO_ADDRESS:
       return process.env.THREAD_ID_NICO;
-    case "sales":
+    case "listings":
       return process.env.THREAD_ID_1;
     case "sales-snipe":
       return process.env.THREAD_ID_2;
-    case "listings":
+    case "sales":
       return process.env.THREAD_ID_2;
     default:
       return process.env.STATUS_THREAD_ID;
@@ -61,6 +69,16 @@ export function eventBotReady(discordClient) {
         console.error("Erreur envoi test embed :", e);
       }
     }
+    // Start calling Cometh API with interval
+    await callComethApiForLastListings(discordClient);
+    // setInterval(async () => {
+    //   await callComethApiForLastListings(discordClient);
+    // }, COMETH_API_INTERVAL);
+
+    // Start calling Cometh API with interval
+    // await callComethApiForLastSales(discordClient);
+
+    // Alive ping
     setInterval(async () => {
       await sendStatusMessage(
         discordClient,
