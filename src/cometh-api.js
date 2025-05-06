@@ -1,6 +1,6 @@
 import { buildSaleNFTEmbed } from "./embeds.js";
 import { getThreadIdForToken } from "./discord.js";
-import { getNFTData } from "./nft-utils.js";
+import { getNFTData, checkDateIsValidSinceLastOneInterval } from "./utils.js";
 
 export async function callComethApiForLastSales(discordClient) {
   try {
@@ -28,7 +28,10 @@ export async function callComethApiForLastSales(discordClient) {
     const data = await response.json();
     console.log(data);
     data.filledEvents.forEach(async (item) => {
-      if (item.direction == "sell") {
+      if (
+        item.direction == "sell" &&
+        checkDateIsValidSinceLastOneInterval(new Date(item.blockTimestamp))
+      ) {
         const tokenId = item.tokenId;
         const data = await getNFTData(tokenId);
         const embed = buildSaleNFTEmbed(
@@ -82,7 +85,10 @@ export async function callComethApiForLastListings(discordClient) {
     const data = await response.json();
     console.log(data);
     data.orders.forEach(async (item) => {
-      if (item.direction == "sell") {
+      if (
+        item.direction == "sell" &&
+        checkDateIsValidSinceLastOneInterval(new Date(item.signedAt))
+      ) {
         const tokenId = item.tokenId;
         const data = await getNFTData(tokenId);
         const embed = buildSaleNFTEmbed(

@@ -1,3 +1,5 @@
+import { COMETH_API_INTERVAL } from "./config.js";
+
 function getRarityColor(rarity) {
   switch (rarity) {
     case "Rare":
@@ -9,6 +11,10 @@ function getRarityColor(rarity) {
     default:
       return "#000000";
   }
+}
+
+export function checkDateIsValidSinceLastOneInterval(date) {
+  return date >= new Date(new Date().getTime() - COMETH_API_INTERVAL);
 }
 
 export async function getNFTData(tokenId) {

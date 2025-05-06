@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import { buildSaleNFTEmbed } from "./embeds.js";
-import { getNFTData } from "./nft-utils.js";
+import { getNFTData } from "./utils.js";
 import {
   IS_TEST_MODE,
   ALIVE_PING_INTERVAL,
@@ -71,12 +71,11 @@ export function eventBotReady(discordClient) {
     }
     // Start calling Cometh API with interval
     await callComethApiForLastListings(discordClient);
-    // setInterval(async () => {
-    //   await callComethApiForLastListings(discordClient);
-    // }, COMETH_API_INTERVAL);
-
-    // Start calling Cometh API with interval
-    // await callComethApiForLastSales(discordClient);
+    await callComethApiForLastSales(discordClient);
+    setInterval(async () => {
+      await callComethApiForLastListings(discordClient);
+      await callComethApiForLastSales(discordClient);
+    }, COMETH_API_INTERVAL);
 
     // Alive ping
     setInterval(async () => {
