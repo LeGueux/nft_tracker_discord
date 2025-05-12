@@ -24,8 +24,6 @@ export function getThreadIdForToken(from) {
       return process.env.THREAD_ID_NICO;
     case "listings":
       return process.env.THREAD_ID_1;
-    case "sales-snipe":
-      return process.env.THREAD_ID_2;
     case "sales":
       return process.env.THREAD_ID_2;
     default:
@@ -53,7 +51,7 @@ export function eventBotReady(discordClient) {
         data,
         "0xFROM",
         "0xTO",
-        "PRICE",
+        50000,
         "51690",
         "sale",
       );
@@ -63,7 +61,16 @@ export function eventBotReady(discordClient) {
           getThreadIdForToken("default"),
         );
         if (thread?.isTextBased()) {
-          await thread.send({ embeds: [embed] });
+          await thread.send({
+            content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
+            embeds: [embed],
+            allowedMentions: {
+              users: [
+                process.env.FRANCK_DISCORD_USER_ID,
+                process.env.NICO_DISCORD_USER_ID,
+              ],
+            },
+          });
         }
       } catch (e) {
         console.error("Erreur envoi test embed :", e);

@@ -1,9 +1,7 @@
 import { getNFTData } from "./utils.js";
 import { getThreadIdForToken } from "./discord.js";
-import { IS_TEST_MODE, MAX_NOTIFICATIONS } from "./config.js";
+import { IS_TEST_MODE } from "./config.js";
 import { sendStatusMessage } from "./error-handler.js";
-
-let notificationCount = 0;
 
 export function setupTransferListener(discordClient, contract) {
   return;
@@ -12,7 +10,7 @@ export function setupTransferListener(discordClient, contract) {
   //   if (from === to || from === "0x0000000000000000000000000000000000000000")
   //     return;
 
-  //   if (IS_TEST_MODE && notificationCount >= MAX_NOTIFICATIONS) {
+  //   if (IS_TEST_MODE) {
   //     await sendStatusMessage(
   //       discordClient,
   //       `🛑 Max notifications atteintes (TEST MODE)`,
@@ -34,7 +32,6 @@ export function setupTransferListener(discordClient, contract) {
   //     const thread = await discordClient.channels.fetch(threadId);
   //     if (thread?.isTextBased()) {
   //       await thread.send({ embeds: [embed] });
-  //       notificationCount++;
   //     }
   //   } catch (err) {
   //     console.error("❌ Erreur d'envoi :", err);

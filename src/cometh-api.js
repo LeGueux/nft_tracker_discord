@@ -43,7 +43,15 @@ export async function callComethApiForLastSales(discordClient) {
         const threadId = getThreadIdForToken("sales");
         const thread = await discordClient.channels.fetch(threadId);
         if (thread?.isTextBased()) {
-          await thread.send({ embeds: [embed] });
+          await thread.send({
+            embeds: [embed],
+            allowedMentions: {
+              users: [
+                process.env.FRANCK_DISCORD_USER_ID,
+                process.env.NICO_DISCORD_USER_ID,
+              ],
+            },
+          });
         }
       }
     });
@@ -98,7 +106,15 @@ export async function callComethApiForLastListings(discordClient) {
         const threadId = getThreadIdForToken("listings");
         const thread = await discordClient.channels.fetch(threadId);
         if (thread?.isTextBased()) {
-          await thread.send({ embeds: [embed] });
+          await thread.send({
+            embeds: [embed],
+            allowedMentions: {
+              users: [
+                process.env.FRANCK_DISCORD_USER_ID,
+                process.env.NICO_DISCORD_USER_ID,
+              ],
+            },
+          });
         }
       }
     });
