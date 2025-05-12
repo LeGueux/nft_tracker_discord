@@ -1,6 +1,9 @@
 import "dotenv/config";
 import { discordClient, eventBotReady } from "./discord.js";
 import { setupErrorHandlers } from "./error-handler.js";
+import express from "express";
+const app = express();
+const PORT = process.env.PORT || 3000;
 // import { WebSocketProvider, Contract } from "ethers";
 // import { setupTransferListener } from "./events.js";
 
@@ -10,6 +13,17 @@ import { setupErrorHandlers } from "./error-handler.js";
 //   "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
 // ];
 // const contract = new Contract(process.env.NFT_CONTRACT_ADDRESS, abi, provider);
+
+// Route HTTP simple
+app.get("/", (req, res) => {
+  console.log("Bot actif");
+  res.send("Bot actif");
+});
+
+// Démarrage du serveur Express
+app.listen(PORT, () => {
+  console.log(`Serveur lancé sur http://localhost:${PORT}`);
+});
 
 eventBotReady(discordClient);
 // Setup listeners and error handling

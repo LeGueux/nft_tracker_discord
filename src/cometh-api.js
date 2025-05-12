@@ -26,6 +26,11 @@ export async function callComethApiForLastSales(discordClient) {
     const data = await response.json();
     // console.log(data);
     data.filledEvents.forEach(async (item) => {
+      // console.log(
+      //   item.tokenId,
+      //   item.direction,
+      //   checkDateIsValidSinceLastOneInterval(new Date(item.blockTimestamp)),
+      // );
       if (
         item.direction == "sell" &&
         checkDateIsValidSinceLastOneInterval(new Date(item.blockTimestamp))
@@ -89,6 +94,7 @@ export async function callComethApiForLastListings(discordClient) {
     const data = await response.json();
     // console.log(data);
     data.orders.forEach(async (item) => {
+      // console.log(item.tokenId, item.direction, checkDateIsValidSinceLastOneInterval(new Date(item.signedAt)));
       if (
         item.direction == "sell" &&
         checkDateIsValidSinceLastOneInterval(new Date(item.signedAt))
