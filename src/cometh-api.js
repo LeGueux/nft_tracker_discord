@@ -4,6 +4,9 @@ import { getNFTData, checkDateIsValidSinceLastOneInterval } from "./utils.js";
 
 export async function callComethApiForLastSales(discordClient) {
   try {
+    console.log(
+      `callComethApiForLastSales à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`,
+    );
     const response = await fetch(
       "https://api.marketplace.cometh.io/v1/orders/filled-events/search",
       {
@@ -15,18 +18,13 @@ export async function callComethApiForLastSales(discordClient) {
         },
         body: JSON.stringify({
           tokenAddress: process.env.NFT_CONTRACT_ADDRESS,
-          attributes: [
-            {
-              "Card Number": ["g0065"],
-            },
-          ],
           limit: 2,
         }),
       },
     );
 
     const data = await response.json();
-    console.log(data);
+    // console.log(data);
     data.filledEvents.forEach(async (item) => {
       if (
         item.direction == "sell" &&
@@ -56,6 +54,9 @@ export async function callComethApiForLastSales(discordClient) {
 
 export async function callComethApiForLastListings(discordClient) {
   try {
+    console.log(
+      `callComethApiForLastListings à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`,
+    );
     // https://api.marketplace.cometh.io/v1/doc#tag/order/operation/searchOrders
     const response = await fetch(
       "https://api.marketplace.cometh.io/v1/orders/search",
@@ -68,11 +69,6 @@ export async function callComethApiForLastListings(discordClient) {
         },
         body: JSON.stringify({
           tokenAddress: process.env.NFT_CONTRACT_ADDRESS,
-          attributes: [
-            {
-              "Card Number": ["g0065"],
-            },
-          ],
           statuses: ["open"],
           direction: "sell",
           limit: 2,
@@ -83,7 +79,7 @@ export async function callComethApiForLastListings(discordClient) {
     );
 
     const data = await response.json();
-    console.log(data);
+    // console.log(data);
     data.orders.forEach(async (item) => {
       if (
         item.direction == "sell" &&
