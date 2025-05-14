@@ -93,6 +93,9 @@ export function eventBotReady(discordClient) {
 
     // Alive ping
     setInterval(async () => {
+      console.log(
+        `🟢 Alive - ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`,
+      );
       await sendStatusMessage(
         discordClient,
         `🟢 Alive - ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`,
