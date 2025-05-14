@@ -15,11 +15,11 @@ export function buildSaleNFTEmbed(data, from, to, price, tokenId, type) {
     .setColor(data.rarity_color)
     .setTimestamp()
     .setFooter({ text: "DOLZ marketplace Tracker" })
+    .addFields({ name: "Price", value: getPriceStringFormatted(price) })
     .addFields({
       name: "Seller",
       value: "[" + from + "](https://dolz.io/marketplace/profile/" + from + ")",
-    })
-    .addFields({ name: "Price", value: getPriceStringFormatted(price) });
+    });
   if (type === "sale") {
     // sale type
     embed.setTitle(`Sale: ${data.name}`);

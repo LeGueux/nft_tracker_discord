@@ -19,6 +19,7 @@ export function checkDateIsValidSinceLastOneInterval(date) {
 
 export async function getNFTData(tokenId) {
   try {
+    // Exemple: https://cardsdata.dolz.io/jsons/51690.json
     const response = await fetch(
       `https://cardsdata.dolz.io/jsons/${tokenId}.json`,
     );
@@ -48,9 +49,14 @@ export async function getNFTData(tokenId) {
   }
 }
 
-export function getContentTagsDependsOnNFT(data) {
+export function getContentTagsDependsOnNFT(data, price) {
+  // Exemple DATA: https://cardsdata.dolz.io/jsons/51690.json
+  // console.log(data, price);
+  if (price < 900) {
+    return `<@${process.env.FRANCK_DISCORD_USER_ID}>`;
+  }
   if (data.card_number === "g0065") {
     return `<@${process.env.FRANCK_DISCORD_USER_ID}>`;
   }
-  return '';
+  return "";
 }

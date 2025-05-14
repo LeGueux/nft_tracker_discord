@@ -105,11 +105,12 @@ export async function callComethApiForLastListings(discordClient) {
       ) {
         const tokenId = item.tokenId;
         const data = await getNFTData(tokenId);
+        const price = parseInt(item.totalPrice) / 1000000000000000000;
         const embed = buildSaleNFTEmbed(
           data,
           item.maker,
           null,
-          parseInt(item.totalPrice) / 1000000000000000000,
+          price,
           tokenId,
           "listing",
         );
@@ -117,7 +118,7 @@ export async function callComethApiForLastListings(discordClient) {
         const thread = await discordClient.channels.fetch(threadId);
         if (thread?.isTextBased()) {
           await thread.send({
-            content: getContentTagsDependsOnNFT(data),
+            content: getContentTagsDependsOnNFT(data, price),
             embeds: [embed],
             allowedMentions: {
               users: [

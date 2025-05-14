@@ -16,13 +16,12 @@ const PORT = process.env.PORT || 3000;
 
 // Route HTTP simple
 app.get("/", (req, res) => {
-  console.log("Bot actif");
-  res.send("Bot actif");
+  res.send("Hello from Koyeb!");
 });
 
 // Démarrage du serveur Express
 app.listen(PORT, () => {
-  console.log(`Serveur lancé sur http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
 
 eventBotReady(discordClient);
