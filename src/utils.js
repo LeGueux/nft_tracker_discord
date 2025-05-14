@@ -47,3 +47,10 @@ export async function getNFTData(tokenId) {
     return {};
   }
 }
+
+export function getContentTagsDependsOnNFT(data) {
+  if (data.card_number === "g0065") {
+    return `<@${process.env.FRANCK_DISCORD_USER_ID}>`;
+  }
+  return '';
+}

@@ -16,8 +16,15 @@ export const discordClient = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
 });
 
-export function getThreadIdForToken(from) {
-  switch (from) {
+export function getThreadIdForToken(type, from) {
+  // Cas où from correspond à un utilisateur spécifique
+  if (from === process.env.FRANCK_ADDRESS) {
+    return process.env.THREAD_ID_FRANCK;
+  } else if (from === process.env.NICO_ADDRESS) {
+    return process.env.THREAD_ID_NICO;
+  }
+
+  switch (type) {
     case process.env.FRANCK_ADDRESS:
       return process.env.THREAD_ID_FRANCK;
     case process.env.NICO_ADDRESS:
@@ -35,7 +42,7 @@ export function getThreadIdForToken(from) {
 export function eventBotReady(discordClient) {
   discordClient.once("ready", async () => {
     console.log(
-      `✅ Bot connecté en tant que ${discordClient.user.tag} à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`,
+      `✅ Bot démarré à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`,
     );
     await sendStatusMessage(
       discordClient,

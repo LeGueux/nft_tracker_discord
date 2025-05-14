@@ -1,6 +1,10 @@
 import { buildSaleNFTEmbed } from "./embeds.js";
 import { getThreadIdForToken } from "./discord.js";
-import { getNFTData, checkDateIsValidSinceLastOneInterval } from "./utils.js";
+import {
+  getNFTData,
+  checkDateIsValidSinceLastOneInterval,
+  getContentTagsDependsOnNFT,
+} from "./utils.js";
 
 export async function callComethApiForLastSales(discordClient) {
   try {
@@ -45,7 +49,7 @@ export async function callComethApiForLastSales(discordClient) {
           tokenId,
           "sale",
         );
-        const threadId = getThreadIdForToken("sales");
+        const threadId = getThreadIdForToken("sales", item.maker);
         const thread = await discordClient.channels.fetch(threadId);
         if (thread?.isTextBased()) {
           await thread.send({
@@ -113,6 +117,7 @@ export async function callComethApiForLastListings(discordClient) {
         const thread = await discordClient.channels.fetch(threadId);
         if (thread?.isTextBased()) {
           await thread.send({
+            content: getContentTagsDependsOnNFT(data),
             embeds: [embed],
             allowedMentions: {
               users: [
