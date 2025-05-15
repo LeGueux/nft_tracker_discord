@@ -2,7 +2,7 @@
 FROM node:24
 
 # Dossier de travail
-WORKDIR /app
+WORKDIR /
 
 # Copier les fichiers
 COPY package*.json ./
