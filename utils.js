@@ -49,14 +49,44 @@ export async function getNFTData(tokenId) {
   }
 }
 
-export function getContentTagsDependsOnNFT(data, price) {
+export function getContentTagsDependsOnNFT(data, price, type) {
   // Exemple DATA: https://cardsdata.dolz.io/jsons/51690.json
   // console.log(data, price);
-  if (price < 900) {
+  // Listing / Price < 900
+  if (price < 900 && type === "listings") {
     return `<@${process.env.FRANCK_DISCORD_USER_ID}>`;
   }
-  if (data.card_number === "g0065") {
+  // Listing / Price < 9000 / Epic
+  if (price < 9000 && data.rarity === "Epic" && type === "listings") {
     return `<@${process.env.FRANCK_DISCORD_USER_ID}>`;
+  }
+  // Listing / Octokuro
+  if (data.card_number === "g0065" && type === "listings") {
+    return `<@${process.env.FRANCK_DISCORD_USER_ID}>`;
+  }
+  // Sale / Georgia / Limited
+  if (
+    data.card_number === "g0116" &&
+    data.rarity === "Limited" &&
+    type === "sales"
+  ) {
+    return `<@${process.env.NICO_DISCORD_USER_ID}>`;
+  }
+  // Sale / Ashby Winter / Limited
+  if (
+    data.card_number === "g0053" &&
+    data.rarity === "Limited" &&
+    type === "sales"
+  ) {
+    return `<@${process.env.NICO_DISCORD_USER_ID}>`;
+  }
+  // Sale / Sakura / Limited / Rare
+  if (
+    data.card_number === "g0119" &&
+    ["Limited", "Rare"].includes(data.rarity) &&
+    type === "sales"
+  ) {
+    return `<@${process.env.NICO_DISCORD_USER_ID}>`;
   }
   return "";
 }
