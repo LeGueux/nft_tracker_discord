@@ -22,7 +22,7 @@ export async function callComethApiForLastSales(discordClient) {
         },
         body: JSON.stringify({
           tokenAddress: process.env.NFT_CONTRACT_ADDRESS,
-          limit: 2,
+          limit: 50,
         }),
       },
     );
@@ -88,7 +88,7 @@ export async function callComethApiForLastListings(discordClient) {
           tokenAddress: process.env.NFT_CONTRACT_ADDRESS,
           statuses: ["open"],
           direction: "sell",
-          limit: 2,
+          limit: 50,
           orderBy: "UPDATED_AT",
           orderByDirection: "DESC",
         }),

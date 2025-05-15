@@ -17,11 +17,13 @@ export const discordClient = new Client({
 });
 
 export function getThreadIdForToken(type, from) {
-  // Cas où from correspond à un utilisateur spécifique
-  if (from === process.env.FRANCK_ADDRESS) {
-    return process.env.THREAD_ID_FRANCK;
-  } else if (from === process.env.NICO_ADDRESS) {
-    return process.env.THREAD_ID_NICO;
+  if (from) {
+    // Cas où from correspond à un utilisateur spécifique
+    if (from.toLowerCase() === process.env.FRANCK_ADDRESS.toLowerCase()) {
+      return process.env.THREAD_ID_FRANCK;
+    } else if (from.toLowerCase() === process.env.NICO_ADDRESS.toLowerCase()) {
+      return process.env.THREAD_ID_NICO;
+    }
   }
 
   switch (type) {
