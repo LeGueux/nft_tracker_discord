@@ -1,8 +1,7 @@
 import { EmbedBuilder } from "discord.js";
-import { DOLZ_PRICE } from "./config.js";
 
 function getPriceStringFormatted(price) {
-  const priceInDollars = price * DOLZ_PRICE;
+  const priceInDollars = price * parseFloat(process.env.DOLZ_PRICE);
   return `${parseInt(price)} DOLZ ($ ${priceInDollars.toFixed(2)})`;
 }
 
