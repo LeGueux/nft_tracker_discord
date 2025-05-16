@@ -20,28 +20,18 @@ export function checkDateIsValidSinceLastOneInterval(date) {
 export async function getNFTData(tokenId) {
   try {
     // Exemple: https://cardsdata.dolz.io/jsons/51690.json
-    const response = await fetch(
-      `https://cardsdata.dolz.io/jsons/${tokenId}.json`,
-    );
+    const response = await fetch(`https://cardsdata.dolz.io/jsons/${tokenId}.json`);
     if (!response.ok) return;
 
     const data = await response.json();
     return {
       name: data.name,
       image: data.image,
-      rarity: data.attributes.find((attr) => attr.trait_type === "Rarity")
-        ?.value,
-      rarity_color: getRarityColor(
-        data.attributes.find((attr) => attr.trait_type === "Rarity")?.value,
-      ),
-      season: data.attributes.find((attr) => attr.trait_type === "Season")
-        ?.value,
-      card_number: data.attributes.find(
-        (attr) => attr.trait_type === "Card Number",
-      )?.value,
-      serial_number: data.attributes.find(
-        (attr) => attr.trait_type === "Serial Number",
-      )?.value,
+      rarity: data.attributes.find((attr) => attr.trait_type === "Rarity") ?.value,
+      rarity_color: getRarityColor(data.attributes.find((attr) => attr.trait_type === "Rarity")?.value),
+      season: data.attributes.find((attr) => attr.trait_type === "Season") ?.value,
+      card_number: data.attributes.find((attr) => attr.trait_type === "Card Number")?.value,
+      serial_number: data.attributes.find((attr) => attr.trait_type === "Serial Number")?.value,
     };
   } catch (error) {
     console.error(`Erreur lors de la récupération du token ${tokenId}:`, error);
@@ -65,27 +55,15 @@ export function getContentTagsDependsOnNFT(data, price, type) {
     return `<@${process.env.FRANCK_DISCORD_USER_ID}>`;
   }
   // Sale / Georgia / Limited
-  if (
-    data.card_number === "g0116" &&
-    data.rarity === "Limited" &&
-    type === "sales"
-  ) {
+  if (data.card_number === "g0116" && data.rarity === "Limited" && type === "sales") {
     return `<@${process.env.NICO_DISCORD_USER_ID}>`;
   }
   // Sale / Ashby Winter / Limited
-  if (
-    data.card_number === "g0053" &&
-    data.rarity === "Limited" &&
-    type === "sales"
-  ) {
+  if (data.card_number === "g0053" && data.rarity === "Limited" && type === "sales") {
     return `<@${process.env.NICO_DISCORD_USER_ID}>`;
   }
   // Sale / Sakura / Limited / Rare
-  if (
-    data.card_number === "g0119" &&
-    ["Limited", "Rare"].includes(data.rarity) &&
-    type === "sales"
-  ) {
+  if (data.card_number === "g0119" && ["Limited", "Rare"].includes(data.rarity) && type === "sales") {
     return `<@${process.env.NICO_DISCORD_USER_ID}>`;
   }
   return "";

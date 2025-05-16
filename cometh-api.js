@@ -8,9 +8,7 @@ import {
 
 export async function callComethApiForLastSales(discordClient) {
   try {
-    console.log(
-      `callComethApiForLastSales à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`,
-    );
+    console.log(`callComethApiForLastSales à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`);
     const response = await fetch(
       "https://api.marketplace.cometh.io/v1/orders/filled-events/search",
       {
@@ -35,14 +33,10 @@ export async function callComethApiForLastSales(discordClient) {
       //   item.direction,
       //   checkDateIsValidSinceLastOneInterval(new Date(item.blockTimestamp)),
       // );
-      if (
-        item.direction == "sell" &&
-        checkDateIsValidSinceLastOneInterval(new Date(item.blockTimestamp))
-      ) {
+      if (item.direction == "sell" && checkDateIsValidSinceLastOneInterval(new Date(item.blockTimestamp))) {
         const tokenId = item.tokenId;
         const data = await getNFTData(tokenId);
-        const price =
-          parseInt(item.erc20FillAmount) / 1000000000000000000 / 0.9803;
+        const price = parseInt(item.erc20FillAmount) / 1000000000000000000 / 0.9803;
         const embed = buildSaleNFTEmbed(
           data,
           item.maker,
@@ -74,9 +68,7 @@ export async function callComethApiForLastSales(discordClient) {
 
 export async function callComethApiForLastListings(discordClient) {
   try {
-    console.log(
-      `callComethApiForLastListings à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`,
-    );
+    console.log(`callComethApiForLastListings à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`);
     // https://api.marketplace.cometh.io/v1/doc#tag/order/operation/searchOrders
     const response = await fetch(
       "https://api.marketplace.cometh.io/v1/orders/search",
@@ -135,9 +127,7 @@ export async function callComethApiForLastListings(discordClient) {
             process.env.NICO_ADDRESS.toLowerCase(),
           ].includes(item.asset?.owner.toLowerCase())
         ) {
-          const isForFranck =
-            item.asset.owner.toLowerCase() ===
-            process.env.FRANCK_ADDRESS.toLowerCase();
+          const isForFranck = item.asset.owner.toLowerCase() === process.env.FRANCK_ADDRESS.toLowerCase();
           const tokenId = item.tokenId;
           const data = await getNFTData(tokenId);
           const price = parseInt(item.totalPrice) / 1000000000000000000;
@@ -151,9 +141,7 @@ export async function callComethApiForLastListings(discordClient) {
           );
           const threadId = getThreadIdForToken("offers");
           const thread = await discordClient.channels.fetch(threadId);
-          const contentTag = isForFranck
-            ? `<@${process.env.FRANCK_DISCORD_USER_ID}>`
-            : `<@${process.env.NICO_DISCORD_USER_ID}>`;
+          const contentTag = isForFranck ? `<@${process.env.FRANCK_DISCORD_USER_ID}>` : `<@${process.env.NICO_DISCORD_USER_ID}>`;
           if (thread?.isTextBased()) {
             await thread.send({
               content: contentTag,
