@@ -26,6 +26,9 @@ export function buildSaleNFTEmbed(data, from, to, price, tokenId, type) {
       name: "Buyer",
       value: "[" + to + "](https://dolz.io/marketplace/profile/" + to + ")",
     });
+  } else if (type === "offer") {
+    // Listing type
+    embed.setTitle(`Received Offer: ${data.name}`);
   } else {
     // Listing type
     embed.setTitle(`Listing: ${data.name}`);

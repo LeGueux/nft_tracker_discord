@@ -90,8 +90,7 @@ export async function callComethApiForLastListings(discordClient) {
         body: JSON.stringify({
           tokenAddress: process.env.NFT_CONTRACT_ADDRESS,
           statuses: ["open"],
-          direction: "sell",
-          limit: 50,
+          limit: 200,
           orderBy: "UPDATED_AT",
           orderByDirection: "DESC",
         }),
@@ -102,34 +101,71 @@ export async function callComethApiForLastListings(discordClient) {
     // console.log(data);
     data.orders.forEach(async (item) => {
       // console.log(item.tokenId, item.direction, checkDateIsValidSinceLastOneInterval(new Date(item.signedAt)));
-      if (
-        item.direction == "sell" &&
-        checkDateIsValidSinceLastOneInterval(new Date(item.signedAt))
-      ) {
-        const tokenId = item.tokenId;
-        const data = await getNFTData(tokenId);
-        const price = parseInt(item.totalPrice) / 1000000000000000000;
-        const embed = buildSaleNFTEmbed(
-          data,
-          item.maker,
-          null,
-          price,
-          tokenId,
-          "listing",
-        );
-        const threadId = getThreadIdForToken("listings");
-        const thread = await discordClient.channels.fetch(threadId);
-        if (thread?.isTextBased()) {
-          await thread.send({
-            content: getContentTagsDependsOnNFT(data, price, "listings"),
-            embeds: [embed],
-            allowedMentions: {
-              users: [
-                process.env.FRANCK_DISCORD_USER_ID,
-                process.env.NICO_DISCORD_USER_ID,
-              ],
-            },
-          });
+      if (checkDateIsValidSinceLastOneInterval(new Date(item.signedAt))) {
+        if (item.direction == "sell") {
+          const tokenId = item.tokenId;
+          const data = await getNFTData(tokenId);
+          const price = parseInt(item.totalPrice) / 1000000000000000000;
+          const embed = buildSaleNFTEmbed(
+            data,
+            item.maker,
+            null,
+            price,
+            tokenId,
+            "listing",
+          );
+          const threadId = getThreadIdForToken("listings");
+          const thread = await discordClient.channels.fetch(threadId);
+          if (thread?.isTextBased()) {
+            await thread.send({
+              content: getContentTagsDependsOnNFT(data, price, "listings"),
+              embeds: [embed],
+              allowedMentions: {
+                users: [
+                  process.env.FRANCK_DISCORD_USER_ID,
+                  process.env.NICO_DISCORD_USER_ID,
+                ],
+              },
+            });
+          }
+        } else if (
+          item.direction == "buy" &&
+          [
+            process.env.FRANCK_ADDRESS.toLowerCase(),
+            process.env.NICO_ADDRESS.toLowerCase(),
+          ].includes(item.asset?.owner.toLowerCase())
+        ) {
+          const isForFranck =
+            item.asset.owner.toLowerCase() ===
+            process.env.FRANCK_ADDRESS.toLowerCase();
+          const tokenId = item.tokenId;
+          const data = await getNFTData(tokenId);
+          const price = parseInt(item.totalPrice) / 1000000000000000000;
+          const embed = buildSaleNFTEmbed(
+            data,
+            item.asset.owner,
+            item.asset.owner,
+            price,
+            tokenId,
+            "offer",
+          );
+          const threadId = getThreadIdForToken("offers");
+          const thread = await discordClient.channels.fetch(threadId);
+          const contentTag = isForFranck
+            ? `<@${process.env.FRANCK_DISCORD_USER_ID}>`
+            : `<@${process.env.NICO_DISCORD_USER_ID}>`;
+          if (thread?.isTextBased()) {
+            await thread.send({
+              content: contentTag,
+              embeds: [embed],
+              allowedMentions: {
+                users: [
+                  process.env.FRANCK_DISCORD_USER_ID,
+                  process.env.NICO_DISCORD_USER_ID,
+                ],
+              },
+            });
+          }
         }
       }
     });

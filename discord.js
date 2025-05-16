@@ -35,6 +35,8 @@ export function getThreadIdForToken(type, from) {
       return process.env.THREAD_ID_1;
     case "sales":
       return process.env.THREAD_ID_2;
+    case "offers":
+      return process.env.THREAD_ID_3;
     default:
       return process.env.STATUS_THREAD_ID;
   }
