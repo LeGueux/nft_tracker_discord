@@ -45,11 +45,11 @@ export async function callComethApiForLastSales(discordClient) {
           tokenId,
           "sale",
         );
-        const threadId = getThreadIdForToken("sales", item.maker);
+        const threadId = getThreadIdForToken("sale", item.maker);
         const thread = await discordClient.channels.fetch(threadId);
         if (thread?.isTextBased()) {
           await thread.send({
-            content: getContentTagsDependsOnNFT(data, price, "sales"),
+            content: getContentTagsDependsOnNFT(data, price, "sale"),
             embeds: [embed],
             allowedMentions: {
               users: [
@@ -106,11 +106,11 @@ export async function callComethApiForLastListings(discordClient) {
             tokenId,
             "listing",
           );
-          const threadId = getThreadIdForToken("listings");
+          const threadId = getThreadIdForToken("listing");
           const thread = await discordClient.channels.fetch(threadId);
           if (thread?.isTextBased()) {
             await thread.send({
-              content: getContentTagsDependsOnNFT(data, price, "listings"),
+              content: getContentTagsDependsOnNFT(data, price, "listing"),
               embeds: [embed],
               allowedMentions: {
                 users: [

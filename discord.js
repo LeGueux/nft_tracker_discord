@@ -16,6 +16,15 @@ export const discordClient = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
 });
 
+/**
+ * Retourne l'ID de thread Discord correspondant à une action (listing, vente, offre) ou à un utilisateur spécifique.
+ *
+ * Priorité à l'adresse `from` si elle est définie. Sinon, `type` est utilisé pour déterminer l’ID du thread.
+ *
+ * @param {string} type - Type d'action ou adresse (ex: "listing", "sale", "offer", ou une adresse wallet).
+ * @param {string} [from] - Adresse de l'utilisateur à l'origine de l'action, si connue.
+ * @returns {string} L'identifiant du thread Discord correspondant.
+ */
 export function getThreadIdForToken(type, from) {
   if (from) {
     // Cas où from correspond à un utilisateur spécifique
@@ -31,11 +40,11 @@ export function getThreadIdForToken(type, from) {
       return process.env.THREAD_ID_FRANCK;
     case process.env.NICO_ADDRESS:
       return process.env.THREAD_ID_NICO;
-    case "listings":
+    case "listing":
       return process.env.THREAD_ID_1;
-    case "sales":
+    case "sale":
       return process.env.THREAD_ID_2;
-    case "offers":
+    case "offer":
       return process.env.THREAD_ID_3;
     default:
       return process.env.STATUS_THREAD_ID;
