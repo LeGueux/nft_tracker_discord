@@ -1,6 +1,6 @@
 # NFT Discord Tracker Bot
 
-Un bot Discord pour suivre les transferts de NFT sur la blockchain **Polygon** et envoyer des notifications dans des threads Discord spécifiques. Le bot peut fonctionner en mode **TEST** (limité à 3 notifications) ou en mode **PROD**. Un ping périodique est envoyé pour signaler que le bot est **alive**.
+Un bot Discord pour suivre les transferts de NFT sur la blockchain **Polygon** et envoyer des notifications dans des threads Discord spécifiques. Un ping périodique est envoyé pour signaler que le bot est **alive**.
 
 ## Fonctionnalités
 
