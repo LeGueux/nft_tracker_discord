@@ -11,7 +11,7 @@ Un bot Discord pour suivre les transferts de NFT sur la blockchain **Polygon** e
 
 ## Prérequis
 
-1. **Node.js** >= v16
+1. **Node.js** >= v20
 2. **Discord bot token**.
 3. **Infura project ID** (ou autre fournisseur RPC compatible Polygon).
 4. Un **contrat ERC721** sur Polygon.
@@ -36,34 +36,36 @@ npm install
 Copiez le modèle suivant dans un fichier `.env` à la racine du projet :
 
 ```env
-# INFURA WSS URL pour Polygon
-INFURA_WSS=wss://polygon-mainnet.infura.io/ws/v3/YOUR_PROJECT_ID
+MODE=TEST  # ou MODE=PROD
 
-# Token du bot Discord
-DISCORD_BOT_TOKEN=your_discord_bot_token
+INFURA_WSS=wss://polygon-mainnet.infura.io/ws/v3/TO_REPLACE
+DISCORD_BOT_TOKEN=TO_REPLACE
+NFT_CONTRACT_ADDRESS=TO_REPLACE
 
-# Adresse du contrat NFT ERC721
-NFT_CONTRACT_ADDRESS=0xYourNFTContractAddress
+FRANCK_ADDRESS=TO_REPLACE
+NICO_ADDRESS=TO_REPLACE
+FRANCK_DISCORD_USER_ID=TO_REPLACE
+NICO_DISCORD_USER_ID=TO_REPLACE
 
-# IDs des threads Discord pour chaque type de NFT
-THREAD_ID_1=123456789012345678
-THREAD_ID_2=234567890123456789
-THREAD_ID_3=345678901234567890
+STATUS_THREAD_ID=TO_REPLACE
+THREAD_ID_1=TO_REPLACE       # Thread pour NFT type A
+THREAD_ID_2=TO_REPLACE       # Thread pour NFT type B
+THREAD_ID_3=TO_REPLACE       # Thread pour NFT type C
+THREAD_ID_FRANCK=TO_REPLACE  # Thread pour NFT pour les ventes de Franck
+THREAD_ID_NICO=TO_REPLACE    # Thread pour NFT pour les ventes de Nico
 
-# ID du thread de statut
-STATUS_THREAD_ID=456789012345678901
+COMETH_API_KEY=TO_REPLACE
 
-# Mode de fonctionnement : TEST ou PROD
-MODE=TEST  # ou PROD
+COMETH_API_INTERVAL=10 # en min
+ALIVE_PING_INTERVAL=10 # en min
 
-# Intervalle du ping alive (en minutes)
-ALIVE_PING_INTERVAL=10
+DOLZ_PRICE="0.006" # Prix du dolz en $
 ```
 
 ### 4. Lancez le bot
 
 ```bash
-node index.js
+npm run start
 ```
 
 Le bot démarrera et commencera à écouter les événements de transfert NFT. Si le mode **TEST** est activé, le bot enverra un maximum de 3 notifications avant de s'arrêter.
