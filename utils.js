@@ -75,32 +75,48 @@ export function getContentTagsDependsOnNFT(data, price, type) {
   const isSale = type === "sale";
   const isStandardSeason = !["Special Edition", "Off-Season"].includes(data.season);
   const isLimited = data.rarity === "Limited";
+  const isRare = data.rarity === "Rare";
   const isEpic = data.rarity === "Epic";
   const isRareOrLimited = ["Limited", "Rare"].includes(data.rarity);
 
   if (isListing && isStandardSeason) {
     // FRANCK ONLY
-    // Price < 900
-    // Price < 9000 | Epic
-    // Octokuro g0065
-    if (price < 900 ||
-      (price < 9000 && isEpic) ||
-      ["g0065"].includes(data.card_number)
+    // Listing | All seasons                          | Price <= 900
+    // Listing | All seasons                          | Price <= 9000 | Epic
+    // Listing | S1                                   | Price <= 6000
+    // Listing | S2                                   | Price <= 5000
+    // Listing | S2 Alissa Foxy & Kelly Collins g0056 | Price <= 9000
+    // Listing | S5 Alissa Foxy g0026                 | Price <= 4500 | Rare
+    // Listing | S5 Mathilda Scorpy g0044             | Price <= 4500 | Rare
+    // Listing | S5 Shelena g0048                     | Price <= 4500 | Rare
+    // Listing | S5 Sirena Milano g0076               | Price <= 4500 | Rare
+    // Listing | S6                                   | Price <= 1000
+    // Listing | S6 Octokuro g0065                    | Price <= 8000
+    // Listing | S7                                   | Price <= 1000
+    if (price <= 900 ||
+      (isEpic && price <= 9000) ||
+      (data.season === "1" && price <= 6000) ||
+      (data.season === "2" && price <= 5000) ||
+      (["g0056"].includes(data.card_number) && price <= 9000) ||
+      (["g0026", "g0044", "g0048", "g0076"].includes(data.card_number) && price <= 4500 && isRare) ||
+      (data.season === "6" && price <= 1000) ||
+      (["g0065"].includes(data.card_number) && price <= 8000) ||
+      (data.season === "7" && price <= 1000)
     ) {
       return FRANCK;
     }
-    
+
     // FRANCK + NICO
-    // Emiri S7 | Price < 2000
-    if (data.card_number === "g0125" && price < 2000) {
+    // Listing | S7 Emiri Momota g0125 | Price <= 2000
+    if (["g0125"].includes(data.card_number) && price <= 2000) {
       return `${FRANCK} ${NICO}`;
     }
   }
   // NICO ONLY
-  // Sale | Georgia g0116      | Limited
-  // Sale | Ashby Winter g0053 | Limited
-  // Sale | Sakura g0119       | Limited/Rare
-  if (isSale && 
+  // Sale | S6 Georgia g0116      | Limited
+  // Sale | S6 Ashby Winter g0053 | Limited
+  // Sale | S6 Sakura g0119       | Limited,Rare
+  if (isSale &&
     (isLimited && ["g0116", "g0053"].includes(data.card_number)) ||
     (isRareOrLimited && ["g0119"].includes(data.card_number))) {
     return NICO;
