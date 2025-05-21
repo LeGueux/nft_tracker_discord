@@ -45,9 +45,9 @@ export async function getNFTData(tokenId) {
     return {
       name: data.name,
       image: data.image,
-      rarity: data.attributes.find((attr) => attr.trait_type === "Rarity") ?.value,
+      rarity: data.attributes.find((attr) => attr.trait_type === "Rarity")?.value,
       rarity_color: getRarityColor(data.attributes.find((attr) => attr.trait_type === "Rarity")?.value),
-      season: data.attributes.find((attr) => attr.trait_type === "Season") ?.value,
+      season: data.attributes.find((attr) => attr.trait_type === "Season")?.value,
       card_number: data.attributes.find((attr) => attr.trait_type === "Card Number")?.value,
       serial_number: data.attributes.find((attr) => attr.trait_type === "Serial Number")?.value,
     };
@@ -71,32 +71,38 @@ export function getContentTagsDependsOnNFT(data, price, type) {
   const FRANCK = `<@${process.env.FRANCK_DISCORD_USER_ID}>`;
   const NICO = `<@${process.env.NICO_DISCORD_USER_ID}>`;
 
-  // Listing | Price < 900
-  if (price < 900 && type === "listing") {
-    return FRANCK;
+  const isListing = type === "listing";
+  const isSale = type === "sale";
+  const isStandardSeason = !["Special Edition", "Off-Season"].includes(data.season);
+  const isLimited = data.rarity === "Limited";
+  const isEpic = data.rarity === "Epic";
+  const isRareOrLimited = ["Limited", "Rare"].includes(data.rarity);
+
+  if (isListing && isStandardSeason) {
+    // FRANCK ONLY
+    // Price < 900
+    // Price < 9000 | Epic
+    // Octokuro g0065
+    if (price < 900 ||
+      (price < 9000 && isEpic) ||
+      ["g0065"].includes(data.card_number)
+    ) {
+      return FRANCK;
+    }
+    
+    // FRANCK + NICO
+    // Emiri S7 | Price < 2000
+    if (data.card_number === "g0125" && price < 2000) {
+      return `${FRANCK} ${NICO}`;
+    }
   }
-  // Listing | Price < 9000 | Epic
-  if (price < 9000 && data.rarity === "Epic" && type === "listing") {
-    return FRANCK;
-  }
-  // Listing | Octokuro
-  if (data.card_number === "g0065" && type === "listing") {
-    return FRANCK;
-  }
-  // Listing | Emiri S7 | Price < 2000
-  if (data.card_number === "g0125" && type === "listing" && price < 2000) {
-    return `${FRANCK} ${NICO}`;
-  }
-  // Sale | Georgia | Limited
-  if (data.card_number === "g0116" && data.rarity === "Limited" && type === "sale") {
-    return NICO;
-  }
-  // Sale | Ashby Winter | Limited
-  if (data.card_number === "g0053" && data.rarity === "Limited" && type === "sale") {
-    return NICO;
-  }
-  // Sale | Sakura | Limited | Rare
-  if (data.card_number === "g0119" && ["Limited", "Rare"].includes(data.rarity) && type === "sale") {
+  // NICO ONLY
+  // Sale | Georgia g0116      | Limited
+  // Sale | Ashby Winter g0053 | Limited
+  // Sale | Sakura g0119       | Limited/Rare
+  if (isSale && 
+    (isLimited && ["g0116", "g0053"].includes(data.card_number)) ||
+    (isRareOrLimited && ["g0119"].includes(data.card_number))) {
     return NICO;
   }
   return "";
