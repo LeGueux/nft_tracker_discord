@@ -20,7 +20,7 @@ export async function callComethApiForLastSales(discordClient) {
         },
         body: JSON.stringify({
           tokenAddress: process.env.NFT_CONTRACT_ADDRESS,
-          limit: 50,
+          limit: 100,
         }),
       },
     );
@@ -33,7 +33,7 @@ export async function callComethApiForLastSales(discordClient) {
       //   item.direction,
       //   checkDateIsValidSinceLastOneInterval(new Date(item.blockTimestamp)),
       // );
-      if (item.direction == "sell" && checkDateIsValidSinceLastOneInterval(new Date(item.blockTimestamp))) {
+      if (checkDateIsValidSinceLastOneInterval(new Date(item.blockTimestamp))) {
         const tokenId = item.tokenId;
         const data = await getNFTData(tokenId);
         const price = parseInt(item.erc20FillAmount) / 1000000000000000000 / 0.9803;
