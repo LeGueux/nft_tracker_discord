@@ -139,7 +139,7 @@ export async function callComethApiForLastListings(discordClient) {
             tokenId,
             "offer",
           );
-          const threadId = getThreadIdForToken("offers");
+          const threadId = getThreadIdForToken("offer");
           const thread = await discordClient.channels.fetch(threadId);
           const contentTag = isForFranck ? `<@${process.env.FRANCK_DISCORD_USER_ID}>` : `<@${process.env.NICO_DISCORD_USER_ID}>`;
           if (thread?.isTextBased()) {
