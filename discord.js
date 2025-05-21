@@ -36,10 +36,6 @@ export function getThreadIdForToken(type, from) {
   }
 
   switch (type) {
-    case process.env.FRANCK_ADDRESS:
-      return process.env.THREAD_ID_FRANCK;
-    case process.env.NICO_ADDRESS:
-      return process.env.THREAD_ID_NICO;
     case "listing":
       return process.env.THREAD_ID_1;
     case "sale":
