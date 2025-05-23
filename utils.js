@@ -107,8 +107,8 @@ export function getContentTagsDependsOnNFT(data, price, type) {
     }
 
     // FRANCK + NICO
-    // Listing | S7 Emiri Momota g0125 | Price <= 2000
-    if (["g0125"].includes(data.card_number) && price <= 2000) {
+    // Listing | S7 Emiri Momota g0125 | Price <= 3000
+    if (["g0125"].includes(data.card_number) && price <= 3000) {
       return `${FRANCK} ${NICO}`;
     }
   }
