@@ -1,4 +1,5 @@
 import { EmbedBuilder } from "discord.js";
+import { WALLETS } from "./config.js";
 
 function getPriceStringFormatted(price) {
   const priceInDollars = price * parseFloat(process.env.DOLZ_PRICE);
@@ -16,14 +17,14 @@ export function buildSaleNFTEmbed(data, from, to, price, tokenId, type) {
     .setFooter({ text: "DOLZ marketplace Tracker" })
     .addFields({ name: "Price", value: getPriceStringFormatted(price) })
     .addFields({
-      name: "Seller",
+      name: `Seller: ${WALLETS.get(from.toLowerCase()) || ''}`,
       value: "[" + from + "](https://dolz.io/marketplace/profile/" + from + ")",
     });
   if (type === "sale") {
     // sale type
     embed.setTitle(`Sale: ${data.name}`);
     embed.addFields({
-      name: "Buyer",
+      name: `Buyer: ${WALLETS.get(to.toLowerCase()) || ''}`,
       value: "[" + to + "](https://dolz.io/marketplace/profile/" + to + ")",
     });
   } else if (type === "offer") {
