@@ -38,16 +38,17 @@ export async function callComethApiForLastSales(discordClient) {
       if (checkDateIsValidSinceLastOneInterval(new Date(item.blockTimestamp))) {
         const tokenId = item.tokenId;
         const data = await getNFTData(tokenId);
-        const price =
-          parseInt(item.erc20FillAmount) / 1000000000000000000 / 0.9803;
+        const price = parseInt(item.erc20FillAmount) / 1000000000000000000 / 0.9803;
+        const seller = item.direction === "sell" ? item.maker : item.taker;
+        const buyer = item.direction === "sell" ? item.taker : item.maker;
         const embed = await buildSaleNFTEmbed(
           data,
-          item.maker,
-          item.taker,
+          seller,
+          buyer,
           price,
           tokenId,
           "sale",
-        );
+        );        
         const threadId = getThreadIdForToken("sale", item.maker);
         const thread = await discordClient.channels.fetch(threadId);
         if (thread?.isTextBased()) {

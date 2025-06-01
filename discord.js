@@ -65,8 +65,8 @@ export function eventBotReady(discordClient) {
       const data = await getNFTData("51490"); // Legendary
       const embed = buildSaleNFTEmbed(
         data,
-        "0xFROM",
-        "0xTO",
+        process.env.NICO_ADDRESS,
+        process.env.FRANCK_ADDRESS,
         50000,
         "51690",
         "sale",
