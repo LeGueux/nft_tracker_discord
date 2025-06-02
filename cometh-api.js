@@ -187,6 +187,8 @@ export async function getTotalAssetsForWallet(address) {
           contractAddress: process.env.NFT_CONTRACT_ADDRESS,
           owner: address,
           limit: 1,
+          orderBy: "LISTING_DATE",
+          direction: "DESC"
         }),
       },
     );
