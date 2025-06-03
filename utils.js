@@ -84,24 +84,21 @@ export function getContentTagsDependsOnNFT(data, price, type) {
     // Listing | All seasons                          | Price <= 800
     // Listing | All seasons                          | Price <= 8000 | Epic
     // Listing | S1                                   | Price <= 6000
-    // Listing | S2                                   | Price <= 5000
+    // Listing | S2                                   | Price <= 4000
     // Listing | S2 Alissa Foxy & Kelly Collins g0056 | Price <= 9000
-    // Listing | S5 Alissa Foxy g0026                 | Price <= 4000 | Rare
-    // Listing | S5 Mathilda Scorpy g0044             | Price <= 4000 | Rare
-    // Listing | S5 Shelena g0048                     | Price <= 4000 | Rare
-    // Listing | S5 Sirena Milano g0076               | Price <= 4000 | Rare
     // Listing | S6                                   | Price <= 1000
     // Listing | S6 Octokuro g0065                    | Price <= 7000
     // Listing | S7                                   | Price <= 1000
+    // Listing | S7                                   | Price <= 4000 | Rare
     if (price <= 800 ||
       (isEpic && price <= 8000) ||
       (data.season === "1" && price <= 6000) ||
-      (data.season === "2" && price <= 5000) ||
+      (data.season === "2" && price <= 4000) ||
       (["g0056"].includes(data.card_number) && price <= 9000) ||
-      (["g0026", "g0044", "g0048", "g0076"].includes(data.card_number) && price <= 4000 && isRare) ||
       (data.season === "6" && price <= 1000) ||
       (["g0065"].includes(data.card_number) && price <= 7000) ||
-      (data.season === "7" && price <= 1000)
+      (data.season === "7" && price <= 1000) ||
+      (data.season === "7" && price <= 4000 && isRare)
     ) {
       return FRANCK;
     }

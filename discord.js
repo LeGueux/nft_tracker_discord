@@ -50,9 +50,7 @@ export function getThreadIdForToken(type, from) {
 // Discord bot ready
 export function eventBotReady(discordClient) {
   discordClient.once("ready", async () => {
-    console.log(
-      `✅ Bot démarré à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`,
-    );
+    console.log(`✅ Bot démarré à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`);
     await sendStatusMessage(
       discordClient,
       `✅ Bot démarré à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`,
@@ -102,9 +100,7 @@ export function eventBotReady(discordClient) {
 
     // Alive ping
     setInterval(async () => {
-      console.log(
-        `🟢 Alive - ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`,
-      );
+      console.log(`🟢 Alive - ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`);
       await sendStatusMessage(
         discordClient,
         `🟢 Alive - ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`,
