@@ -18,6 +18,27 @@ export const discordClient = new Client({
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+function buildSeasonButtons(season) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`prev_snipe_${season}`)
+      .setLabel('⏮️ Précédent')
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(season <= 1), // Désactive si saison 1
+
+    new ButtonBuilder()
+      .setCustomId(`reload_snipe_${season}`)
+      .setLabel('🔁 Reload')
+      .setStyle(ButtonStyle.Primary),
+
+    new ButtonBuilder()
+      .setCustomId(`next_snipe_${season}`)
+      .setLabel('⏭️ Suivant')
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(season >= 7) // Désactive si dernière saison
+  );
+}
+
 /**
  * Retourne l'ID de thread Discord correspondant à une action (listing, vente, offre) ou à un utilisateur spécifique.
  *
@@ -116,11 +137,39 @@ export function eventBotReady(discordClient) {
 
     if (interaction.commandName === 'snipe') {
       const season = interaction.options.getInteger('season');
-      console.log('Season:', season);
+      const row = buildSeasonButtons(season);
       await interaction.deferReply();
-      await interaction.editReply(`📅 Saison sélectionnée : ${season + 1}`);
+      await interaction.reply({
+        content: `📅 Saison sélectionnée : ${season} edit1`,
+        components: [row]
+      });
       await sleep(5000);
-      await interaction.editReply(`📅 Saison sélectionnée : ${season + 2}`);
+      await interaction.reply({
+        content: `📅 Saison sélectionnée : ${season} edit2`,
+        components: [row]
+      });
     }
+
+    // Handle buttons actions
+    if (!interaction.isButton()) return;
+
+    const match = interaction.customId.match(/(prev|next|reload)_snipe_(\d+)/);
+    if (!match) return;
+
+    const action = match[1]; // prev, next, reload
+    let season = parseInt(match[2]);
+
+    if (action === 'prev') season = Math.max(1, season - 1);
+    if (action === 'next') season = Math.min(7, season + 1);
+
+    await interaction.deferUpdate(); // Pas de "chargement visible"
+
+    const updatedMessage = `📅 Saison sélectionnée : ${season}`;
+    const row = buildSeasonButtons(season);
+
+    await interaction.editReply({
+      content: updatedMessage,
+      components: [row]
+    });
   });
 }
