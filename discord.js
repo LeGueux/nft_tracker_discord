@@ -23,18 +23,29 @@ export const discordClient = new Client({
 });
 
 function buildSeasonButtons(currentSeason) {
-  const buttons = [];
+  const rows = [];
+  let currentRow = new ActionRowBuilder();
 
   for (let i = 1; i <= 7; i++) {
-    buttons.push(
-      new ButtonBuilder()
-        .setCustomId(`select_season_snipe_${i}`)
-        .setLabel(`S${i}`)
-        .setStyle(i === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary)
-    );
+    const button = new ButtonBuilder()
+      .setCustomId(`select_season_snipe_${i}`)
+      .setLabel(`S${i}`)
+      .setStyle(i === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+
+    if (currentRow.components.length === 5) {
+      rows.push(currentRow);
+      currentRow = new ActionRowBuilder();
+    }
+
+    currentRow.addComponents(button);
   }
 
-  return new ActionRowBuilder().addComponents(buttons);
+  // Push the last row if it has any buttons
+  if (currentRow.components.length > 0) {
+    rows.push(currentRow);
+  }
+
+  return rows;
 }
 
 /**
@@ -138,7 +149,7 @@ export function eventBotReady(discordClient) {
         await interaction.deferReply();
         await interaction.editReply({
           content: `📅 Saison sélectionnée : ${season}`,
-          components: [row]
+          components: row
         });
       }
     } else if (interaction.isButton()) {
@@ -158,7 +169,7 @@ export function eventBotReady(discordClient) {
 
       await interaction.editReply({
         content: updatedMessage,
-        components: [row]
+        components: row
       });
     }
   });
