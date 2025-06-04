@@ -108,12 +108,16 @@ export function eventBotReady(discordClient) {
     }, ALIVE_PING_INTERVAL);
   });
 
+  // Slash commands from Discord
   discordClient.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
 
   if (interaction.commandName === 'snipe') {
     const season = interaction.options.getInteger('season');
-    await interaction.reply(`📅 Saison sélectionnée : ${season}`);
+    await interaction.deferReply(`📅 Saison sélectionnée : ${season}`);
+    setInterval(async () => {
+      await interaction.editReply(`📅 Saison sélectionnée : ${season + 1}`);
+    }, 4000);
   }
 });
 }

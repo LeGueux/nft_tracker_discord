@@ -10,7 +10,15 @@ const commands = [
       option.setName('season')
         .setDescription('Numéro de la saison')
         .setRequired(true)
-    )
+        .addChoices(
+          { name: 'Saison 1', value: 1 },
+          { name: 'Saison 2', value: 2 },
+          { name: 'Saison 3', value: 3 },
+          { name: 'Saison 4', value: 4 },
+          { name: 'Saison 5', value: 5 },
+          { name: 'Saison 6', value: 6 },
+          { name: 'Saison 7', value: 7 },
+        ))
     .toJSON()
 ];
 
