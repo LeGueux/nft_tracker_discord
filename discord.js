@@ -158,6 +158,7 @@ export function eventBotReady(discordClient) {
 
       const action = match[1]; // prev, next, reload
       let season = parseInt(match[2]);
+      console.log(match, season);
 
       if (action === 'prev') season = Math.max(1, season - 1);
       if (action === 'next') season = Math.min(7, season + 1);
