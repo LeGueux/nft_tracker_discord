@@ -156,12 +156,8 @@ export function eventBotReady(discordClient) {
       const match = interaction.customId.match(/select_season_snipe_(\d+)/);
       if (!match) return;
 
-      const action = match[1]; // prev, next, reload
-      let season = parseInt(match[2]);
+      let season = parseInt(match[1]);
       console.log(match, season);
-
-      if (action === 'prev') season = Math.max(1, season - 1);
-      if (action === 'next') season = Math.min(7, season + 1);
 
       await interaction.deferUpdate(); // Important pour éviter "Échec de l'interaction"
 
