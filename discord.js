@@ -107,4 +107,13 @@ export function eventBotReady(discordClient) {
       );
     }, ALIVE_PING_INTERVAL);
   });
+
+  discordClient.on('interactionCreate', async interaction => {
+  if (!interaction.isChatInputCommand()) return;
+
+  if (interaction.commandName === 'snipe') {
+    const season = interaction.options.getInteger('season');
+    await interaction.reply(`📅 Saison sélectionnée : ${season}`);
+  }
+});
 }
