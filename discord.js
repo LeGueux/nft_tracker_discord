@@ -114,8 +114,10 @@ export function eventBotReady(discordClient) {
 
   if (interaction.commandName === 'snipe') {
     const season = interaction.options.getInteger('season');
+    console.log('Season:', season);
     await interaction.deferReply(`📅 Saison sélectionnée : ${season}`);
-    setInterval(async () => {
+    setInterval(async (interaction) => {
+      console.log('before editReply');
       await interaction.editReply(`📅 Saison sélectionnée : ${season + 1}`);
     }, 4000);
   }
