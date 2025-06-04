@@ -16,6 +16,8 @@ export const discordClient = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
 });
 
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 /**
  * Retourne l'ID de thread Discord correspondant à une action (listing, vente, offre) ou à un utilisateur spécifique.
  *
@@ -110,16 +112,15 @@ export function eventBotReady(discordClient) {
 
   // Slash commands from Discord
   discordClient.on('interactionCreate', async interaction => {
-  if (!interaction.isChatInputCommand()) return;
+    if (!interaction.isChatInputCommand()) return;
 
-  if (interaction.commandName === 'snipe') {
-    const season = interaction.options.getInteger('season');
-    console.log('Season:', season);
-    await interaction.deferReply();
-    setInterval(async (interaction) => {
-      console.log('before editReply');
+    if (interaction.commandName === 'snipe') {
+      const season = interaction.options.getInteger('season');
+      console.log('Season:', season);
+      await interaction.deferReply();
       await interaction.editReply(`📅 Saison sélectionnée : ${season + 1}`);
-    }, 4000);
-  }
-});
+      await sleep(5000);
+      await interaction.editReply(`📅 Saison sélectionnée : ${season + 2}`);
+    }
+  });
 }
