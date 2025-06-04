@@ -145,12 +145,12 @@ export function eventBotReady(discordClient) {
       const season = interaction.options.getInteger('season');
       const row = buildSeasonButtons(season);
       await interaction.deferReply();
-      await interaction.reply({
+      await interaction.editReply({
         content: `📅 Saison sélectionnée : ${season} edit1`,
         components: [row]
       });
       await sleep(5000);
-      await interaction.reply({
+      await interaction.editReply({
         content: `📅 Saison sélectionnée : ${season} edit2`,
         components: [row]
       });
