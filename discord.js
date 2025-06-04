@@ -139,43 +139,42 @@ export function eventBotReady(discordClient) {
 
   // Slash commands from Discord
   discordClient.on('interactionCreate', async interaction => {
-    if (!interaction.isChatInputCommand()) return;
+    if (interaction.isChatInputCommand()) {
+      if (interaction.commandName === 'snipe') {
+        const season = interaction.options.getInteger('season');
+        const row = buildSeasonButtons(season);
+        await interaction.deferReply();
+        await interaction.editReply({
+          content: `📅 Saison sélectionnée : ${season} edit1`,
+          components: [row]
+        });
 
-    if (interaction.commandName === 'snipe') {
-      const season = interaction.options.getInteger('season');
+        // Ceci n'est pas bloquant mais pourrait être déplacé
+        await sleep(5000);
+        await interaction.editReply({
+          content: `📅 Saison sélectionnée : ${season} edit2`,
+          components: [row]
+        });
+      }
+    } else if (interaction.isButton()) {
+      const match = interaction.customId.match(/(prev|next|reload)_snipe_(\d+)/);
+      if (!match) return;
+
+      const action = match[1]; // prev, next, reload
+      let season = parseInt(match[2]);
+
+      if (action === 'prev') season = Math.max(1, season - 1);
+      if (action === 'next') season = Math.min(7, season + 1);
+
+      await interaction.deferUpdate(); // Important pour éviter "Échec de l'interaction"
+
+      const updatedMessage = `📅 Saison sélectionnée : ${season}`;
       const row = buildSeasonButtons(season);
-      await interaction.deferReply();
+
       await interaction.editReply({
-        content: `📅 Saison sélectionnée : ${season} edit1`,
-        components: [row]
-      });
-      await sleep(5000);
-      await interaction.editReply({
-        content: `📅 Saison sélectionnée : ${season} edit2`,
+        content: updatedMessage,
         components: [row]
       });
     }
-
-    // Handle buttons actions
-    if (!interaction.isButton()) return;
-
-    const match = interaction.customId.match(/(prev|next|reload)_snipe_(\d+)/);
-    if (!match) return;
-
-    const action = match[1]; // prev, next, reload
-    let season = parseInt(match[2]);
-
-    if (action === 'prev') season = Math.max(1, season - 1);
-    if (action === 'next') season = Math.min(7, season + 1);
-
-    await interaction.deferUpdate(); // Pas de "chargement visible"
-
-    const updatedMessage = `📅 Saison sélectionnée : ${season}`;
-    const row = buildSeasonButtons(season);
-
-    await interaction.editReply({
-      content: updatedMessage,
-      components: [row]
-    });
   });
 }
