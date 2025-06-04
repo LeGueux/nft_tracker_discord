@@ -22,27 +22,19 @@ export const discordClient = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
 });
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+function buildSeasonButtons(currentSeason) {
+  const buttons = [];
 
-function buildSeasonButtons(season) {
-  return new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId(`prev_snipe_${season}`)
-      .setLabel('⏮️ Précédent')
-      .setStyle(ButtonStyle.Secondary)
-      .setDisabled(season <= 1), // Désactive si saison 1
+  for (let i = 1; i <= 7; i++) {
+    buttons.push(
+      new ButtonBuilder()
+        .setCustomId(`select_season_snipe_${i}`)
+        .setLabel(`S${i}`)
+        .setStyle(i === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary)
+    );
+  }
 
-    new ButtonBuilder()
-      .setCustomId(`reload_snipe_${season}`)
-      .setLabel('🔁 Reload')
-      .setStyle(ButtonStyle.Primary),
-
-    new ButtonBuilder()
-      .setCustomId(`next_snipe_${season}`)
-      .setLabel('⏭️ Suivant')
-      .setStyle(ButtonStyle.Secondary)
-      .setDisabled(season >= 7) // Désactive si dernière saison
-  );
+  return new ActionRowBuilder().addComponents(buttons);
 }
 
 /**
@@ -145,19 +137,12 @@ export function eventBotReady(discordClient) {
         const row = buildSeasonButtons(season);
         await interaction.deferReply();
         await interaction.editReply({
-          content: `📅 Saison sélectionnée : ${season} edit1`,
-          components: [row]
-        });
-
-        // Ceci n'est pas bloquant mais pourrait être déplacé
-        await sleep(5000);
-        await interaction.editReply({
-          content: `📅 Saison sélectionnée : ${season} edit2`,
+          content: `📅 Saison sélectionnée : ${season}`,
           components: [row]
         });
       }
     } else if (interaction.isButton()) {
-      const match = interaction.customId.match(/(prev|next|reload)_snipe_(\d+)/);
+      const match = interaction.customId.match(/select_season_snipe_(\d+)/);
       if (!match) return;
 
       const action = match[1]; // prev, next, reload
