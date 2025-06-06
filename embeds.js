@@ -105,7 +105,7 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
         const lines = [
             `[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`,
             `FP Limited ${item.floor}`,
-            `Next ${item.next ?? '-'} (Gap: ${item.priceGapPercent?.toFixed(2) ?? '-'}%)`,
+            `Next ${item.next ?? '-'} Gap ${item.priceGapPercent?.toFixed(2) ?? '-'}%`,
             `FP Rare ${item.floorRare ?? '-'}`,
             `Prix ${item.prices.join(', ')}`,
             `Analyse (+25%) ${item.isFragile ? '✅' : '❌'}${item.isVeryFragileAfterBuy ? '⚠️' : '❌'}`,
