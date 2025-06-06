@@ -144,11 +144,12 @@ export function eventBotReady(discordClient) {
         if (interaction.isChatInputCommand()) {
             if (interaction.commandName === 'snipe') {
                 const season = interaction.options.getInteger('season');
+                const snipeEmbedSeason = await handleSnipeForSeason(season);
                 const row = buildSeasonButtons(season);
                 await interaction.deferReply();
                 await interaction.editReply({
-                    content: `📅 Saison sélectionnée : ${season}`,
-                    components: row
+                    embeds: [snipeEmbedSeason],
+                    components: row,
                 });
             }
         } else if (interaction.isButton()) {
