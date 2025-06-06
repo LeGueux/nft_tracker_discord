@@ -15,9 +15,9 @@ function getPriceStringFormatted(price) {
 }
 
 function getTitle(type, name) {
-  if (type === "sale") return `Sale: ${name}`;
-  if (type === "offer") return `Received Offer: ${name}`;
-  return `Listing: ${name}`;
+  if (type === "sale") return `🛒 Sale: ${name}`;
+  if (type === "offer") return `📩 Received Offer: ${name}`;
+  return `📢 Listing: ${name}`;
 }
 
 function getWhaleEmoji(totalAssets, dolzBalance) {
@@ -48,9 +48,9 @@ export async function buildSaleNFTEmbed(data, from, to, price, tokenId, type) {
     .setTimestamp()
     .setFooter({ text: "DOLZ marketplace Tracker" })
     .addFields(
-      { name: "Price:", value: getPriceStringFormatted(price) },
+      { name: "💰 Price:", value: getPriceStringFormatted(price) },
       {
-        name: `Seller: ${getWhaleEmoji(totalAssetsSeller, dolzBalanceSeller)} ${sellerUsername}`,
+        name: `🧑‍💼 Seller: ${getWhaleEmoji(totalAssetsSeller, dolzBalanceSeller)} ${sellerUsername}`,
         value:
           `🔗 [${from}](https://dolz.io/marketplace/profile/${from})\n` +
           `Total Assets: ${totalAssetsSeller}\n` +
@@ -68,7 +68,7 @@ export async function buildSaleNFTEmbed(data, from, to, price, tokenId, type) {
     const buyerUsername = (buyerUsernameData[0]?.duUsername ?? "").split("#")[0];
 
     embed.addFields({
-      name: `Buyer: ${getWhaleEmoji(totalAssetsBuyer, dolzBalanceBuyer)} ${buyerUsername}`,
+      name: `🧑‍💼 Buyer: ${getWhaleEmoji(totalAssetsBuyer, dolzBalanceBuyer)} ${buyerUsername}`,
       value:
         `🔗 [${to}](https://dolz.io/marketplace/profile/${to})\n` +
         `Total Assets: ${totalAssetsBuyer}\n` +
