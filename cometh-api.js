@@ -22,7 +22,7 @@ export async function callComethApiForLastSales(discordClient) {
         },
         body: JSON.stringify({
           tokenAddress: process.env.NFT_CONTRACT_ADDRESS,
-          limit: 100,
+          limit: 10,
         }),
       },
     );
@@ -30,11 +30,7 @@ export async function callComethApiForLastSales(discordClient) {
     const data = await response.json();
     // console.log(data);
     data.filledEvents.forEach(async (item) => {
-      // console.log(
-      //   item.tokenId,
-      //   item.direction,
-      //   checkDateIsValidSinceLastOneInterval(new Date(item.blockTimestamp)),
-      // );
+      console.log(item.tokenId, item.direction, checkDateIsValidSinceLastOneInterval(new Date(item.blockTimestamp)));
       if (checkDateIsValidSinceLastOneInterval(new Date(item.blockTimestamp))) {
         const tokenId = item.tokenId;
         const data = await getNFTData(tokenId);
@@ -88,7 +84,7 @@ export async function callComethApiForLastListings(discordClient) {
         body: JSON.stringify({
           tokenAddress: process.env.NFT_CONTRACT_ADDRESS,
           statuses: ["open"],
-          limit: 200,
+          limit: 50,
           orderBy: "UPDATED_AT",
           orderByDirection: "DESC",
         }),
@@ -98,7 +94,7 @@ export async function callComethApiForLastListings(discordClient) {
     const data = await response.json();
     // console.log(data);
     data.orders.forEach(async (item) => {
-      // console.log(item.tokenId, item.direction, checkDateIsValidSinceLastOneInterval(new Date(item.signedAt)));
+      console.log(item.tokenId, item.direction, checkDateIsValidSinceLastOneInterval(new Date(item.signedAt)));
       if (checkDateIsValidSinceLastOneInterval(new Date(item.signedAt))) {
         if (item.direction == "sell") {
           const tokenId = item.tokenId;
