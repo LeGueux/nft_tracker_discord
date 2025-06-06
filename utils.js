@@ -1,11 +1,5 @@
 import { COMETH_API_INTERVAL } from "./config.js";
 
-/**
- * Retourne une couleur hexadécimale correspondant à la rareté donnée.
- *
- * @param {string} rarity - Niveau de rareté du NFT ("Rare", "Epic", "Legendary", etc.).
- * @returns {string} Code couleur hex correspondant à la rareté.
- */
 function getRarityColor(rarity) {
   switch (rarity) {
     case "Rare":
@@ -19,22 +13,10 @@ function getRarityColor(rarity) {
   }
 }
 
-/**
- * Vérifie si une date est suffisamment récente par rapport à l'intervalle défini.
- *
- * @param {Date} date - Date à comparer avec l'intervalle de temps passé.
- * @returns {boolean} `true` si la date est postérieure à l'heure actuelle moins l'intervalle, sinon `false`.
- */
 export function checkDateIsValidSinceLastOneInterval(date) {
   return date >= new Date(new Date().getTime() - COMETH_API_INTERVAL);
 }
 
-/**
- * Récupère les données d'un NFT via son `tokenId`, depuis l'API Dolz.
- *
- * @param {string|number} tokenId - ID unique du token (ex: "51690").
- * @returns {Promise<Object>} Un objet contenant les informations du NFT (nom, image, rareté, etc.).
- */
 export async function getNFTData(tokenId) {
   try {
     // Exemple: https://cardsdata.dolz.io/jsons/51690.json
@@ -57,14 +39,6 @@ export async function getNFTData(tokenId) {
   }
 }
 
-/**
- * Retourne une mention Discord basée sur les conditions du NFT listé ou vendu.
- *
- * @param {NFTData} data - Données du NFT.
- * @param {number} price - Prix du NFT (en DOLZ).
- * @param {string} type - Type d'événement ("listing" ou "sale").
- * @returns {string} Mention Discord si une condition est remplie, sinon une chaîne vide.
- */
 export function getContentTagsDependsOnNFT(data, price, type) {
   // Exemple DATA: https://cardsdata.dolz.io/jsons/51690.json
   // console.log(data, price);
