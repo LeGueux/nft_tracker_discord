@@ -83,3 +83,52 @@ export async function buildSaleNFTEmbed(data, from, to, price, tokenId, type) {
 
     return embed;
 }
+
+export async function buildSnipeEmbed(dataFormatted, season = 0) {
+    const embed = new EmbedBuilder()
+        .setTitle(`💹 Sniping Opportunities - Season ${season}`)
+        .setFooter({ text: `💹 Sniping Opportunities - Season ${season}` })
+        .setDescription(`Cartes fragiles ou sensibles au sniping (${new Date().toLocaleDateString()})`)
+        .setColor(0x00ff99);
+
+    for (const item of dataFormatted) {
+        // Filtrer uniquement les gaps valides
+        const simulatedGaps = item.simulatedGaps
+            .map((g, i) => {
+                const gap = g?.priceGapPercent;
+                return gap !== null && gap !== undefined
+                    ? `• After ${i + 1} buy: ${gap.toFixed(2)}%`
+                    : null;
+            })
+            .filter(Boolean); // Retire les nulls
+
+        const lines = [
+            `• **Link MP**: [🔗 LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`,
+            `• **FP Limited**:  ${item.floor} DOLZ`,
+            `• **Next**: ${item.next ?? '-'} (Gap: ${item.priceGapPercent?.toFixed(2) ?? '-'}%)`,
+            `• **FP Rare**: ${item.floorRare ?? '-'} DOLZ`,
+            `• **Prices**: ${item.prices.join(', ')}`,
+            `• **Fragilité (+25%)**: ${item.isFragile ? '✅' : '❌'} ${item.isVeryFragileAfterBuy ? '⚠️' : '❌'}`,
+        ];
+
+        // Ajoute les simulated gaps seulement s'il y en a au moins un
+        if (simulatedGaps.length > 0) {
+            lines.push('', '**Simulated Gaps:**', ...simulatedGaps);
+        }
+
+        embed.addFields({
+            name: `🔗 ${item.name}`,
+            value: lines.join('\n'),
+            inline: false,
+        });
+    }
+
+    if (embed.length > 6000) {
+        console.warn("Embed too large, truncating...");
+        embed.setFields({
+            name: "Warning",
+            value: `The embed content was too large and has been truncated. Please check the logs for details. ${embed.length} characters`,
+        });
+    }
+    return embed;
+}

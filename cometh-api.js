@@ -287,7 +287,7 @@ export async function getListingsBySeasonAndRarity(seasonCtriteria, rarityCriter
                 body: JSON.stringify({
                     contractAddress: process.env.NFT_CONTRACT_ADDRESS,
                     attributes: [{ Season: seasonCtriteria, Rarity: rarityCriteria }],
-                    limit: 150,
+                    limit: 500,
                     skip: 0,
                     isOnSale: true,
                     orderBy: "PRICE",

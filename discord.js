@@ -7,16 +7,10 @@ import {
 } from "discord.js";
 import { buildSaleNFTEmbed } from "./embeds.js";
 import { getNFTData } from "./utils.js";
-import {
-    IS_TEST_MODE,
-    ALIVE_PING_INTERVAL,
-    COMETH_API_INTERVAL,
-} from "./config.js";
+import { IS_TEST_MODE, ALIVE_PING_INTERVAL, COMETH_API_INTERVAL } from "./config.js";
 import { sendStatusMessage } from "./error-handler.js";
-import {
-    callComethApiForLastListings,
-    callComethApiForLastSales,
-} from "./cometh-api.js";
+import { callComethApiForLastListings, callComethApiForLastSales } from "./cometh-api.js";
+import { handleSnipeForSeason } from "./snipe.js";
 
 export const discordClient = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -80,24 +74,34 @@ export function eventBotReady(discordClient) {
         );
 
         if (IS_TEST_MODE) {
-            // const data = await getNFTData("51618"); // Limited
-            // const data = await getNFTData("51520"); // Rare
-            // const data = await getNFTData("51495"); // Epic
-            const data = await getNFTData("51490"); // Legendary
-            const embed = await buildSaleNFTEmbed(
-                data,
-                process.env.NICO_ADDRESS,
-                process.env.FRANCK_ADDRESS,
-                50000,
-                "51690",
-                "sale",
-            );
-
             try {
-                const thread = await discordClient.channels.fetch(
-                    getThreadIdForToken("default"),
+                const snipeEmbed1 = await handleSnipeForSeason(1);
+                const snipeEmbed2 = await handleSnipeForSeason(2);
+                const snipeEmbed3 = await handleSnipeForSeason(3);
+                const snipeEmbed4 = await handleSnipeForSeason(4);
+                const snipeEmbed5 = await handleSnipeForSeason(5);
+                const snipeEmbed6 = await handleSnipeForSeason(6);
+                // const data = await getNFTData("51618"); // Limited
+                // const data = await getNFTData("51520"); // Rare
+                // const data = await getNFTData("51495"); // Epic
+                const data = await getNFTData("51490"); // Legendary
+                const embed = await buildSaleNFTEmbed(
+                    data,
+                    process.env.NICO_ADDRESS,
+                    process.env.FRANCK_ADDRESS,
+                    50000,
+                    "51690",
+                    "sale",
                 );
+
+                const thread = await discordClient.channels.fetch(getThreadIdForToken("default"));
                 if (thread?.isTextBased()) {
+                    await thread.send({ embeds: [snipeEmbed1] });
+                    await thread.send({ embeds: [snipeEmbed2] });
+                    await thread.send({ embeds: [snipeEmbed3] });
+                    await thread.send({ embeds: [snipeEmbed4] });
+                    await thread.send({ embeds: [snipeEmbed5] });
+                    await thread.send({ embeds: [snipeEmbed6] });
                     await thread.send({
                         content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
                         embeds: [embed],
