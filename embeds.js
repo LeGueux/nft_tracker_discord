@@ -14,7 +14,6 @@ function getPriceStringFormatted(price) {
 export async function buildSaleNFTEmbed(data, from, to, price, tokenId, type) {
   const totalAssetsSeller = await getTotalAssetsForWallet(from);
   const babyDolzBalanceSeller = await getBabyDolzBalance(from);
-  const dolzBalanceSeller = await getDolzBalance(from);
   const embed = new EmbedBuilder()
     .setURL(
       `https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}/${tokenId}`,
@@ -30,7 +29,6 @@ export async function buildSaleNFTEmbed(data, from, to, price, tokenId, type) {
       value:
         `🔗 [${from}](https://dolz.io/marketplace/profile/${from})\n` +
         `Total Assets: ${totalAssetsSeller}\n` +
-        `Total DOLZ: ${dolzBalanceSeller}\n` +
         `Total BabyDOLZ: ${babyDolzBalanceSeller}\n`,
     });
   if (type === "sale") {
@@ -38,13 +36,11 @@ export async function buildSaleNFTEmbed(data, from, to, price, tokenId, type) {
     embed.setTitle(`Sale: ${data.name}`);
     const totalAssetsBuyer = await getTotalAssetsForWallet(to);
     const babyDolzBalanceBuyer = await getBabyDolzBalance(to);
-    const dolzBalanceBuyer = await getDolzBalance(to);
     embed.addFields({
       name: `Buyer: ${totalAssetsBuyer > 200 ? "🐋 " : ""} ${((await getDolzUsername(to))[0]?.duUsername ?? "").split("#")[0]}`,
       value:
         `🔗 [${to}](https://dolz.io/marketplace/profile/${to})\n` +
         `Total Assets: ${totalAssetsBuyer}\n` +
-        `Total DOLZ: ${dolzBalanceBuyer}\n` +
         `Total BabyDOLZ: ${babyDolzBalanceBuyer}\n`,
     });
   } else if (type === "offer") {
