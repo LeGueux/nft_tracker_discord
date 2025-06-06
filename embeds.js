@@ -20,6 +20,16 @@ function getTitle(type, name) {
   return `Listing: ${name}`;
 }
 
+function getWhaleEmoji(totalAssets, dolzBalance) {
+  const isDolzWhale = dolzBalance >= 100000;
+  const isCardWhale = totalAssets >= 150;
+
+  if (isDolzWhale && isCardWhale) return "🐋 🔴";
+  if (isDolzWhale) return "🐋 🟣";
+  if (isCardWhale) return "🐋 🟡";
+  return "";
+}
+
 export async function buildSaleNFTEmbed(data, from, to, price, tokenId, type) {
   const [totalAssetsSeller, babyDolzBalanceSeller, dolzBalanceSeller, sellerUsernameData] = await Promise.all([
     getTotalAssetsForWallet(from),
@@ -29,7 +39,6 @@ export async function buildSaleNFTEmbed(data, from, to, price, tokenId, type) {
   ]);
 
   const sellerUsername = (sellerUsernameData[0]?.duUsername ?? "").split("#")[0];
-  const isSellerWhale = totalAssetsSeller >= 150 || dolzBalanceSeller >= 100000;
 
   const embed = new EmbedBuilder()
     .setTitle(getTitle(type, data.name))
@@ -41,7 +50,7 @@ export async function buildSaleNFTEmbed(data, from, to, price, tokenId, type) {
     .addFields(
       { name: "Price:", value: getPriceStringFormatted(price) },
       {
-        name: `Seller: ${isSellerWhale ? "🐋 " : ""} ${sellerUsername}`,
+        name: `Seller: ${getWhaleEmoji(totalAssetsSeller, dolzBalanceSeller)} ${sellerUsername}`,
         value:
           `🔗 [${from}](https://dolz.io/marketplace/profile/${from})\n` +
           `Total Assets: ${totalAssetsSeller}\n` +
@@ -57,10 +66,9 @@ export async function buildSaleNFTEmbed(data, from, to, price, tokenId, type) {
       getDolzUsername(to),
     ]);
     const buyerUsername = (buyerUsernameData[0]?.duUsername ?? "").split("#")[0];
-    const isBuyerWhale = totalAssetsBuyer >= 150 || dolzBalanceBuyer >= 100000;
 
     embed.addFields({
-      name: `Buyer: ${isBuyerWhale ? "🐋 " : ""} ${buyerUsername}`,
+      name: `Buyer: ${getWhaleEmoji(totalAssetsBuyer, dolzBalanceBuyer)} ${buyerUsername}`,
       value:
         `🔗 [${to}](https://dolz.io/marketplace/profile/${to})\n` +
         `Total Assets: ${totalAssetsBuyer}\n` +
