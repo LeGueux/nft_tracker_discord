@@ -161,11 +161,11 @@ export function eventBotReady(discordClient) {
 
             await interaction.deferUpdate(); // Important pour éviter "Échec de l'interaction"
 
-            const updatedMessage = `📅 Saison sélectionnée : ${season}`;
+            const snipeEmbedSeason = await handleSnipeForSeason(season);
             const row = buildSeasonButtons(season);
 
             await interaction.editReply({
-                content: updatedMessage,
+                embeds: [snipeEmbedSeason],
                 components: row
             });
         }
