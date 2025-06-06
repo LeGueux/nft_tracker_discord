@@ -93,7 +93,7 @@ export function eventBotReady(discordClient) {
       // const data = await getNFTData("51520"); // Rare
       // const data = await getNFTData("51495"); // Epic
       const data = await getNFTData("51490"); // Legendary
-      const embed = buildSaleNFTEmbed(
+      const embed = await buildSaleNFTEmbed(
         data,
         process.env.NICO_ADDRESS,
         process.env.FRANCK_ADDRESS,
@@ -120,6 +120,10 @@ export function eventBotReady(discordClient) {
         }
       } catch (e) {
         console.error("Erreur envoi test embed :", e);
+        await sendStatusMessage(
+          discordClient,
+          `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Rejection : \`${e}\``,
+        );
       }
     }
     // Start calling Cometh API with interval

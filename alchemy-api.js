@@ -25,7 +25,7 @@ export async function getDolzBalance(address) {
         const rawBalance = parseInt(hex, 16);
         const formattedBalance = rawBalance / 1e18; // DOLZ a 18 décimales
 
-        console.log(`Solde DOLZ pour ${address} : ${formattedBalance}`);
+        // console.log(`Solde DOLZ pour ${address} : ${formattedBalance}`);
         return parseInt(formattedBalance);
     } catch (error) {
         console.error("Erreur lors de la récupération du solde DOLZ :", error);
