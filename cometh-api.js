@@ -5,6 +5,7 @@ import {
     checkDateIsValidSinceLastOneInterval,
     getContentTagsDependsOnNFT,
 } from "./utils.js";
+import { sendStatusMessage } from "./error-handler.js";
 
 export async function callComethApiForLastSales(discordClient) {
     try {
@@ -267,5 +268,40 @@ export async function getBabyDolzBalance(address) {
         );
         // Retourne 0 par défaut en cas d'erreur
         return 0;
+    }
+}
+
+export async function getListingsBySeasonAndRarity(seasonCtriteria, rarityCriteria) {
+    try {
+        console.log(`getListingsBySeasonAndRarity à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}, criterias: ${seasonCtriteria}, ${rarityCriteria}`);
+        // https://api.marketplace.cometh.io/v1/doc#tag/asset/operation/searchAssets
+        const response = await fetch(
+            "https://api.marketplace.cometh.io/v1/assets/search",
+            {
+                method: "POST",
+                headers: {
+                    accept: "application/json",
+                    "content-type": "application/json",
+                    apikey: process.env.COMETH_API_KEY,
+                },
+                body: JSON.stringify({
+                    contractAddress: process.env.NFT_CONTRACT_ADDRESS,
+                    attributes: [{ Season: seasonCtriteria, Rarity: rarityCriteria }],
+                    limit: 150,
+                    skip: 0,
+                    isOnSale: true,
+                    orderBy: "PRICE",
+                    direction: "ASC",
+                }),
+            },
+        );
+
+        return await response.json();
+    } catch (e) {
+        console.error("Erreur lors de la récupération des cartes:", e);
+        await sendStatusMessage(
+            discordClient,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur lors de la récupération des cartes - Rejection : \`${e}\``,
+        );
     }
 }
