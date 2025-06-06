@@ -97,18 +97,18 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
             .map((g, i) => {
                 const gap = g?.priceGapPercent;
                 return gap !== null && gap !== undefined
-                    ? `• After ${i + 1} buy: ${gap.toFixed(2)}%`
+                    ? `• After ${i + 1} buy ${gap.toFixed(2)}%`
                     : null;
             })
             .filter(Boolean); // Retire les nulls
 
         const lines = [
-            `• **Link MP**: [🔗 LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`,
-            `• **FP Limited**:  ${item.floor} DOLZ`,
-            `• **Next**: ${item.next ?? '-'} (Gap: ${item.priceGapPercent?.toFixed(2) ?? '-'}%)`,
-            `• **FP Rare**: ${item.floorRare ?? '-'} DOLZ`,
-            `• **Prices**: ${item.prices.join(', ')}`,
-            `• **Fragilité (+25%)**: ${item.isFragile ? '✅' : '❌'} ${item.isVeryFragileAfterBuy ? '⚠️' : '❌'}`,
+            `[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`,
+            `FP Limited ${item.floor}`,
+            `Next ${item.next ?? '-'} (Gap: ${item.priceGapPercent?.toFixed(2) ?? '-'}%)`,
+            `FP Rare ${item.floorRare ?? '-'}`,
+            `Prix ${item.prices.join(', ')}`,
+            `Analyse (+25%) ${item.isFragile ? '✅' : '❌'}${item.isVeryFragileAfterBuy ? '⚠️' : '❌'}`,
         ];
 
         // Ajoute les simulated gaps seulement s'il y en a au moins un
@@ -117,7 +117,7 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
         }
 
         embed.addFields({
-            name: `🔗 ${item.name}`,
+            name: `${item.name}`,
             value: lines.join('\n'),
             inline: false,
         });
