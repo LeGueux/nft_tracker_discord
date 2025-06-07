@@ -86,9 +86,9 @@ export async function buildSaleNFTEmbed(data, from, to, price, tokenId, type) {
 
 export async function buildSnipeEmbed(dataFormatted, season = 0) {
     const embed = new EmbedBuilder()
-        .setTitle(`💹 Sniping Opportunities - Season ${season}`)
-        .setFooter({ text: `💹 Sniping Opportunities - Season ${season}` })
-        .setDescription(`Cartes fragiles ou sensibles au sniping (${new Date().toLocaleDateString()})`)
+        .setTitle(`💹 Sniping S${season}`)
+        .setFooter({ text: `💹 Sniping S${season}` })
+        .setDescription(`Sniping du (${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })})`)
         .setColor(0x00ff99);
 
     for (const item of dataFormatted) {
@@ -97,7 +97,7 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
             .map((g, i) => {
                 const gap = g?.priceGapPercent;
                 return gap !== null && gap !== undefined
-                    ? `• After ${i + 1} buy ${gap.toFixed(2)}%`
+                    ? `• After ${i + 1} buy ${gap.toFixed(1)}%`
                     : null;
             })
             .filter(Boolean); // Retire les nulls
@@ -105,21 +105,20 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
         const lines = [
             `[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`,
             `FP Limited ${item.floor}`,
-            `Next ${item.next ?? '-'} Gap ${item.priceGapPercent?.toFixed(2) ?? '-'}%`,
+            `Next ${item.next ?? '-'} Gap ${item.priceGapPercent?.toFixed(1) ?? '-'}%`,
             `FP Rare ${item.floorRare ?? '-'}`,
             `Prix ${item.prices.join(', ')}`,
-            `Analyse (+25%) ${item.isFragile ? '✅' : '❌'}${item.isVeryFragileAfterBuy ? '⚠️' : '❌'}`,
         ];
 
         // Ajoute les simulated gaps seulement s'il y en a au moins un
         if (simulatedGaps.length > 0) {
-            lines.push('', '**Simulated Gaps:**', ...simulatedGaps);
+            lines.push('**Simulated Gaps:**', ...simulatedGaps, '\u200B');
         }
 
         embed.addFields({
-            name: `${item.name}`,
+            name: `🃏 ${item.name} ${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'}`,
             value: lines.join('\n'),
-            inline: false,
+            inline: true,
         });
     }
 

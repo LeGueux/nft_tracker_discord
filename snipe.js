@@ -3,11 +3,26 @@ import { buildSnipeEmbed } from "./embeds.js";
 import { IS_TEST_MODE } from "./config.js";
 
 export async function handleSnipeForSeason(season) {
-    console.log(`buildSnipeEmbed for season: ${season}`);
-    const dataListings = await getListingsBySeasonAndRarity([season], ["Limited", "Rare"]);
-    const dataFormatted = analyzeListingsFragility(dataListings);
+    let dataListings = null;
+    let isSnipeOnly = false;
+    if (season === 100) {
+        console.log("buildSnipeEmbed for ALL seasons");
+        dataListings = await getListingsBySeasonAndRarity(["Off-Season", "Special Edition", "1", "2", "3", "4", "5", "6", "7"], ["Limited", "Rare"]);
+        isSnipeOnly = true;
+    } else if (season === 101) {
+        console.log("buildSnipeEmbed for Season Edition");
+        dataListings = await getListingsBySeasonAndRarity(["Special Edition"], ["Limited", "Rare"]);
+        isSnipeOnly = true;
+    } else if (season === 102) {
+        console.log("buildSnipeEmbed for Off-Season");
+        dataListings = await getListingsBySeasonAndRarity(["Off-Season"], ["Limited", "Rare"]);
+    } else {
+        console.log(`buildSnipeEmbed for Season ${season}`);
+        dataListings = await getListingsBySeasonAndRarity([season], ["Limited", "Rare"]);
+    }
+    const dataFormatted = analyzeListingsFragility(dataListings, isSnipeOnly);
     if (IS_TEST_MODE) {
-        console.dir(dataFormatted, { depth: null, colors: true });
+        // console.dir(dataFormatted, { depth: null, colors: true });
         console.table(dataFormatted.map(item => {
             const gaps = {};
             for (let i = 0; i < 5; i++) {
@@ -17,17 +32,17 @@ export async function handleSnipeForSeason(season) {
                     ? `${gapValue.toFixed(2)}%`
                     : '-';
             }
-    
+
             return {
                 Name: item.name,
                 'S/N': item.modelId,
                 FloorLimited: item.floor,
                 Next: item.next ?? '-',
                 FloorRare: item.floorRare ?? '-',
-                Prices: item.prices.join(', '),
+                Prices: item.prices.slice(0, 20).join(', '),
                 'Gap %': item.priceGapPercent !== null ? item.priceGapPercent.toFixed(2) : '-',
-                'Fragile (+25%)': item.isFragile,
-                'VeryFragileAfterBuy (+25%)': item.isVeryFragileAfterBuy,
+                'Fragile L1 (+25%)': item.isFragileLevel1,
+                'Fragile L2 (+25%)': item.isFragileLevel2,
                 ...gaps
             };
         }));
@@ -41,7 +56,7 @@ function weiToDolz(weiStr) {
     return parseFloat(weiStr) / 1e18;
 }
 
-function analyzeListingsFragility(data) {
+function analyzeListingsFragility(data, snipeOnly = false) {
     const grouped = {};
     const rareFloorsByModel = {}; // floorRare par modèleId
 
@@ -102,7 +117,9 @@ function analyzeListingsFragility(data) {
         if (rarity === "Limited" && floorRare !== null && floor >= floorRare) continue;
 
         const simulatedGaps = simulateGapAfterPurchases(filteredPrices, 5);
-        const hasFragileSim = simulatedGaps.some(s => s.priceGapPercent !== null && s.priceGapPercent >= 25);
+        const isFragileLevel2 = simulatedGaps.some(s => s.priceGapPercent !== null && s.priceGapPercent >= 25);
+
+        if (snipeOnly && (priceGap === null || priceGap < 25) && !isFragileLevel2) continue;
 
         results.push({
             name,
@@ -111,8 +128,8 @@ function analyzeListingsFragility(data) {
             next,
             prices: filteredPrices,
             priceGapPercent: priceGap,
-            isFragile: priceGap !== null && priceGap >= 25,
-            isVeryFragileAfterBuy: hasFragileSim,
+            isFragileLevel1: priceGap !== null && priceGap >= 25,
+            isFragileLevel2: isFragileLevel2,
             simulatedGaps,
             floorRare,
         });

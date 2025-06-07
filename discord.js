@@ -34,6 +34,42 @@ function buildSeasonButtons(currentSeason) {
         currentRow.addComponents(button);
     }
 
+    // All Season Snipe ONLY Buttons ID=100
+    const buttonAll = new ButtonBuilder()
+        .setCustomId(`select_season_snipe_100`)
+        .setLabel(`All Snipe`)
+        .setStyle(i === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+
+    if (currentRow.components.length === 5) {
+        rows.push(currentRow);
+        currentRow = new ActionRowBuilder();
+    }
+    currentRow.addComponents(buttonAll);
+
+    // Special Edition Button ID=101
+    const buttonOffSeason = new ButtonBuilder()
+        .setCustomId(`select_season_snipe_101`)
+        .setLabel(`Spe-E`)
+        .setStyle(i === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+
+    if (currentRow.components.length === 5) {
+        rows.push(currentRow);
+        currentRow = new ActionRowBuilder();
+    }
+    currentRow.addComponents(buttonOffSeason);
+
+    // Off-Season Button ID=102
+    const buttonSpecialEdition = new ButtonBuilder()
+        .setCustomId(`select_season_snipe_102`)
+        .setLabel(`OFF-S`)
+        .setStyle(i === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+
+    if (currentRow.components.length === 5) {
+        rows.push(currentRow);
+        currentRow = new ActionRowBuilder();
+    }
+    currentRow.addComponents(buttonSpecialEdition);
+
     // Push the last row if it has any buttons
     if (currentRow.components.length > 0) {
         rows.push(currentRow);
@@ -75,12 +111,15 @@ export function eventBotReady(discordClient) {
 
         if (IS_TEST_MODE) {
             try {
-                const snipeEmbed1 = await handleSnipeForSeason(1);
-                const snipeEmbed2 = await handleSnipeForSeason(2);
-                const snipeEmbed3 = await handleSnipeForSeason(3);
-                const snipeEmbed4 = await handleSnipeForSeason(4);
-                const snipeEmbed5 = await handleSnipeForSeason(5);
-                const snipeEmbed6 = await handleSnipeForSeason(6);
+                // const snipeEmbed1 = await handleSnipeForSeason(1);
+                // const snipeEmbed2 = await handleSnipeForSeason(2);
+                // const snipeEmbed3 = await handleSnipeForSeason(3);
+                // const snipeEmbed4 = await handleSnipeForSeason(4);
+                // const snipeEmbed5 = await handleSnipeForSeason(5);
+                // const snipeEmbed6 = await handleSnipeForSeason(6);
+                const snipeEmbedAll = await handleSnipeForSeason(100);
+                // const snipeEmbedSE = await handleSnipeForSeason(101);
+                // const snipeEmbedOS = await handleSnipeForSeason(102);
                 // const data = await getNFTData("51618"); // Limited
                 // const data = await getNFTData("51520"); // Rare
                 // const data = await getNFTData("51495"); // Epic
@@ -96,12 +135,15 @@ export function eventBotReady(discordClient) {
 
                 const thread = await discordClient.channels.fetch(getThreadIdForToken("default"));
                 if (thread?.isTextBased()) {
-                    await thread.send({ embeds: [snipeEmbed1] });
-                    await thread.send({ embeds: [snipeEmbed2] });
-                    await thread.send({ embeds: [snipeEmbed3] });
-                    await thread.send({ embeds: [snipeEmbed4] });
-                    await thread.send({ embeds: [snipeEmbed5] });
-                    await thread.send({ embeds: [snipeEmbed6] });
+                    // await thread.send({ embeds: [snipeEmbed1] });
+                    // await thread.send({ embeds: [snipeEmbed2] });
+                    // await thread.send({ embeds: [snipeEmbed3] });
+                    // await thread.send({ embeds: [snipeEmbed4] });
+                    // await thread.send({ embeds: [snipeEmbed5] });
+                    // await thread.send({ embeds: [snipeEmbed6] });
+                    await thread.send({ embeds: [snipeEmbedAll] });
+                    // await thread.send({ embeds: [snipeEmbedSE] });
+                    // await thread.send({ embeds: [snipeEmbedOS] });
                     await thread.send({
                         content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
                         embeds: [embed],

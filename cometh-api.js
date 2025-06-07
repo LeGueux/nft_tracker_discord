@@ -287,7 +287,7 @@ export async function getListingsBySeasonAndRarity(seasonCtriteria, rarityCriter
                 body: JSON.stringify({
                     contractAddress: process.env.NFT_CONTRACT_ADDRESS,
                     attributes: [{ Season: seasonCtriteria, Rarity: rarityCriteria }],
-                    limit: 500,
+                    limit: 9999,
                     skip: 0,
                     isOnSale: true,
                     orderBy: "PRICE",
@@ -295,8 +295,9 @@ export async function getListingsBySeasonAndRarity(seasonCtriteria, rarityCriter
                 }),
             },
         );
-
-        return await response.json();
+        const data = await response.json();
+        
+        return data;
     } catch (e) {
         console.error("Erreur lors de la récupération des cartes:", e);
         await sendStatusMessage(
