@@ -38,7 +38,7 @@ function buildSeasonButtons(currentSeason) {
     const buttonAll = new ButtonBuilder()
         .setCustomId(`select_season_snipe_100`)
         .setLabel(`All Snipe`)
-        .setStyle(i === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+        .setStyle(100 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
 
     if (currentRow.components.length === 5) {
         rows.push(currentRow);
@@ -50,7 +50,7 @@ function buildSeasonButtons(currentSeason) {
     const buttonOffSeason = new ButtonBuilder()
         .setCustomId(`select_season_snipe_101`)
         .setLabel(`Spe-E`)
-        .setStyle(i === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+        .setStyle(101 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
 
     if (currentRow.components.length === 5) {
         rows.push(currentRow);
@@ -62,7 +62,7 @@ function buildSeasonButtons(currentSeason) {
     const buttonSpecialEdition = new ButtonBuilder()
         .setCustomId(`select_season_snipe_102`)
         .setLabel(`OFF-S`)
-        .setStyle(i === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+        .setStyle(102 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
 
     if (currentRow.components.length === 5) {
         rows.push(currentRow);
