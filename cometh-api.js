@@ -1,4 +1,4 @@
-import { buildSaleNFTEmbed } from "./embeds.js";
+import { buildSaleListingNFTEmbed } from "./embeds.js";
 import { getThreadIdForToken } from "./discord.js";
 import {
     getNFTData,
@@ -38,7 +38,7 @@ export async function callComethApiForLastSales(discordClient) {
                 const price = parseInt(item.erc20FillAmount) / 1000000000000000000 / 0.9803;
                 const seller = item.direction === "sell" ? item.maker : item.taker;
                 const buyer = item.direction === "sell" ? item.taker : item.maker;
-                const embed = await buildSaleNFTEmbed(
+                const embed = await buildSaleListingNFTEmbed(
                     data,
                     seller,
                     buyer,
@@ -101,7 +101,7 @@ export async function callComethApiForLastListings(discordClient) {
                 const tokenId = item.tokenId;
                 const data = await getNFTData(tokenId);
                 const price = parseInt(item.totalPrice) / 1000000000000000000;
-                const embed = await buildSaleNFTEmbed(
+                const embed = await buildSaleListingNFTEmbed(
                     data,
                     item.maker,
                     null,
@@ -136,7 +136,7 @@ export async function callComethApiForLastListings(discordClient) {
                 const tokenId = item.tokenId;
                 const data = await getNFTData(tokenId);
                 const price = parseInt(item.totalPrice) / 1000000000000000000;
-                const embed = await buildSaleNFTEmbed(
+                const embed = await buildSaleListingNFTEmbed(
                     data,
                     item.asset.owner,
                     item.asset.owner,

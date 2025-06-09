@@ -5,7 +5,7 @@ import {
     ButtonBuilder,
     ButtonStyle,
 } from "discord.js";
-import { buildSaleNFTEmbed } from "./embeds.js";
+import { buildSaleListingNFTEmbed } from "./embeds.js";
 import { getNFTData } from "./utils.js";
 import { IS_TEST_MODE, ALIVE_PING_INTERVAL, COMETH_API_INTERVAL } from "./config.js";
 import { sendStatusMessage } from "./error-handler.js";
@@ -124,7 +124,7 @@ export function eventBotReady(discordClient) {
                 // const data = await getNFTData("51520"); // Rare
                 // const data = await getNFTData("51495"); // Epic
                 const data = await getNFTData("51490"); // Legendary
-                const embed = await buildSaleNFTEmbed(
+                const embed = await buildSaleListingNFTEmbed(
                     data,
                     process.env.NICO_ADDRESS,
                     process.env.FRANCK_ADDRESS,

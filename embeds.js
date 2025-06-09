@@ -30,7 +30,7 @@ function getWhaleEmoji(totalAssets, dolzBalance) {
     return "";
 }
 
-export async function buildSaleNFTEmbed(data, from, to, price, tokenId, type) {
+export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, type) {
     const [totalAssetsSeller, babyDolzBalanceSeller, dolzBalanceSeller, sellerUsernameData] = await Promise.all([
         getTotalAssetsForWallet(from),
         getBabyDolzBalance(from),
