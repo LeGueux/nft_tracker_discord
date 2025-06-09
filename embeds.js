@@ -5,6 +5,7 @@ import {
     getBabyDolzBalance,
 } from "./cometh-api.js";
 import { getDolzBalance } from "./alchemy-api.js";
+import { getNFTSeasonByCardNumber } from "./utils.js";
 
 const formatNumber = (num) => new Intl.NumberFormat('fr-FR').format(num);
 
@@ -28,6 +29,20 @@ function getWhaleEmoji(totalAssets, dolzBalance) {
     if (isDolzWhale) return "🐋 🟣";
     if (isCardWhale) return "🐋 🟡";
     return "";
+}
+
+function getPrefixNameEmojiBySeason(season) {
+    const emojiMap = {
+        "1": "1️⃣",
+        "2": "2️⃣",
+        "3": "3️⃣",
+        "4": "4️⃣",
+        "5": "5️⃣",
+        "6": "6️⃣",
+        "7": "7️⃣",
+    };
+
+    return emojiMap[season] || "🃏";
 }
 
 export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, type) {
@@ -96,28 +111,22 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
         const simulatedGaps = item.simulatedGaps
             .map((g, i) => {
                 const gap = g?.priceGapPercent;
-                return gap !== null && gap !== undefined
-                    ? `• After ${i + 1} buy ${gap.toFixed(1)}%`
-                    : null;
+                return gap !== null && gap !== undefined ? `${gap.toFixed(1)}%` : null;
             })
             .filter(Boolean); // Retire les nulls
 
         const lines = [
             `[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`,
             `FP Limited ${item.floor}`,
-            `Next ${item.next ?? '-'} Gap ${item.priceGapPercent?.toFixed(1) ?? '-'}%`,
             `FP Rare ${item.floorRare ?? '-'}`,
-            `Prix ${item.prices.join(', ')}`,
+            `**Prices** ${item.prices.join(', ')}`,
+            '**Gaps:**',
+            `${item.priceGapPercent?.toFixed(1) ?? '-'}% ${simulatedGaps.length > 0 ? ` | ${simulatedGaps.join(' | ')}` : ''}` // Ajoute les simulated gaps seulement s'il y en a au moins un
         ];
 
-        // Ajoute les simulated gaps seulement s'il y en a au moins un
-        if (simulatedGaps.length > 0) {
-            lines.push('**Simulated Gaps:**', ...simulatedGaps, '\u200B');
-        }
-
         embed.addFields({
-            name: `🃏 ${item.name} ${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'}`,
-            value: lines.join('\n'),
+            name: `${getPrefixNameEmojiBySeason(getNFTSeasonByCardNumber(item.modelId))}${item.name}${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'}`,
+            value: `${lines.join('\n')}\u200B`,
             inline: true,
         });
     }

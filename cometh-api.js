@@ -9,9 +9,7 @@ import { sendStatusMessage } from "./error-handler.js";
 
 export async function callComethApiForLastSales(discordClient) {
     try {
-        console.log(
-            `callComethApiForLastSales à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`,
-        );
+        console.log(`callComethApiForLastSales à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`);
         const response = await fetch(
             "https://api.marketplace.cometh.io/v1/orders/filled-events/search",
             {
