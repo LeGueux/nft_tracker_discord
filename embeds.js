@@ -119,13 +119,13 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
             `[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`,
             `FP Limited ${item.floor}`,
             `FP Rare ${item.floorRare ?? '-'}`,
-            `**Prices** ${item.prices.join(', ')}`,
+            `**Prices (${item.countLimitedBeforeRare})** ${item.prices.join(', ')}`,
             '**Gaps:**',
             `${item.priceGapPercent?.toFixed(1) ?? '-'}% ${simulatedGaps.length > 0 ? ` | ${simulatedGaps.join(' | ')}` : ''}` // Ajoute les simulated gaps seulement s'il y en a au moins un
         ];
 
         embed.addFields({
-            name: `${getPrefixNameEmojiBySeason(getNFTSeasonByCardNumber(item.modelId))}${item.name}${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'}`,
+            name: `${getPrefixNameEmojiBySeason(getNFTSeasonByCardNumber(item.modelId))} ${item.name} ${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'}`,
             value: `${lines.join('\n')}\u200B`,
             inline: true,
         });
