@@ -23,7 +23,7 @@ function buildSeasonButtons(currentSeason) {
     // All Season Snipe ONLY Buttons ID=100
     const buttonAll = new ButtonBuilder()
         .setCustomId(`select_season_snipe_100`)
-        .setLabel(`All`)
+        .setLabel(`All cards`)
         .setStyle(100 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
 
     if (currentRow.components.length === 5) {
@@ -35,7 +35,7 @@ function buildSeasonButtons(currentSeason) {
     // All Season Snipe ONLY Buttons ID=110
     const buttonAllSeasonsOnly = new ButtonBuilder()
         .setCustomId(`select_season_snipe_110`)
-        .setLabel(`All`)
+        .setLabel(`S1-S7`)
         .setStyle(110 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
 
     if (currentRow.components.length === 5) {
