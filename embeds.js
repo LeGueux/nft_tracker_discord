@@ -101,9 +101,8 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
 
 export async function buildSnipeEmbed(dataFormatted, season = 0) {
     const embed = new EmbedBuilder()
-        .setTitle(`💹 Sniping S${season}`)
-        .setFooter({ text: `💹 Sniping S${season}` })
-        .setDescription(`Sniping du (${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })})`)
+        .setTitle(`💹 Sniping du (${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })})`)
+        .setFooter({ text: `Sniping du (${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })})` })
         .setColor(0x00ff99);
 
     for (const item of dataFormatted) {

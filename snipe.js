@@ -6,14 +6,18 @@ export async function handleSnipeForSeason(season) {
     let dataListings = null;
     let isSnipeOnly = false;
     if (season === 100) {
-        console.log("buildSnipeEmbed for ALL seasons");
+        console.log("buildSnipeEmbed for ALL cards");
         dataListings = await getListingsBySeasonAndRarity(["Off-Season", "Special Edition", "1", "2", "3", "4", "5", "6", "7"], ["Limited", "Rare"]);
         isSnipeOnly = true;
-    } else if (season === 101) {
+    } else if (season === 110) {
+        console.log("buildSnipeEmbed for All Seasons");
+        dataListings = await getListingsBySeasonAndRarity(["1", "2", "3", "4", "5", "6", "7"], ["Limited", "Rare"]);
+        isSnipeOnly = true;
+    } else if (season === 120) {
         console.log("buildSnipeEmbed for Season Edition");
         dataListings = await getListingsBySeasonAndRarity(["Special Edition"], ["Limited", "Rare"]);
         isSnipeOnly = true;
-    } else if (season === 102) {
+    } else if (season === 130) {
         console.log("buildSnipeEmbed for Off-Season");
         dataListings = await getListingsBySeasonAndRarity(["Off-Season"], ["Limited", "Rare"]);
     } else {

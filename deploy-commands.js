@@ -11,6 +11,8 @@ const commands = [
                 .setDescription('Numéro de la saison')
                 .setRequired(true)
                 .addChoices(
+                    { name: 'ALL', value: 100 },
+                    { name: 'S1-S7', value: 110 },
                     { name: 'Saison 1', value: 1 },
                     { name: 'Saison 2', value: 2 },
                     { name: 'Saison 3', value: 3 },
@@ -18,6 +20,8 @@ const commands = [
                     { name: 'Saison 5', value: 5 },
                     { name: 'Saison 6', value: 6 },
                     { name: 'Saison 7', value: 7 },
+                    { name: 'SPE-S', value: 120 },
+                    { name: 'OFF-S', value: 130 },
                 ))
         .toJSON()
 ];

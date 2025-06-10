@@ -20,6 +20,30 @@ function buildSeasonButtons(currentSeason) {
     const rows = [];
     let currentRow = new ActionRowBuilder();
 
+    // All Season Snipe ONLY Buttons ID=100
+    const buttonAll = new ButtonBuilder()
+        .setCustomId(`select_season_snipe_100`)
+        .setLabel(`All`)
+        .setStyle(100 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+
+    if (currentRow.components.length === 5) {
+        rows.push(currentRow);
+        currentRow = new ActionRowBuilder();
+    }
+    currentRow.addComponents(buttonAll);
+
+    // All Season Snipe ONLY Buttons ID=110
+    const buttonAllSeasonsOnly = new ButtonBuilder()
+        .setCustomId(`select_season_snipe_110`)
+        .setLabel(`All`)
+        .setStyle(110 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+
+    if (currentRow.components.length === 5) {
+        rows.push(currentRow);
+        currentRow = new ActionRowBuilder();
+    }
+    currentRow.addComponents(buttonAllSeasonsOnly);
+
     for (let i = 1; i <= 7; i++) {
         const button = new ButtonBuilder()
             .setCustomId(`select_season_snipe_${i}`)
@@ -34,23 +58,11 @@ function buildSeasonButtons(currentSeason) {
         currentRow.addComponents(button);
     }
 
-    // All Season Snipe ONLY Buttons ID=100
-    const buttonAll = new ButtonBuilder()
-        .setCustomId(`select_season_snipe_100`)
-        .setLabel(`All Snipe`)
-        .setStyle(100 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
-
-    if (currentRow.components.length === 5) {
-        rows.push(currentRow);
-        currentRow = new ActionRowBuilder();
-    }
-    currentRow.addComponents(buttonAll);
-
-    // Special Edition Button ID=101
+    // Special Edition Button ID=120
     const buttonOffSeason = new ButtonBuilder()
-        .setCustomId(`select_season_snipe_101`)
+        .setCustomId(`select_season_snipe_120`)
         .setLabel(`Spe-E`)
-        .setStyle(101 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+        .setStyle(120 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
 
     if (currentRow.components.length === 5) {
         rows.push(currentRow);
@@ -58,11 +70,11 @@ function buildSeasonButtons(currentSeason) {
     }
     currentRow.addComponents(buttonOffSeason);
 
-    // Off-Season Button ID=102
+    // Off-Season Button ID=130
     const buttonSpecialEdition = new ButtonBuilder()
-        .setCustomId(`select_season_snipe_102`)
+        .setCustomId(`select_season_snipe_130`)
         .setLabel(`OFF-S`)
-        .setStyle(102 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+        .setStyle(130 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
 
     if (currentRow.components.length === 5) {
         rows.push(currentRow);
@@ -118,8 +130,9 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbed5 = await handleSnipeForSeason(5);
                 // const snipeEmbed6 = await handleSnipeForSeason(6);
                 const snipeEmbedAll = await handleSnipeForSeason(100);
-                // const snipeEmbedSE = await handleSnipeForSeason(101);
-                // const snipeEmbedOS = await handleSnipeForSeason(102);
+                // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
+                // const snipeEmbedSE = await handleSnipeForSeason(120);
+                // const snipeEmbedOS = await handleSnipeForSeason(130);
                 // const data = await getNFTData("51618"); // Limited
                 // const data = await getNFTData("51520"); // Rare
                 // const data = await getNFTData("51495"); // Epic
@@ -142,6 +155,7 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbed5] });
                     // await thread.send({ embeds: [snipeEmbed6] });
                     await thread.send({ embeds: [snipeEmbedAll] });
+                    // await thread.send({ embeds: [snipeEmbedAllSeasons] });
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
                     await thread.send({
