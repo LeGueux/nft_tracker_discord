@@ -105,7 +105,7 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
         .setFooter({ text: `Sniping du (${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })})` })
         .setColor(0x00ff99);
 
-    for (const item of dataFormatted) {
+    for (const [index, item] of dataFormatted.entries()) {
         // Filtrer uniquement les gaps valides
         const simulatedGaps = item.simulatedGaps
             .map((g, i) => {
@@ -114,22 +114,26 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
             })
             .filter(Boolean); // Retire les nulls
 
-        const lines = [
-            `[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`,
+        const lines = [];
+        if (index < 15) {
+            lines.push(`[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`);
+        }
+        lines.push(
             `FP Limited ${item.floor}`,
             `FP Rare ${item.floorRare ?? '-'}`,
             `**Prices (${item.countLimitedBeforeRare})** ${item.prices.join(', ')}`,
             '**Gaps:**',
             `${item.priceGapPercent?.toFixed(1) ?? '-'}% ${simulatedGaps.length > 0 ? ` | ${simulatedGaps.join(' | ')}` : ''}` // Ajoute les simulated gaps seulement s'il y en a au moins un
-        ];
+        );
 
         embed.addFields({
-            name: `${getPrefixNameEmojiBySeason(getNFTSeasonByCardNumber(item.modelId))} ${item.name} ${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'}`,
+            name: `${getPrefixNameEmojiBySeason(getNFTSeasonByCardNumber(item.modelId))} ${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'} ${item.name}`,
             value: `${lines.join('\n')}\u200B`,
             inline: true,
         });
     }
 
+    // console.log(embed.length);
     if (embed.length > 6000) {
         console.warn("Embed too large, truncating...");
         embed.setFields({
