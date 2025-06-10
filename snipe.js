@@ -81,7 +81,7 @@ function analyzeListingsFragility(data, snipeOnly = false) {
             rarity = match[2];
         }
 
-        const priceDolz = parseInt(weiToDolz(priceWei));
+        let priceDolz = parseInt(weiToDolz(priceWei));
 
         if (rarity === "Rare" && modelId) {
             if (!rareFloorsByModel[modelId]) {
@@ -95,6 +95,9 @@ function analyzeListingsFragility(data, snipeOnly = false) {
         if (!grouped[keyName]) {
             grouped[keyName] = { prices: [], rarity, modelId };
         }
+        if ([process.env.FRANCK_ADDRESS.toLowerCase(), process.env.NICO_ADDRESS.toLowerCase()].includes(asset?.owner.toLowerCase())) {
+            priceDolz += asset.owner.toLowerCase() === process.env.FRANCK_ADDRESS.toLowerCase() ? "-F" : "-N";
+        }
 
         grouped[keyName].prices.push(priceDolz);
     }
@@ -102,15 +105,25 @@ function analyzeListingsFragility(data, snipeOnly = false) {
     const results = [];
 
     for (const [name, { prices, rarity, modelId }] of Object.entries(grouped)) {
-        const sorted = prices.sort((a, b) => a - b);
+        const cleanPrices = prices.map(price => {
+            if (typeof price === 'string') {
+                // Si c'est une chaîne de caractères, on gère les suffixes -F ou -N
+                // On utilise une expression régulière pour cibler '-F' ou '-N' à la fin de la chaîne
+                const cleanedString = price.replace(/-(F|N)$/, '');
+                return parseInt(cleanedString, 10);
+            }
+            // Si c'est déjà un nombre, on le retourne tel quel
+            return price;
+        });
+        const sortedPrices = cleanPrices.sort((a, b) => a - b);
 
         // Calculer floorRare pour CE modèle
         const rarePrices = modelId && rareFloorsByModel[modelId] ? rareFloorsByModel[modelId] : [];
         const floorRare = rarePrices.length > 0 ? Math.min(...rarePrices) : null;
 
         const filteredPrices = floorRare !== null
-            ? sorted.filter(price => price < floorRare)
-            : sorted.slice();
+            ? sortedPrices.filter(price => price < floorRare)
+            : sortedPrices.slice();
 
         if (filteredPrices.length === 0) continue;
 
@@ -125,12 +138,14 @@ function analyzeListingsFragility(data, snipeOnly = false) {
 
         if (snipeOnly && (priceGap === null || priceGap < 25) && !isFragileLevel2) continue;
 
+        const maxPricesLength1 = Math.min(filteredPrices.length, 10);
+
         results.push({
             name,
             modelId,
-            floor,
-            next,
-            prices: filteredPrices.slice(0, 10),
+            floor: prices[0],
+            next: prices[1] ?? null,
+            prices: prices.slice(0, maxPricesLength1),
             countLimitedBeforeRare: filteredPrices.length,
             priceGapPercent: priceGap,
             isFragileLevel1: priceGap !== null && priceGap >= 25,

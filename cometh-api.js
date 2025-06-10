@@ -128,9 +128,7 @@ export async function callComethApiForLastListings(discordClient) {
                     process.env.NICO_ADDRESS.toLowerCase(),
                 ].includes(item.asset?.owner.toLowerCase())
             ) {
-                const isForFranck =
-                    item.asset.owner.toLowerCase() ===
-                    process.env.FRANCK_ADDRESS.toLowerCase();
+                const isForFranck = item.asset.owner.toLowerCase() === process.env.FRANCK_ADDRESS.toLowerCase();
                 const tokenId = item.tokenId;
                 const data = await getNFTData(tokenId);
                 const price = parseInt(item.totalPrice) / 1000000000000000000;
