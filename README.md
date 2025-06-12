@@ -59,7 +59,7 @@ COMETH_API_KEY=TO_REPLACE
 COMETH_API_INTERVAL=10 # en min
 ALIVE_PING_INTERVAL=10 # en min
 
-DOLZ_PRICE="0.006" # Prix du dolz en $
+DOLZ_PRICE="0.0065" # Prix du dolz en $
 ```
 
 ### 4. Lancez le bot
