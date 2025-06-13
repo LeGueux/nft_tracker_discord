@@ -101,9 +101,12 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
 
 export async function buildSnipeEmbed(dataFormatted, season = 0) {
     const embed = new EmbedBuilder()
-        .setTitle(`💹 Sniping du (${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })})`)
-        .setFooter({ text: `Sniping du (${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })})` })
+        .setTitle(`💹 Sniping du ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`)
         .setColor(0x00ff99);
+
+    // 🧮 Initialisation des totaux
+    let totalFloorLimited = 0;
+    let totalFloorRare = 0;
 
     for (const [index, item] of dataFormatted.entries()) {
         // Filtrer uniquement les gaps valides
@@ -126,10 +129,30 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
             `${item.priceGapPercent?.toFixed(1) ?? '-'}% ${simulatedGaps.length > 0 ? ` | ${simulatedGaps.join(' | ')}` : ''}` // Ajoute les simulated gaps seulement s'il y en a au moins un
         );
 
+        // ➕ Ajouter au total si saison < 100
+        if (season < 100) {
+            if (typeof item.floor === 'number') totalFloorLimited += item.floor;
+            if (typeof item.floorRare === 'number') totalFloorRare += item.floorRare;
+        }
+
         embed.addFields({
             name: `${getPrefixNameEmojiBySeason(getNFTSeasonByCardNumber(item.modelId))} ${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'} ${item.name}`,
             value: `${lines.join('\n')}\u200B`,
             inline: true,
+        });
+    }
+
+    // 📆 Date du footer
+    const nowFormatted = new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" });
+
+    // 🦶 Footer avec ou sans total
+    if (season < 100) {
+        embed.setFooter({
+            text: `Total Floor Limited: ${totalFloorLimited} | Rare: ${totalFloorRare} | Sniping du ${nowFormatted}`
+        });
+    } else {
+        embed.setFooter({
+            text: `Sniping du ${nowFormatted}`
         });
     }
 
