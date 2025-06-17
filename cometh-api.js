@@ -135,7 +135,7 @@ export async function callComethApiForLastListings(discordClient) {
                 const embed = await buildSaleListingNFTEmbed(
                     data,
                     item.asset.owner,
-                    item.asset.owner,
+                    item.maker,
                     price,
                     tokenId,
                     "offer",

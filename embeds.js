@@ -73,7 +73,7 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
                     `Total BabyDOLZ: ${formatNumber(babyDolzBalanceSeller)}\n`,
             }
         );
-    if (type === "sale") {
+    if (['sale', 'offer'].includes(type)) {
         const [totalAssetsBuyer, babyDolzBalanceBuyer, dolzBalanceBuyer, buyerUsernameData] = await Promise.all([
             getTotalAssetsForWallet(to),
             getBabyDolzBalance(to),
