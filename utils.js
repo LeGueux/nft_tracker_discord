@@ -85,16 +85,18 @@ export function getContentTagsDependsOnNFT(data, price, type) {
 
         // FRANCK + NICO
         // Listing | S7 Emiri Momota g0125 | Price <= 3500
-        // Listing | S7 Emiri Momota g0125 | Price <= 6000 | Rare
+        // Listing | S7 Emiri Momota g0125 | Price <= 5000 | Rare
         if (["g0125"].includes(data.card_number) &&
-            (price <= 3500 || (isRare && price <= 6000))
+            (price <= 3500 || (isRare && price <= 5000))
         ) {
             return `${FRANCK} ${NICO}`;
         }
     }
     // NICO ONLY
     // S3 Kelly Zelda g0092      | Limited
-    if (["g0092"].includes(data.card_number)) {
+    // Listing | S1
+    if (["g0092"].includes(data.card_number) ||
+        data.season === "1") {
         return NICO;
     }
     return "";
