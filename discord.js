@@ -16,37 +16,39 @@ export const discordClient = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
 });
 
-function buildSeasonButtons(currentSeason) {
+function buildSeasonButtons(currentSeason, includeAllRecap = true, includeOffSeason = true, includeSpecialEdition = true) {
     const rows = [];
     let currentRow = new ActionRowBuilder();
 
-    // All Season Snipe ONLY Buttons ID=100
-    const buttonAll = new ButtonBuilder()
-        .setCustomId(`select_season_snipe_100`)
-        .setLabel(`All cards`)
-        .setStyle(100 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+    if (includeAllRecap) {
+        // All Season Snipe ONLY Buttons ID=100
+        const buttonAll = new ButtonBuilder()
+            .setCustomId(`select_season_100`)
+            .setLabel(`All cards`)
+            .setStyle(100 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
 
-    if (currentRow.components.length === 5) {
-        rows.push(currentRow);
-        currentRow = new ActionRowBuilder();
+        if (currentRow.components.length === 5) {
+            rows.push(currentRow);
+            currentRow = new ActionRowBuilder();
+        }
+        currentRow.addComponents(buttonAll);
+
+        // All Season Snipe ONLY Buttons ID=110
+        const buttonAllSeasonsOnly = new ButtonBuilder()
+            .setCustomId(`select_season_110`)
+            .setLabel(`S1-S7`)
+            .setStyle(110 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+
+        if (currentRow.components.length === 5) {
+            rows.push(currentRow);
+            currentRow = new ActionRowBuilder();
+        }
+        currentRow.addComponents(buttonAllSeasonsOnly);
     }
-    currentRow.addComponents(buttonAll);
-
-    // All Season Snipe ONLY Buttons ID=110
-    const buttonAllSeasonsOnly = new ButtonBuilder()
-        .setCustomId(`select_season_snipe_110`)
-        .setLabel(`S1-S7`)
-        .setStyle(110 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
-
-    if (currentRow.components.length === 5) {
-        rows.push(currentRow);
-        currentRow = new ActionRowBuilder();
-    }
-    currentRow.addComponents(buttonAllSeasonsOnly);
 
     for (let i = 1; i <= 7; i++) {
         const button = new ButtonBuilder()
-            .setCustomId(`select_season_snipe_${i}`)
+            .setCustomId(`select_season_${i}`)
             .setLabel(`S${i}`)
             .setStyle(i === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
 
@@ -58,29 +60,33 @@ function buildSeasonButtons(currentSeason) {
         currentRow.addComponents(button);
     }
 
-    // Special Edition Button ID=120
-    const buttonOffSeason = new ButtonBuilder()
-        .setCustomId(`select_season_snipe_120`)
-        .setLabel(`Spe-E`)
-        .setStyle(120 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+    if (includeSpecialEdition) {
+        // Special Edition Button ID=120
+        const buttonOffSeason = new ButtonBuilder()
+            .setCustomId(`select_season_120`)
+            .setLabel(`Spe-E`)
+            .setStyle(120 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
 
-    if (currentRow.components.length === 5) {
-        rows.push(currentRow);
-        currentRow = new ActionRowBuilder();
+        if (currentRow.components.length === 5) {
+            rows.push(currentRow);
+            currentRow = new ActionRowBuilder();
+        }
+        currentRow.addComponents(buttonOffSeason);
     }
-    currentRow.addComponents(buttonOffSeason);
 
-    // Off-Season Button ID=130
-    const buttonSpecialEdition = new ButtonBuilder()
-        .setCustomId(`select_season_snipe_130`)
-        .setLabel(`OFF-S`)
-        .setStyle(130 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+    if (includeOffSeason) {
+        // Off-Season Button ID=130
+        const buttonSpecialEdition = new ButtonBuilder()
+            .setCustomId(`select_season_130`)
+            .setLabel(`OFF-S`)
+            .setStyle(130 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
 
-    if (currentRow.components.length === 5) {
-        rows.push(currentRow);
-        currentRow = new ActionRowBuilder();
+        if (currentRow.components.length === 5) {
+            rows.push(currentRow);
+            currentRow = new ActionRowBuilder();
+        }
+        currentRow.addComponents(buttonSpecialEdition);
     }
-    currentRow.addComponents(buttonSpecialEdition);
 
     // Push the last row if it has any buttons
     if (currentRow.components.length > 0) {
@@ -130,6 +136,7 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbed5 = await handleSnipeForSeason(5);
                 // const snipeEmbed6 = await handleSnipeForSeason(6);
                 const snipeEmbedAll = await handleSnipeForSeason(100);
+                const nftHoldersEmbed1 = await handleSnipeForSeason(1);
                 // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
@@ -158,16 +165,17 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedAllSeasons] });
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
-                    await thread.send({
-                        content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
-                        embeds: [embed],
-                        allowedMentions: {
-                            users: [
-                                process.env.FRANCK_DISCORD_USER_ID,
-                                process.env.NICO_DISCORD_USER_ID,
-                            ],
-                        },
-                    });
+                    await thread.send({ embeds: [nftHoldersEmbed1] });
+                    // await thread.send({
+                    //     content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
+                    //     embeds: [embed],
+                    //     allowedMentions: {
+                    //         users: [
+                    //             process.env.FRANCK_DISCORD_USER_ID,
+                    //             process.env.NICO_DISCORD_USER_ID,
+                    //         ],
+                    //     },
+                    // });
                 }
             } catch (e) {
                 console.error("Erreur envoi test embed :", e);
@@ -201,7 +209,16 @@ export function eventBotReady(discordClient) {
             if (interaction.commandName === 'snipe') {
                 const season = interaction.options.getInteger('season');
                 const snipeEmbedSeason = await handleSnipeForSeason(season);
-                const row = buildSeasonButtons(season);
+                const row = buildSeasonButtons(season, true, true, true);
+                await interaction.deferReply();
+                await interaction.editReply({
+                    embeds: [snipeEmbedSeason],
+                    components: row,
+                });
+            } else if (interaction.commandName === 'nft_holders') {
+                const season = interaction.options.getInteger('season');
+                const snipeEmbedSeason = await handleSnipeForSeason(season);
+                const row = buildSeasonButtons(season, false, true, false);
                 await interaction.deferReply();
                 await interaction.editReply({
                     embeds: [snipeEmbedSeason],
@@ -209,21 +226,39 @@ export function eventBotReady(discordClient) {
                 });
             }
         } else if (interaction.isButton()) {
-            const match = interaction.customId.match(/select_season_snipe_(\d+)/);
-            if (!match) return;
+            if (interaction.commandName === 'snipe') {
+                const match = interaction.customId.match(/select_season_(\d+)/);
+                if (!match) return;
 
-            let season = parseInt(match[1]);
-            console.log(match, season);
+                let season = parseInt(match[1]);
+                console.log(match, season);
 
-            await interaction.deferUpdate(); // Important pour éviter "Échec de l'interaction"
+                await interaction.deferUpdate(); // Important pour éviter "Échec de l'interaction"
 
-            const snipeEmbedSeason = await handleSnipeForSeason(season);
-            const row = buildSeasonButtons(season);
+                const snipeEmbedSeason = await handleSnipeForSeason(season);
+                const row = buildSeasonButtons(season, true, true, true);
 
-            await interaction.editReply({
-                embeds: [snipeEmbedSeason],
-                components: row
-            });
+                await interaction.editReply({
+                    embeds: [snipeEmbedSeason],
+                    components: row
+                });
+            } else if (interaction.commandName === 'nft_holders') {
+                const match = interaction.customId.match(/select_season_(\d+)/);
+                if (!match) return;
+
+                let season = parseInt(match[1]);
+                console.log(match, season);
+
+                await interaction.deferUpdate(); // Important pour éviter "Échec de l'interaction"
+
+                const snipeEmbedSeason = await handleSnipeForSeason(season);
+                const row = buildSeasonButtons(season, false, true, false);
+
+                await interaction.editReply({
+                    embeds: [snipeEmbedSeason],
+                    components: row
+                });
+            }
         }
     });
 }
