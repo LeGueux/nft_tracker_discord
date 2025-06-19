@@ -226,7 +226,8 @@ export function eventBotReady(discordClient) {
                 });
             }
         } else if (interaction.isButton()) {
-            console.log(interaction);
+            console.log("interaction.commandName", interaction.commandName);
+            console.log("interaction.customId", interaction.customId);
             if (interaction.commandName === 'snipe') {
                 const match = interaction.customId.match(/select_season_(\d+)/);
                 if (!match) return;
