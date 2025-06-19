@@ -135,7 +135,7 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbed4 = await handleSnipeForSeason(4);
                 // const snipeEmbed5 = await handleSnipeForSeason(5);
                 // const snipeEmbed6 = await handleSnipeForSeason(6);
-                const snipeEmbedAll = await handleSnipeForSeason(100);
+                // const snipeEmbedAll = await handleSnipeForSeason(100);
                 const nftHoldersEmbed1 = await handleSnipeForSeason(1);
                 // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
@@ -143,15 +143,15 @@ export function eventBotReady(discordClient) {
                 // const data = await getNFTData("51618"); // Limited
                 // const data = await getNFTData("51520"); // Rare
                 // const data = await getNFTData("51495"); // Epic
-                const data = await getNFTData("51490"); // Legendary
-                const embed = await buildSaleListingNFTEmbed(
-                    data,
-                    process.env.NICO_ADDRESS,
-                    process.env.FRANCK_ADDRESS,
-                    50000,
-                    "51690",
-                    "sale",
-                );
+                // const data = await getNFTData("51490"); // Legendary
+                // const embed = await buildSaleListingNFTEmbed(
+                //     data,
+                //     process.env.NICO_ADDRESS,
+                //     process.env.FRANCK_ADDRESS,
+                //     50000,
+                //     "51690",
+                //     "sale",
+                // );
 
                 const thread = await discordClient.channels.fetch(getThreadIdForToken("default"));
                 if (thread?.isTextBased()) {
@@ -161,7 +161,7 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbed4] });
                     // await thread.send({ embeds: [snipeEmbed5] });
                     // await thread.send({ embeds: [snipeEmbed6] });
-                    await thread.send({ embeds: [snipeEmbedAll] });
+                    // await thread.send({ embeds: [snipeEmbedAll] });
                     // await thread.send({ embeds: [snipeEmbedAllSeasons] });
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
@@ -226,6 +226,7 @@ export function eventBotReady(discordClient) {
                 });
             }
         } else if (interaction.isButton()) {
+            console.log(interaction);
             if (interaction.commandName === 'snipe') {
                 const match = interaction.customId.match(/select_season_(\d+)/);
                 if (!match) return;
