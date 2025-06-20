@@ -135,12 +135,12 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbed3 = await handleSnipeForSeason(3);
                 // const snipeEmbed4 = await handleSnipeForSeason(4);
                 // const snipeEmbed5 = await handleSnipeForSeason(5);
-                // const snipeEmbed6 = await handleSnipeForSeason(6);
+                const snipeEmbed6 = await handleSnipeForSeason(6);
                 // const snipeEmbedAll = await handleSnipeForSeason(100);
-                const nftHoldersEmbed = await handleNftHoldersForSeason(6);
                 // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
+                const nftHoldersEmbed = await handleNftHoldersForSeason(6);
                 // const data = await getNFTData("51618"); // Limited
                 // const data = await getNFTData("51520"); // Rare
                 // const data = await getNFTData("51495"); // Epic
@@ -161,7 +161,7 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbed3] });
                     // await thread.send({ embeds: [snipeEmbed4] });
                     // await thread.send({ embeds: [snipeEmbed5] });
-                    // await thread.send({ embeds: [snipeEmbed6] });
+                    await thread.send({ embeds: [snipeEmbed6] });
                     // await thread.send({ embeds: [snipeEmbedAll] });
                     // await thread.send({ embeds: [snipeEmbedAllSeasons] });
                     // await thread.send({ embeds: [snipeEmbedSE] });
@@ -177,6 +177,7 @@ export function eventBotReady(discordClient) {
                     //         ],
                     //     },
                     // });
+                    // process.exit(0);
                 }
             } catch (e) {
                 console.error("Erreur envoi test embed :", e);

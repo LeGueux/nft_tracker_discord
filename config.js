@@ -11,3 +11,4 @@ export const NFT_LIST_BY_SEASON = {
     7: new Set(["g0125", "g0047", "g0105", "g0126", "g0067", "g0128", "g0122", "g0129", "g0123", "g0127", "g0121", "g0130"]),
     "Off-Season": new Set(["g0034", "g0039", "g0028", "g0054", "g0096", "g0091"]),
 };
+export const RARITY_ORDER = ["Limited", "Rare", "Epic", "Legendary", "Not Revealed"]

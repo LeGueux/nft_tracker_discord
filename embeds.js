@@ -6,6 +6,7 @@ import {
 } from "./cometh-api.js";
 import { getDolzBalance } from "./alchemy-api.js";
 import { getNFTSeasonByCardNumber } from "./utils.js";
+import { RARITY_ORDER } from "./config.js";
 
 const formatNumber = (num) => new Intl.NumberFormat('fr-FR').format(num);
 
@@ -101,7 +102,8 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
 
 export async function buildSnipeEmbed(dataFormatted, season = 0) {
     const embed = new EmbedBuilder()
-        .setTitle(`💹 Sniping du ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`)
+        .setTitle(`💹 Sniping`)
+        .setTimestamp()
         .setColor(0x00ff99);
 
     // 🧮 Initialisation des totaux
@@ -142,21 +144,14 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
         });
     }
 
-    // 📆 Date du footer
-    const nowFormatted = new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" });
-
     // 🦶 Footer avec ou sans total
     if (season < 100) {
         embed.setFooter({
-            text: `Total Floor Limited: ${totalFloorLimited} | Rare: ${totalFloorRare} | Sniping du ${nowFormatted}`
-        });
-    } else {
-        embed.setFooter({
-            text: `Sniping du ${nowFormatted}`
+            text: `Total Floor Limited: ${totalFloorLimited} | Rare: ${totalFloorRare}`
         });
     }
 
-    // console.log(embed.length);
+    // console.log(`Embed length: ${embed.length} characters`);
     if (embed.length > 6000) {
         console.warn("Embed too large, truncating...");
         embed.setFields({
@@ -164,5 +159,76 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
             value: `The embed content was too large and has been truncated. Please check the logs for details. ${embed.length} characters`,
         });
     }
+    return embed;
+}
+
+export async function buildNftHoldersEmbed(analysisResult, season) {
+    const {
+        modelNames,
+        cardsPerModel,
+        topWalletsPerModel,
+        numberOfFullCollectors,
+        walletsPerModel,
+    } = analysisResult;
+
+    const rarityShort = {
+        "Limited": "L",
+        "Rare": "R",
+        "Epic": "E",
+        "Legendary": "LG",
+        "Not Revealed": "NR"
+    };
+
+    const embed = new EmbedBuilder()
+        .setTitle(`🐋 Top Whales Saison ${season}`)
+        .setColor(0x00ffcc)
+        .setTimestamp()
+        .setFooter({ text: `✅ Saison complète : ${numberOfFullCollectors} wallets` });
+
+    for (const [modelId, topList] of Object.entries(topWalletsPerModel)) {
+        const lines = [];
+
+        const nbWallets = walletsPerModel[modelId] || 0;
+        const nbCards = cardsPerModel[modelId] || 0;
+        const avg = nbWallets > 0 ? (nbCards / nbWallets).toFixed(1) : '0.0';
+
+        // Une ligne par info
+        lines.push(`📦 ${nbCards} cartes`);
+        lines.push(`🪪 ${nbWallets} portefeuilles`);
+        lines.push(`📊 Moy: ${avg} carte(s)`);
+
+        for (const [i, holder] of topList.entries()) {
+            const holderUsernameData = await getDolzUsername(holder.wallet);
+            const holderUsername = (holderUsernameData[0]?.duUsername ?? "").split("#")[0];
+            const percent = holder.percentOwned;
+            const total = holder.total;
+
+            const rarityStr = RARITY_ORDER
+                .filter(r => (holder[r] ?? 0) > 0) // ✅ Supprime les 0
+                .map(r => `${rarityShort[r]}: ${holder[r]}`)
+                .join(' | ');
+
+            lines.push(`\n#${i + 1} [${holderUsername}](https://dolz.io/marketplace/profile/${holder.wallet})`);
+            lines.push(`${total} cartes (${percent}%)`);
+            lines.push(`🎖️ ${rarityStr}`);
+        }
+
+        embed.addFields({
+            name: `${getPrefixNameEmojiBySeason(season)} ${modelNames?.[modelId]} ${modelId}`,
+            value: lines.join('\n') + '\u200B',
+            inline: true,
+        });
+    }
+
+    // Sécurité : éviter débordement Discord
+    console.log(`Embed length: ${embed.length} characters`);
+    if (embed.length > 6000) {
+        console.warn("Embed too large, truncating...");
+        embed.setFields({
+            name: "Warning",
+            value: `The embed content was too large and has been truncated. Please check les logs. ${embed.length} characters`,
+        });
+    }
+
     return embed;
 }
