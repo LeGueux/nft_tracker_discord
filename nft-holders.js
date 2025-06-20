@@ -14,7 +14,7 @@ export async function handleNftHoldersForSeason(season) {
 
     const stats = computeNftHoldersForSeason(dataCardsBySeason, {
         topX: 3,
-        minCardsPerModel: 10,
+        minCardsPerModel: 5,
     });
     if (IS_TEST_MODE) {
         console.log(`🎯 ${stats.numberOfFullCollectors} wallets ont une saison complète`);
