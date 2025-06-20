@@ -244,7 +244,7 @@ export function eventBotReady(discordClient) {
                     components: row
                 });
             } else if (context === 'nft_holders') {
-                const snipeEmbedSeason = await handleSnipeForSeason(season);
+                const snipeEmbedSeason = await handleNftHoldersForSeason(season);
                 const row = buildSeasonButtons(context, season, false, true, false);
 
                 await interaction.editReply({
