@@ -44,7 +44,7 @@ export async function callComethApiForLastSales(discordClient) {
                     tokenId,
                     "sale",
                 );
-                const threadId = getThreadIdForToken("sale", item.maker);
+                const threadId = getThreadIdForToken("sale", seller);
                 const thread = await discordClient.channels.fetch(threadId);
                 if (thread?.isTextBased()) {
                     await thread.send({
