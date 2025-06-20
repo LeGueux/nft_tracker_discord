@@ -293,7 +293,40 @@ export async function getListingsBySeasonAndRarity(seasonCtriteria, rarityCriter
             },
         );
         const data = await response.json();
-        
+
+        return data;
+    } catch (e) {
+        console.error("Erreur lors de la récupération des cartes:", e);
+        await sendStatusMessage(
+            discordClient,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur lors de la récupération des cartes - Rejection : \`${e}\``,
+        );
+    }
+}
+
+export async function getAllCardsBySeason(seasonCtriteria) {
+    try {
+        console.log(`getAllCardsBySeason à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}, criterias: ${seasonCtriteria}`);
+        // https://api.marketplace.cometh.io/v1/doc#tag/asset/operation/searchAssets
+        const response = await fetch(
+            "https://api.marketplace.cometh.io/v1/assets/search",
+            {
+                method: "POST",
+                headers: {
+                    accept: "application/json",
+                    "content-type": "application/json",
+                    apikey: process.env.COMETH_API_KEY,
+                },
+                body: JSON.stringify({
+                    contractAddress: process.env.NFT_CONTRACT_ADDRESS,
+                    attributes: [{ Season: seasonCtriteria }],
+                    limit: 20000,
+                    skip: 0,
+                }),
+            },
+        );
+        const data = await response.json();
+
         return data;
     } catch (e) {
         console.error("Erreur lors de la récupération des cartes:", e);

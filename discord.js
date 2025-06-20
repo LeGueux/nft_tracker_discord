@@ -11,6 +11,7 @@ import { IS_TEST_MODE, ALIVE_PING_INTERVAL, COMETH_API_INTERVAL } from "./config
 import { sendStatusMessage } from "./error-handler.js";
 import { callComethApiForLastListings, callComethApiForLastSales } from "./cometh-api.js";
 import { handleSnipeForSeason } from "./snipe.js";
+import { handleNftHoldersForSeason } from "./nft-holders.js";
 
 export const discordClient = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -136,7 +137,7 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbed5 = await handleSnipeForSeason(5);
                 // const snipeEmbed6 = await handleSnipeForSeason(6);
                 // const snipeEmbedAll = await handleSnipeForSeason(100);
-                const nftHoldersEmbed1 = await handleSnipeForSeason(1);
+                const nftHoldersEmbed = await handleNftHoldersForSeason(6);
                 // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
@@ -165,7 +166,7 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedAllSeasons] });
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
-                    await thread.send({ embeds: [nftHoldersEmbed1] });
+                    await thread.send({ embeds: [nftHoldersEmbed] });
                     // await thread.send({
                     //     content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
                     //     embeds: [embed],
@@ -226,14 +227,12 @@ export function eventBotReady(discordClient) {
                 });
             }
         } else if (interaction.isButton()) {
-            console.log("interaction.customId", interaction.customId);
             const match = interaction.customId.match(/select_season_(\d+)_(snipe|nft_holders)/);
             if (!match) return;
 
-            let season = parseInt(match[1]);
+            const season = parseInt(match[1]);
             const context = match[2]; // "snipe" ou "nft_holders"
-            console.log(match, context, season);
-
+            console.log("interaction.customId Match", match, context, season);
             await interaction.deferUpdate(); // Important pour éviter "Échec de l'interaction"
             if (context === 'snipe') {
                 const snipeEmbedSeason = await handleSnipeForSeason(season);
