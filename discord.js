@@ -219,7 +219,7 @@ export function eventBotReady(discordClient) {
                 });
             } else if (interaction.commandName === 'nft_holders') {
                 const season = interaction.options.getInteger('season');
-                const snipeEmbedSeason = await handleSnipeForSeason(season);
+                const snipeEmbedSeason = await handleNftHoldersForSeason(season);
                 const row = buildSeasonButtons('nft_holders', season, false, true, false);
                 await interaction.deferReply();
                 await interaction.editReply({
