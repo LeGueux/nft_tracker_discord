@@ -1,6 +1,7 @@
 import { getListingsBySeasonAndRarity } from "./cometh-api.js";
 import { buildSnipeEmbed } from "./embeds.js";
 import { IS_TEST_MODE } from "./config.js";
+import { weiToDolz } from "./utils.js";
 
 export async function handleSnipeForSeason(season) {
     let dataListings = null;
@@ -53,11 +54,6 @@ export async function handleSnipeForSeason(season) {
     }
 
     return await buildSnipeEmbed(dataFormatted, season);
-}
-
-// Convertit du wei en DOLZ
-function weiToDolz(weiStr) {
-    return parseFloat(weiStr) / 1e18;
 }
 
 function analyzeListingsFragility(data, snipeOnly = false) {

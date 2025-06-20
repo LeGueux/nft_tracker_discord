@@ -17,6 +17,11 @@ export function checkDateIsValidSinceLastOneInterval(date) {
     return date >= new Date(new Date().getTime() - COMETH_API_INTERVAL);
 }
 
+// Convertit du wei en DOLZ
+export function weiToDolz(weiStr) {
+    return parseFloat(weiStr) / 1e18;
+}
+
 export async function getNFTData(tokenId) {
     try {
         // Exemple: https://cardsdata.dolz.io/jsons/51690.json

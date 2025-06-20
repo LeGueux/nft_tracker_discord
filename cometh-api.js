@@ -2,6 +2,7 @@ import { buildSaleListingNFTEmbed } from "./embeds.js";
 import { getThreadIdForToken } from "./discord.js";
 import {
     getNFTData,
+    weiToDolz,
     checkDateIsValidSinceLastOneInterval,
     getContentTagsDependsOnNFT,
 } from "./utils.js";
@@ -33,7 +34,7 @@ export async function callComethApiForLastSales(discordClient) {
             if (checkDateIsValidSinceLastOneInterval(new Date(item.blockTimestamp))) {
                 const tokenId = item.tokenId;
                 const data = await getNFTData(tokenId);
-                const price = parseInt(item.erc20FillAmount) / 1000000000000000000 / 0.9803;
+                const price = parseInt(weiToDolz(item.erc20FillAmount)) / 0.9803;
                 const seller = item.direction === "sell" ? item.maker : item.taker;
                 const buyer = item.direction === "sell" ? item.taker : item.maker;
                 const embed = await buildSaleListingNFTEmbed(
@@ -98,7 +99,7 @@ export async function callComethApiForLastListings(discordClient) {
             if (item.direction == "sell") {
                 const tokenId = item.tokenId;
                 const data = await getNFTData(tokenId);
-                const price = parseInt(item.totalPrice) / 1000000000000000000;
+                const price = parseInt(weiToDolz(item.totalPrice));
                 const embed = await buildSaleListingNFTEmbed(
                     data,
                     item.maker,
@@ -131,7 +132,7 @@ export async function callComethApiForLastListings(discordClient) {
                 const isForFranck = item.asset.owner.toLowerCase() === process.env.FRANCK_ADDRESS.toLowerCase();
                 const tokenId = item.tokenId;
                 const data = await getNFTData(tokenId);
-                const price = parseInt(item.totalPrice) / 1000000000000000000;
+                const price = parseInt(weiToDolz(item.totalPrice));
                 const embed = await buildSaleListingNFTEmbed(
                     data,
                     item.asset.owner,
