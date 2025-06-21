@@ -209,19 +209,19 @@ export function eventBotReady(discordClient) {
     discordClient.on('interactionCreate', async interaction => {
         if (interaction.isChatInputCommand()) {
             if (interaction.commandName === 'snipe') {
+                await interaction.deferReply({ ephemeral: true });
                 const season = interaction.options.getInteger('season');
                 const snipeEmbedSeason = await handleSnipeForSeason(season);
                 const row = buildSeasonButtons('snipe', season, true, true, true);
-                await interaction.deferReply();
                 await interaction.editReply({
                     embeds: [snipeEmbedSeason],
                     components: row,
                 });
             } else if (interaction.commandName === 'nft_holders') {
+                await interaction.deferReply({ ephemeral: true });
                 const season = interaction.options.getInteger('season');
                 const snipeEmbedSeason = await handleNftHoldersForSeason(season);
                 const row = buildSeasonButtons('nft_holders', season, false, true, false);
-                await interaction.deferReply();
                 await interaction.editReply({
                     embeds: [snipeEmbedSeason],
                     components: row,
