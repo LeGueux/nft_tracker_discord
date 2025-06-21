@@ -192,10 +192,7 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
         const nbCards = cardsPerModel[modelId] || 0;
         const avg = nbWallets > 0 ? (nbCards / nbWallets).toFixed(1) : '0.0';
 
-        // Une ligne par info
-        lines.push(`📦 ${nbCards} cartes`);
-        lines.push(`🪪 ${nbWallets} portefeuilles`);
-        lines.push(`📊 Moy: ${avg} carte(s)`);
+        lines.push(`📦 ${nbCards} cartes | 🪪 ${nbWallets} wallets | 📊 Moy: ${avg}`);
 
         for (const [i, holder] of topList.entries()) {
             const holderUsernameData = await getDolzUsername(holder.wallet);
@@ -208,9 +205,10 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
                 .map(r => `${rarityShort[r]}: ${holder[r]}`)
                 .join(' | ');
 
-            lines.push(`\n#${i + 1} [${holderUsername}](https://dolz.io/marketplace/profile/${holder.wallet})`);
-            lines.push(`${total} cartes (${percent}%)`);
-            lines.push(`🎖️ ${rarityStr}`);
+            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+
+            lines.push(`${medal} [${holderUsername}](https://dolz.io/marketplace/profile/${holder.wallet}) ${total} | ${percent}%`);
+            lines.push(`🎖️ ${rarityStr}\n`);
         }
 
         embed.addFields({
