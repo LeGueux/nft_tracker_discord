@@ -208,7 +208,7 @@ export function eventBotReady(discordClient) {
     // Slash commands from Discord
     discordClient.on('interactionCreate', async interaction => {
         if (interaction.isChatInputCommand()) {
-            await interaction.deferReply({ ephemeral: true });
+            await interaction.deferReply();
             const season = interaction.options.getInteger('season');
             if (interaction.commandName === 'snipe') {
                 const snipeEmbedSeason = await handleSnipeForSeason(season);
