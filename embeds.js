@@ -230,3 +230,96 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
 
     return embed;
 }
+
+export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId) {
+    const {
+        modelNames,
+        cardsPerModel,
+        topWalletsPerModel,
+        walletsPerModel,
+    } = nftHoldersStats;
+
+    const rarityShort = {
+        "Limited": "L",
+        "Rare": "R",
+        "Epic": "E",
+        "Legendary": "LG",
+        "Not Revealed": "NR"
+    };
+
+    const embed = new EmbedBuilder()
+        .setTitle(`<:snipe:1310218808123723829> Tracking card ${modelId}`)
+        .setColor(0x00ffcc)
+        .setTimestamp();
+
+    for (const [index, item] of snipeStats.entries()) {
+        // Filtrer uniquement les gaps valides
+        const simulatedGaps = item.simulatedGaps
+            .map((g, i) => {
+                const gap = g?.priceGapPercent;
+                return gap !== null && gap !== undefined ? `${gap.toFixed(1)}%` : null;
+            })
+            .filter(Boolean); // Retire les nulls
+
+        const snipeLines = [];
+        snipeLines.push(`[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`);
+        snipeLines.push(
+            `FP Limited ${item.floor}`,
+            `FP Rare ${item.floorRare ?? '-'}`,
+            `**Prices (${item.countLimitedBeforeRare})** ${item.prices.join(', ')}`,
+            '**Gaps:**',
+            `${item.priceGapPercent?.toFixed(1) ?? '-'}% ${simulatedGaps.length > 0 ? ` | ${simulatedGaps.join(' | ')}` : ''}` // Ajoute les simulated gaps seulement s'il y en a au moins un
+        );
+
+        embed.addFields({
+            name: `Snipe ${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'} ${item.name}`,
+            value: `${snipeLines.join('\n')}\u200B`,
+            inline: false,
+        });
+    }
+
+    for (const [modelId, topList] of Object.entries(topWalletsPerModel)) {
+        const holdersLines = [];
+
+        const nbWallets = walletsPerModel[modelId] || 0;
+        const nbCards = cardsPerModel[modelId] || 0;
+        const avg = nbWallets > 0 ? (nbCards / nbWallets).toFixed(1) : '0.0';
+
+        holdersLines.push(`📦 ${nbCards} cartes | 🪪 ${nbWallets} wallets | 📊 Moy: ${avg}`);
+
+        for (const [i, holder] of topList.entries()) {
+            const holderUsernameData = await getDolzUsername(holder.wallet);
+            const holderUsername = (holderUsernameData[0]?.duUsername ?? "").split("#")[0];
+            const percent = holder.percentOwned;
+            const total = holder.total;
+
+            const rarityStr = RARITY_ORDER
+                .filter(r => (holder[r] ?? 0) > 0) // ✅ Supprime les 0
+                .map(r => `${rarityShort[r]}: ${holder[r]}`)
+                .join(' | ');
+
+            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+
+            holdersLines.push(`${medal} ${holderUsername} | ${total} assets | ${percent}%`);
+            holdersLines.push(`🎖️ ${rarityStr}\n`);
+        }
+
+        embed.addFields({
+            name: 'Holders',
+            value: holdersLines.join('\n') + '\u200B',
+            inline: false,
+        });
+    }
+
+    // Sécurité : éviter débordement Discord
+    console.log(`Embed length: ${embed.length} characters`);
+    if (embed.length > 6000) {
+        console.warn("Embed too large, truncating...");
+        embed.setFields({
+            name: "Warning",
+            value: `The embed content was too large and has been truncated. Please check les logs. ${embed.length} characters`,
+        });
+    }
+
+    return embed;
+}

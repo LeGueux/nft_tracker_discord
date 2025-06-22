@@ -12,6 +12,7 @@ import { sendStatusMessage } from "./error-handler.js";
 import { callComethApiForLastListings, callComethApiForLastSales } from "./cometh-api.js";
 import { handleSnipeForSeason } from "./snipe.js";
 import { handleNftHoldersForSeason } from "./nft-holders.js";
+import { handleNftTrackingForModel } from "./nft-tracking.js";
 
 export const discordClient = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -135,12 +136,13 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbed3 = await handleSnipeForSeason(3);
                 // const snipeEmbed4 = await handleSnipeForSeason(4);
                 // const snipeEmbed5 = await handleSnipeForSeason(5);
-                const snipeEmbed6 = await handleSnipeForSeason(6);
+                // const snipeEmbed6 = await handleSnipeForSeason(6);
                 // const snipeEmbedAll = await handleSnipeForSeason(100);
                 // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
-                const nftHoldersEmbed = await handleNftHoldersForSeason(6);
+                // const nftHoldersEmbed = await handleNftHoldersForSeason(6);
+                const nftTrackingEmbed = await handleNftTrackingForModel('g0065');
                 // const data = await getNFTData("51618"); // Limited
                 // const data = await getNFTData("51520"); // Rare
                 // const data = await getNFTData("51495"); // Epic
@@ -161,12 +163,13 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbed3] });
                     // await thread.send({ embeds: [snipeEmbed4] });
                     // await thread.send({ embeds: [snipeEmbed5] });
-                    await thread.send({ embeds: [snipeEmbed6] });
+                    // await thread.send({ embeds: [snipeEmbed6] });
                     // await thread.send({ embeds: [snipeEmbedAll] });
                     // await thread.send({ embeds: [snipeEmbedAllSeasons] });
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
-                    await thread.send({ embeds: [nftHoldersEmbed] });
+                    // await thread.send({ embeds: [nftHoldersEmbed] });
+                    await thread.send({ embeds: [nftTrackingEmbed] });
                     // await thread.send({
                     //     content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
                     //     embeds: [embed],
@@ -209,21 +212,26 @@ export function eventBotReady(discordClient) {
     discordClient.on('interactionCreate', async interaction => {
         if (interaction.isChatInputCommand()) {
             await interaction.deferReply();
-            const season = interaction.options.getInteger('season');
             if (interaction.commandName === 'snipe') {
-                const snipeEmbedSeason = await handleSnipeForSeason(season);
+                const season = interaction.options.getInteger('season');
+                const embed = await handleSnipeForSeason(season);
                 const row = buildSeasonButtons('snipe', season, true, true, true);
                 await interaction.editReply({
-                    embeds: [snipeEmbedSeason],
+                    embeds: [embed],
                     components: row,
                 });
             } else if (interaction.commandName === 'nft_holders') {
-                const snipeEmbedSeason = await handleNftHoldersForSeason(season);
+                const season = interaction.options.getInteger('season');
+                const embed = await handleNftHoldersForSeason(season);
                 const row = buildSeasonButtons('nft_holders', season, false, true, false);
                 await interaction.editReply({
-                    embeds: [snipeEmbedSeason],
+                    embeds: [embed],
                     components: row,
                 });
+            } else if (interaction.commandName === 'nft_tracking') {
+                const modelId = interaction.options.getString('modelid');
+                const embed = await handleNftTrackingForModel(modelId);
+                await interaction.editReply({ embeds: [embed] });
             }
         } else if (interaction.isButton()) {
             const match = interaction.customId.match(/select_season_(\d+)_(snipe|nft_holders)/);

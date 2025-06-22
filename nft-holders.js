@@ -12,7 +12,7 @@ export async function handleNftHoldersForSeason(season) {
     dataCardsBySeason = await getAllCardsBySeason([season]);
     console.log(`handleNftHoldersForSeason for Season ${season} - Cards found: ${dataCardsBySeason.total}`);
 
-    const stats = computeNftHoldersForSeason(dataCardsBySeason, {
+    const stats = computeNftHoldersStats(dataCardsBySeason, {
         topX: 3,
         minCardsPerModel: 5,
     });
@@ -20,11 +20,6 @@ export async function handleNftHoldersForSeason(season) {
         console.log(`🎯 ${stats.numberOfFullCollectors} wallets ont une saison complète`);
         console.log(`📊 Nombre de wallets par modèle :`);
         console.table(stats.walletsPerModel);
-
-        for (const [modelId, top] of Object.entries(stats.topWalletsPerModel)) {
-            console.log(`\n${modelId}`);
-            console.table(top);
-        }
 
         console.log(`🐋 Top whales (min 5 cartes) par modèle :`);
         for (const [modelId, topList] of Object.entries(stats.topWalletsPerModel)) {
@@ -36,7 +31,7 @@ export async function handleNftHoldersForSeason(season) {
     return await buildNftHoldersEmbed(stats, season);
 }
 
-function computeNftHoldersForSeason(data, options = {}) {
+export function computeNftHoldersStats(data, options = {}) {
     const { topX = 5, minCardsPerModel = 0 } = options;
 
     const walletModels = new Map();               // wallet → Set(models)

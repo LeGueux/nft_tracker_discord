@@ -56,7 +56,7 @@ export async function handleSnipeForSeason(season) {
     return await buildSnipeEmbed(dataFormatted, season);
 }
 
-function analyzeListingsFragility(data, snipeOnly = false) {
+export function analyzeListingsFragility(data, snipeOnly = false) {
     const grouped = {};
     const rareFloorsByModel = {}; // floorRare par modèleId
 
@@ -72,10 +72,9 @@ function analyzeListingsFragility(data, snipeOnly = false) {
         let modelId = null;
 
         const match = animationUrl.match(/\/(g\d+)\/\d+\/(Limited|Rare)\//);
-        if (match) {
-            modelId = match[1];
-            rarity = match[2];
-        }
+        if (!match) continue;
+        modelId = match[1];
+        rarity = match[2];
 
         let priceDolz = parseInt(weiToDolz(priceWei));
 

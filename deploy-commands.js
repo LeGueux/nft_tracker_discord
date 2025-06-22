@@ -40,7 +40,16 @@ const commands = [
                     { name: 'Saison 6', value: 6 },
                     { name: 'Saison 7', value: 7 },
                 ))
-        .toJSON()
+        .toJSON(),
+    new SlashCommandBuilder()
+        .setName('nft_tracking')
+        .setDescription('Affiche les listings et les holders pour une carte donnée (ex: g0100)')
+        .addStringOption(option =>
+            option.setName('modelid')
+                .setDescription('L\'identifiant du modèle de la carte (ex: g0100)')
+                .setRequired(true)
+        )
+        .toJSON(),
 ];
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);

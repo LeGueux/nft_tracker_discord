@@ -299,7 +299,7 @@ export async function getListingsBySeasonAndRarity(seasonCtriteria, rarityCriter
         console.error("Erreur lors de la récupération des cartes:", e);
         await sendStatusMessage(
             discordClient,
-            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur lors de la récupération des cartes - Rejection : \`${e}\``,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur lors de la récupération des cartes - getListingsBySeasonAndRarity - Rejection : \`${e}\``,
         );
     }
 }
@@ -332,7 +332,43 @@ export async function getAllCardsBySeason(seasonCtriteria) {
         console.error("Erreur lors de la récupération des cartes:", e);
         await sendStatusMessage(
             discordClient,
-            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur lors de la récupération des cartes - Rejection : \`${e}\``,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur lors de la récupération des cartes - getAllCardsBySeason - Rejection : \`${e}\``,
+        );
+    }
+}
+
+export async function getAllCardsByModelId(modelId) {
+    try {
+        console.log(`getAllCardsByModelId à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}, modelId: ${modelId}`);
+        // https://api.marketplace.cometh.io/v1/doc#tag/asset/operation/searchAssets
+        const response = await fetch(
+            "https://api.marketplace.cometh.io/v1/assets/search",
+            {
+                method: "POST",
+                headers: {
+                    accept: "application/json",
+                    "content-type": "application/json",
+                    apikey: process.env.COMETH_API_KEY,
+                },
+                body: JSON.stringify({
+                    contractAddress: process.env.NFT_CONTRACT_ADDRESS,
+                    attributes: [{ 'Card Number': [modelId] }],
+                    limit: 2000,
+                    skip: 0,
+                    orderBy: "PRICE",
+                    direction: "ASC",
+                }),
+            },
+        );
+        const data = await response.json();
+        console.log(`getAllCardsByModelId à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}, modelId: ${modelId}`);
+        console.log(`getAllCardsByModelId - Cards found: ${data.total} à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`);
+        return data;
+    } catch (e) {
+        console.error("Erreur lors de la récupération des cartes:", e);
+        await sendStatusMessage(
+            discordClient,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur lors de la récupération des cartes - getAllCardsByModelId - Rejection : \`${e}\``,
         );
     }
 }
