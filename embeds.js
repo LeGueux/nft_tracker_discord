@@ -106,60 +106,69 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
         .setTimestamp()
         .setColor(0x00ff99);
 
-    // 🧮 Initialisation des totaux
-    let totalFloorLimited = 0;
-    let totalFloorRare = 0;
+    try {
+        // 🧮 Initialisation des totaux
+        let totalFloorLimited = 0;
+        let totalFloorRare = 0;
 
-    for (const [index, item] of dataFormatted.entries()) {
-        // Filtrer uniquement les gaps valides
-        const simulatedGaps = item.simulatedGaps
-            .map((g, i) => {
-                const gap = g?.priceGapPercent;
-                return gap !== null && gap !== undefined ? `${gap.toFixed(1)}%` : null;
-            })
-            .filter(Boolean); // Retire les nulls
+        for (const [index, item] of dataFormatted.slice(0, 25).entries()) {
+            // Filtrer uniquement les gaps valides
+            const simulatedGaps = item.simulatedGaps
+                .map((g, i) => {
+                    const gap = g?.priceGapPercent;
+                    return gap !== null && gap !== undefined ? `${gap.toFixed(1)}%` : null;
+                })
+                .filter(Boolean); // Retire les nulls
 
-        const lines = [];
-        if (index < 15) {
-            lines.push(`[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`);
+            const lines = [];
+            if (index < 15) {
+                lines.push(`[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`);
+            }
+            lines.push(
+                `FP Limited ${item.floor}`,
+                `FP Rare ${item.floorRare ?? '-'}`,
+                `**Prices (${item.countLimitedBeforeRare})** ${item.prices.join(', ')}`,
+                '**Gaps:**',
+                `${item.priceGapPercent?.toFixed(1) ?? '-'}% ${simulatedGaps.length > 0 ? ` | ${simulatedGaps.join(' | ')}` : ''}` // Ajoute les simulated gaps seulement s'il y en a au moins un
+            );
+
+            // ➕ Ajouter au total si saison < 100
+            if (season < 100) {
+                if (typeof item.floor === 'number') totalFloorLimited += item.floor;
+                if (typeof item.floorRare === 'number') totalFloorRare += item.floorRare;
+            }
+
+            embed.addFields({
+                name: `${getPrefixNameEmojiBySeason(getNFTSeasonByCardNumber(item.modelId))} ${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'} ${item.name}`,
+                value: `${lines.join('\n')}\u200B`,
+                inline: true,
+            });
         }
-        lines.push(
-            `FP Limited ${item.floor}`,
-            `FP Rare ${item.floorRare ?? '-'}`,
-            `**Prices (${item.countLimitedBeforeRare})** ${item.prices.join(', ')}`,
-            '**Gaps:**',
-            `${item.priceGapPercent?.toFixed(1) ?? '-'}% ${simulatedGaps.length > 0 ? ` | ${simulatedGaps.join(' | ')}` : ''}` // Ajoute les simulated gaps seulement s'il y en a au moins un
-        );
 
-        // ➕ Ajouter au total si saison < 100
+        // 🦶 Footer avec ou sans total
         if (season < 100) {
-            if (typeof item.floor === 'number') totalFloorLimited += item.floor;
-            if (typeof item.floorRare === 'number') totalFloorRare += item.floorRare;
+            embed.setFooter({
+                text: `Total Floor Limited: ${totalFloorLimited} | Rare: ${totalFloorRare}`
+            });
         }
 
-        embed.addFields({
-            name: `${getPrefixNameEmojiBySeason(getNFTSeasonByCardNumber(item.modelId))} ${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'} ${item.name}`,
-            value: `${lines.join('\n')}\u200B`,
-            inline: true,
-        });
-    }
-
-    // 🦶 Footer avec ou sans total
-    if (season < 100) {
-        embed.setFooter({
-            text: `Total Floor Limited: ${totalFloorLimited} | Rare: ${totalFloorRare}`
-        });
-    }
-
-    // console.log(`Embed length: ${embed.length} characters`);
-    if (embed.length > 6000) {
-        console.warn("Embed too large, truncating...");
+        // console.log(`Embed length: ${embed.length} characters`);
+        if (embed.length > 6000) {
+            console.warn("Embed too large, truncating...");
+            embed.setFields({
+                name: "Warning",
+                value: `The embed content was too large and has been truncated. Please check the logs for details. ${embed.length} characters`,
+            });
+        }
+        return embed;
+    } catch (error) {
+        console.warn("Embed builder error...");
         embed.setFields({
             name: "Warning",
-            value: `The embed content was too large and has been truncated. Please check the logs for details. ${embed.length} characters`,
+            value: `Embed builder error. Please check the logs for details. ${error}`,
         });
+        return embed;
     }
-    return embed;
 }
 
 export async function buildNftHoldersEmbed(analysisResult, season) {
@@ -185,50 +194,59 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
         .setTimestamp()
         .setFooter({ text: `✅ Saison complète : ${numberOfFullCollectors} wallets` });
 
-    for (const [modelId, topList] of Object.entries(topWalletsPerModel)) {
-        const lines = [];
+    try {
+        for (const [modelId, topList] of Object.entries(topWalletsPerModel)) {
+            const lines = [];
 
-        const nbWallets = walletsPerModel[modelId] || 0;
-        const nbCards = cardsPerModel[modelId] || 0;
-        const avg = nbWallets > 0 ? (nbCards / nbWallets).toFixed(1) : '0.0';
+            const nbWallets = walletsPerModel[modelId] || 0;
+            const nbCards = cardsPerModel[modelId] || 0;
+            const avg = nbWallets > 0 ? (nbCards / nbWallets).toFixed(1) : '0.0';
 
-        lines.push(`📦 ${nbCards} cartes | 🪪 ${nbWallets} wallets | 📊 Moy: ${avg}`);
+            lines.push(`📦 ${nbCards} cartes | 🪪 ${nbWallets} wallets | 📊 Moy: ${avg}`);
 
-        for (const [i, holder] of topList.entries()) {
-            const holderUsernameData = await getDolzUsername(holder.wallet);
-            const holderUsername = (holderUsernameData[0]?.duUsername ?? "").split("#")[0];
-            const percent = holder.percentOwned;
-            const total = holder.total;
+            for (const [i, holder] of topList.entries()) {
+                const holderUsernameData = await getDolzUsername(holder.wallet);
+                const holderUsername = (holderUsernameData[0]?.duUsername ?? "").split("#")[0];
+                const percent = holder.percentOwned;
+                const total = holder.total;
 
-            const rarityStr = RARITY_ORDER
-                .filter(r => (holder[r] ?? 0) > 0) // ✅ Supprime les 0
-                .map(r => `${rarityShort[r]}: ${holder[r]}`)
-                .join(' | ');
+                const rarityStr = RARITY_ORDER
+                    .filter(r => (holder[r] ?? 0) > 0) // ✅ Supprime les 0
+                    .map(r => `${rarityShort[r]}: ${holder[r]}`)
+                    .join(' | ');
 
-            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
 
-            lines.push(`${medal} [${holderUsername}](https://dolz.io/marketplace/profile/${holder.wallet}) ${total} | ${percent}%`);
-            lines.push(`🎖️ ${rarityStr}\n`);
+                lines.push(`${medal} [${holderUsername}](https://dolz.io/marketplace/profile/${holder.wallet}) ${total} | ${percent}%`);
+                lines.push(`🎖️ ${rarityStr}\n`);
+            }
+
+            embed.addFields({
+                name: `${getPrefixNameEmojiBySeason(season)} ${modelNames?.[modelId]} ${modelId}`,
+                value: lines.join('\n') + '\u200B',
+                inline: true,
+            });
         }
 
-        embed.addFields({
-            name: `${getPrefixNameEmojiBySeason(season)} ${modelNames?.[modelId]} ${modelId}`,
-            value: lines.join('\n') + '\u200B',
-            inline: true,
-        });
-    }
+        // Sécurité : éviter débordement Discord
+        console.log(`Embed length: ${embed.length} characters`);
+        if (embed.length > 6000) {
+            console.warn("Embed too large, truncating...");
+            embed.setFields({
+                name: "Warning",
+                value: `The embed content was too large and has been truncated. Please check les logs. ${embed.length} characters`,
+            });
+        }
 
-    // Sécurité : éviter débordement Discord
-    console.log(`Embed length: ${embed.length} characters`);
-    if (embed.length > 6000) {
-        console.warn("Embed too large, truncating...");
+        return embed;
+    } catch (error) {
+        console.warn("Embed builder error...");
         embed.setFields({
             name: "Warning",
-            value: `The embed content was too large and has been truncated. Please check les logs. ${embed.length} characters`,
+            value: `Embed builder error. Please check the logs for details. ${error}`,
         });
+        return embed;
     }
-
-    return embed;
 }
 
 export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId) {
@@ -252,74 +270,83 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
         .setColor(0x00ffcc)
         .setTimestamp();
 
-    for (const [index, item] of snipeStats.entries()) {
-        // Filtrer uniquement les gaps valides
-        const simulatedGaps = item.simulatedGaps
-            .map((g, i) => {
-                const gap = g?.priceGapPercent;
-                return gap !== null && gap !== undefined ? `${gap.toFixed(1)}%` : null;
-            })
-            .filter(Boolean); // Retire les nulls
+    try {
+        for (const [index, item] of snipeStats.entries()) {
+            // Filtrer uniquement les gaps valides
+            const simulatedGaps = item.simulatedGaps
+                .map((g, i) => {
+                    const gap = g?.priceGapPercent;
+                    return gap !== null && gap !== undefined ? `${gap.toFixed(1)}%` : null;
+                })
+                .filter(Boolean); // Retire les nulls
 
-        const snipeLines = [];
-        snipeLines.push(`[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`);
-        snipeLines.push(
-            `FP Limited ${item.floor}`,
-            `FP Rare ${item.floorRare ?? '-'}`,
-            `**Prices (${item.countLimitedBeforeRare})** ${item.prices.join(', ')}`,
-            '**Gaps:**',
-            `${item.priceGapPercent?.toFixed(1) ?? '-'}% ${simulatedGaps.length > 0 ? ` | ${simulatedGaps.join(' | ')}` : ''}` // Ajoute les simulated gaps seulement s'il y en a au moins un
-        );
+            const snipeLines = [];
+            snipeLines.push(`[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`);
+            snipeLines.push(
+                `FP Limited ${item.floor}`,
+                `FP Rare ${item.floorRare ?? '-'}`,
+                `**Prices (${item.countLimitedBeforeRare})** ${item.prices.join(', ')}`,
+                '**Gaps:**',
+                `${item.priceGapPercent?.toFixed(1) ?? '-'}% ${simulatedGaps.length > 0 ? ` | ${simulatedGaps.join(' | ')}` : ''}` // Ajoute les simulated gaps seulement s'il y en a au moins un
+            );
 
-        embed.addFields({
-            name: `Snipe ${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'} ${item.name}`,
-            value: `${snipeLines.join('\n')}\u200B`,
-            inline: false,
-        });
-    }
-
-    for (const [modelId, topList] of Object.entries(topWalletsPerModel)) {
-        const holdersLines = [];
-
-        const nbWallets = walletsPerModel[modelId] || 0;
-        const nbCards = cardsPerModel[modelId] || 0;
-        const avg = nbWallets > 0 ? (nbCards / nbWallets).toFixed(1) : '0.0';
-
-        holdersLines.push(`📦 ${nbCards} cartes | 🪪 ${nbWallets} wallets | 📊 Moy: ${avg}`);
-
-        for (const [i, holder] of topList.entries()) {
-            const holderUsernameData = await getDolzUsername(holder.wallet);
-            const holderUsername = (holderUsernameData[0]?.duUsername ?? "").split("#")[0];
-            const percent = holder.percentOwned;
-            const total = holder.total;
-
-            const rarityStr = RARITY_ORDER
-                .filter(r => (holder[r] ?? 0) > 0) // ✅ Supprime les 0
-                .map(r => `${rarityShort[r]}: ${holder[r]}`)
-                .join(' | ');
-
-            const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
-
-            holdersLines.push(`${medal} ${holderUsername} | ${total} assets | ${percent}%`);
-            holdersLines.push(`🎖️ ${rarityStr}\n`);
+            embed.addFields({
+                name: `Snipe ${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'} ${item.name}`,
+                value: `${snipeLines.join('\n')}\u200B`,
+                inline: false,
+            });
         }
 
-        embed.addFields({
-            name: 'Holders',
-            value: holdersLines.join('\n') + '\u200B',
-            inline: false,
-        });
-    }
+        for (const [modelId, topList] of Object.entries(topWalletsPerModel)) {
+            const holdersLines = [];
 
-    // Sécurité : éviter débordement Discord
-    console.log(`Embed length: ${embed.length} characters`);
-    if (embed.length > 6000) {
-        console.warn("Embed too large, truncating...");
+            const nbWallets = walletsPerModel[modelId] || 0;
+            const nbCards = cardsPerModel[modelId] || 0;
+            const avg = nbWallets > 0 ? (nbCards / nbWallets).toFixed(1) : '0.0';
+
+            holdersLines.push(`📦 ${nbCards} cartes | 🪪 ${nbWallets} wallets | 📊 Moy: ${avg}`);
+
+            for (const [i, holder] of topList.entries()) {
+                const holderUsernameData = await getDolzUsername(holder.wallet);
+                const holderUsername = (holderUsernameData[0]?.duUsername ?? "").split("#")[0];
+                const percent = holder.percentOwned;
+                const total = holder.total;
+
+                const rarityStr = RARITY_ORDER
+                    .filter(r => (holder[r] ?? 0) > 0) // ✅ Supprime les 0
+                    .map(r => `${rarityShort[r]}: ${holder[r]}`)
+                    .join(' | ');
+
+                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+
+                holdersLines.push(`${medal} ${holderUsername} | ${total} assets | ${percent}%`);
+                holdersLines.push(`🎖️ ${rarityStr}\n`);
+            }
+
+            embed.addFields({
+                name: 'Holders',
+                value: holdersLines.join('\n') + '\u200B',
+                inline: false,
+            });
+        }
+
+        // Sécurité : éviter débordement Discord
+        console.log(`Embed length: ${embed.length} characters`);
+        if (embed.length > 6000) {
+            console.warn("Embed too large, truncating...");
+            embed.setFields({
+                name: "Warning",
+                value: `The embed content was too large and has been truncated. Please check les logs. ${embed.length} characters`,
+            });
+        }
+
+        return embed;
+    } catch (error) {
+        console.warn("Embed builder error...");
         embed.setFields({
             name: "Warning",
-            value: `The embed content was too large and has been truncated. Please check les logs. ${embed.length} characters`,
+            value: `Embed builder error. Please check the logs for details. ${error}`,
         });
+        return embed;
     }
-
-    return embed;
 }
