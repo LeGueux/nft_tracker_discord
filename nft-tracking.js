@@ -19,7 +19,7 @@ export async function handleNftTrackingForModel(modelId) {
     const nftHoldersStats = computeNftHoldersStats(dataCard, {
         topX: 15,
         minCardsPerModel: 1,
-    });
+    }, false);
     if (IS_TEST_MODE) {
         console.log(`📊 Nombre de wallets par modèle :`);
         console.table(nftHoldersStats.walletsPerModel);

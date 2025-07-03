@@ -31,7 +31,7 @@ export async function handleNftHoldersForSeason(season) {
     return await buildNftHoldersEmbed(stats, season);
 }
 
-export function computeNftHoldersStats(data, options = {}) {
+export function computeNftHoldersStats(data, options = {}, ignoreUnrevealed = true) {
     const { topX = 5, minCardsPerModel = 0 } = options;
 
     const walletModels = new Map();               // wallet → Set(models)
@@ -51,7 +51,13 @@ export function computeNftHoldersStats(data, options = {}) {
         const name = asset.metadata?.name?.split('-')[0]?.trim();
         const owner = asset.owner.toLowerCase();
         const animationUrl = asset?.metadata?.animation_url;
-        const { modelId, rarity } = getModelAndRarity(animationUrl);
+        let modelId = ignoreUnrevealed ? null : 'Unknown';
+        let rarity = 'Not Revealed';
+        if (animationUrl) {
+            const getModelAndRarityData = getModelAndRarity(animationUrl);
+            modelId = getModelAndRarityData.modelId;
+            rarity = getModelAndRarityData.rarity;
+        }
         if (!modelId) continue;
 
         if (modelId && name) {
