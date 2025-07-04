@@ -71,28 +71,27 @@ export function getContentTagsDependsOnNFT(data, price, type) {
         // Listing | All seasons                          | Price <= 800
         // Listing | All seasons                          | Price <= 6000 | Epic
         // Listing | S1                                   | Price <= 5000
-        // Listing | S2                                   | Price <= 3500
+        // Listing | S2                                   | Price <= 4000
         // Listing | S6                                   | Price <= 1000
-        // Listing | S6 Octokuro g0065                    | Price <= 5000
+        // Listing | S6                                   | Price <= 2000 | Rare
         // Listing | S7                                   | Price <= 1000
-        // Listing | S7                                   | Price <= 3000 | Rare
+        // Listing | S7                                   | Price <= 2000 | Rare
         if (price <= 800 ||
             (isEpic && price <= 6000) ||
             (data.season === "1" && price <= 5000) ||
-            (data.season === "2" && price <= 3500) ||
-            (data.season === "6" && price <= 1000) ||
-            (["g0065"].includes(data.card_number) && price <= 5000) ||
-            (data.season === "7" && price <= 1000) ||
-            (data.season === "7" && price <= 3000 && isRare)
+            (data.season === "2" && price <= 4000) ||
+            (data.season === "6" && (price <= 1000 || (isRare && price <= 2000))) ||
+            (data.season === "7" && (price <= 1000 || (isRare && price <= 2000)))
         ) {
             return FRANCK;
         }
 
         // FRANCK + NICO
+        // Listing | S6 Octokuro g0065     | Price <= 5000
         // Listing | S7 Emiri Momota g0125 | Price <= 3500
         // Listing | S7 Emiri Momota g0125 | Price <= 5000 | Rare
-        if (["g0125"].includes(data.card_number) &&
-            (price <= 3500 || (isRare && price <= 5000))
+        if ((["g0125"].includes(data.card_number) && (price <= 3500 || (isRare && price <= 5000))) ||
+            (["g0065"].includes(data.card_number) && price <= 5000)
         ) {
             return `${FRANCK} ${NICO}`;
         }
