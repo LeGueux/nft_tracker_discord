@@ -14,6 +14,7 @@ import { handleSnipeForSeason } from "./command-snipe.js";
 import { handleNftHoldersForSeason } from "./command-nft-holders.js";
 import { handleNftTrackingForModel } from "./command-nft-tracking.js";
 import { handleGetDataForWallet } from "./command-wallet-data.js";
+import { handleGetBBDRewardCalculatorForModel } from "./command-nft-bbd-reward-calculator.js";
 
 export const discordClient = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -157,7 +158,8 @@ export function eventBotReady(discordClient) {
                 //     "51690",
                 //     "sale",
                 // );
-                const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS);
+                // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS);
+                const nftBBDRewardCalculatorEmbed = await handleGetBBDRewardCalculatorForModel('g0065');
 
                 const thread = await discordClient.channels.fetch(getThreadIdForToken("default"));
                 if (thread?.isTextBased()) {
@@ -174,7 +176,8 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedOS] });
                     // await thread.send({ embeds: [nftHoldersEmbed] });
                     // await thread.send({ embeds: [nftTrackingEmbed] });
-                    await thread.send({ embeds: [walletFranckEmbed] });
+                    // await thread.send({ embeds: [walletFranckEmbed] });
+                    await thread.send({ embeds: [nftBBDRewardCalculatorEmbed] });
                     // await thread.send({
                     //     content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
                     //     embeds: [embed],
@@ -240,6 +243,10 @@ export function eventBotReady(discordClient) {
             } else if (interaction.commandName === 'get_wallet_data') {
                 const address = interaction.options.getString('address');
                 const embed = await handleGetDataForWallet(address);
+                await interaction.editReply({ embeds: [embed] });
+            } else if (interaction.commandName === 'nft_bbd_reward_calculator') {
+                const modelId = interaction.options.getString('modelid');
+                const embed = await handleGetBBDRewardCalculatorForModel(modelId);
                 await interaction.editReply({ embeds: [embed] });
             }
         } else if (interaction.isButton()) {

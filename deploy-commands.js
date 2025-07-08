@@ -59,6 +59,15 @@ const commands = [
                 .setRequired(true)
         )
         .toJSON(),
+    new SlashCommandBuilder()
+        .setName('nft_bbd_reward_calculator')
+        .setDescription('Affiche le ratio BBD/DOLZ pour les cartes listées d\'un modèle donné (ex: g0100)')
+        .addStringOption(option =>
+            option.setName('modelid')
+                .setDescription('L\'identifiant du modèle de la carte (ex: g0100)')
+                .setRequired(true)
+        )
+        .toJSON(),
 ];
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);

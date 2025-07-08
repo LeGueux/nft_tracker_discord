@@ -336,9 +336,24 @@ export async function getAllCardsBySeason(seasonCtriteria) {
     }
 }
 
-export async function getAllCardsByModelId(modelId) {
+export async function getAllCardsByModelId(modelId, onSaleOnly = false) {
     try {
         console.log(`getAllCardsByModelId à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}, modelId: ${modelId}`);
+
+        const body = {
+            contractAddress: process.env.NFT_CONTRACT_ADDRESS,
+            attributes: [{ 'Card Number': [modelId] }],
+            limit: 2000,
+            skip: 0,
+            orderBy: "PRICE",
+            direction: "ASC",
+        };
+
+        // Ajouter la condition isOnSale si onSaleOnly est true
+        if (onSaleOnly) {
+            body.isOnSale = true;
+        }
+
         // https://api.marketplace.cometh.io/v1/doc#tag/asset/operation/searchAssets
         const response = await fetch(
             "https://api.marketplace.cometh.io/v1/assets/search",
@@ -349,14 +364,7 @@ export async function getAllCardsByModelId(modelId) {
                     "content-type": "application/json",
                     apikey: process.env.COMETH_API_KEY,
                 },
-                body: JSON.stringify({
-                    contractAddress: process.env.NFT_CONTRACT_ADDRESS,
-                    attributes: [{ 'Card Number': [modelId] }],
-                    limit: 2000,
-                    skip: 0,
-                    orderBy: "PRICE",
-                    direction: "ASC",
-                }),
+                body: JSON.stringify(body),
             },
         );
         const data = await response.json();

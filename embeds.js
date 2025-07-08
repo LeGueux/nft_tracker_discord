@@ -5,7 +5,7 @@ import {
     getBabyDolzBalance,
 } from "./cometh-api.js";
 import { getDolzBalance } from "./alchemy-api.js";
-import { getNFTSeasonByCardNumber } from "./utils.js";
+import { getNFTSeasonByCardNumber, getNFTData } from "./utils.js";
 import { RARITY_ORDER } from "./config.js";
 
 const formatNumber = (num) => new Intl.NumberFormat('fr-FR').format(num);
@@ -374,4 +374,61 @@ export async function buildWalletDataEmbed(from) {
         });
 
     return embed;
+}
+
+export async function buildNftBBDRewardCalculatorEmbed(modelId, data) {
+    const embed = new EmbedBuilder()
+        .setTitle(`<:snipe:1310218808123723829> BBD Calculator card ${modelId}`)
+        .setColor(0x00ffcc)
+        .setTimestamp();
+
+    try {
+        const assetsLines = [];
+        for (const asset of data) {
+            // const nbWallets = walletsPerModel[modelId] || 0;
+            // const nbCards = cardsPerModel[modelId] || 0;
+            // const avg = nbWallets > 0 ? (nbCards / nbWallets).toFixed(1) : '0.0';
+
+            
+            // const nftData = await getNFTData(asset.tokenId);
+            // const holderUsername = (holderUsernameData[0]?.duUsername ?? "").split("#")[0];
+            // const percent = holder.percentOwned;
+            // const total = holder.total;
+            
+            // const rarityStr = RARITY_ORDER
+            //     .filter(r => (holder[r] ?? 0) > 0) // ✅ Supprime les 0
+            //     .map(r => `${rarityShort[r]}: ${holder[r]}`)
+            //     .join(' | ');
+            
+            // const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+            
+            // assetsLines.push(`${medal} | ${total} assets | ${percent}%`);
+            // assetsLines.push(`🎖️ ${nftData.rarity}\n`);
+            assetsLines.push(`📦 ${0} BBD | 🪪 ${0} DOLZ | 📊 Ratio: ${0}`);
+        }
+        embed.addFields({
+            name: 'Assets',
+            value: assetsLines.join('\n') + '\u200B',
+            inline: false,
+        });
+
+        // Sécurité : éviter débordement Discord
+        console.log(`Embed length: ${embed.length} characters`);
+        if (embed.length > 6000) {
+            console.warn("Embed too large, truncating...");
+            embed.setFields({
+                name: "Warning",
+                value: `The embed content was too large and has been truncated. Please check les logs. ${embed.length} characters`,
+            });
+        }
+
+        return embed;
+    } catch (error) {
+        console.warn("Embed builder error...");
+        embed.setFields({
+            name: "Warning",
+            value: `Embed builder error. Please check the logs for details. ${error}`,
+        });
+        return embed;
+    }
 }
