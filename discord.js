@@ -10,9 +10,9 @@ import { getNFTData } from "./utils.js";
 import { IS_TEST_MODE, ALIVE_PING_INTERVAL, COMETH_API_INTERVAL } from "./config.js";
 import { sendStatusMessage } from "./error-handler.js";
 import { callComethApiForLastListings, callComethApiForLastSales } from "./cometh-api.js";
-import { handleSnipeForSeason } from "./snipe.js";
-import { handleNftHoldersForSeason } from "./nft-holders.js";
-import { handleNftTrackingForModel } from "./nft-tracking.js";
+import { handleSnipeForSeason } from "./command-snipe.js";
+import { handleNftHoldersForSeason } from "./command-nft-holders.js";
+import { handleNftTrackingForModel } from "./command-nft-tracking.js";
 import { handleGetDataForWallet } from "./command-wallet-data.js";
 
 export const discordClient = new Client({
