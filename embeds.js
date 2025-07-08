@@ -5,7 +5,7 @@ import {
     getBabyDolzBalance,
 } from "./cometh-api.js";
 import { getDolzBalance } from "./alchemy-api.js";
-import { getNFTSeasonByCardNumber, getNFTData } from "./utils.js";
+import { getNFTSeasonByCardNumber, getNFTData, weiToDolz } from "./utils.js";
 import { RARITY_ORDER } from "./config.js";
 
 const formatNumber = (num) => new Intl.NumberFormat('fr-FR').format(num);
@@ -385,23 +385,16 @@ export async function buildNftBBDRewardCalculatorEmbed(modelId, data) {
     try {
         const assetsLines = [];
         for (const asset of data) {
+            const priceWei = asset.orderbookStats?.lowestListingPrice;
+            console.log(`Processing asset: ${asset.tokenId} with price ${priceWei}`);
+            const priceDolz = parseInt(weiToDolz(priceWei));
+            console.log(`Processing asset: ${asset.tokenId} with priceDolz ${priceDolz}`);
             // const nbWallets = walletsPerModel[modelId] || 0;
             // const nbCards = cardsPerModel[modelId] || 0;
             // const avg = nbWallets > 0 ? (nbCards / nbWallets).toFixed(1) : '0.0';
 
-            
             // const nftData = await getNFTData(asset.tokenId);
-            // const holderUsername = (holderUsernameData[0]?.duUsername ?? "").split("#")[0];
-            // const percent = holder.percentOwned;
-            // const total = holder.total;
-            
-            // const rarityStr = RARITY_ORDER
-            //     .filter(r => (holder[r] ?? 0) > 0) // ✅ Supprime les 0
-            //     .map(r => `${rarityShort[r]}: ${holder[r]}`)
-            //     .join(' | ');
-            
-            // const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
-            
+
             // assetsLines.push(`${medal} | ${total} assets | ${percent}%`);
             // assetsLines.push(`🎖️ ${nftData.rarity}\n`);
             assetsLines.push(`📦 ${0} BBD | 🪪 ${0} DOLZ | 📊 Ratio: ${0}`);
