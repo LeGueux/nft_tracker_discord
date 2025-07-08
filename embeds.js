@@ -350,3 +350,28 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
         return embed;
     }
 }
+
+export async function buildWalletDataEmbed(from) {
+    const [totalAssetsWallet, babyDolzBalanceWallet, dolzBalanceWallet, usernameData] = await Promise.all([
+        getTotalAssetsForWallet(from),
+        getBabyDolzBalance(from),
+        getDolzBalance(from),
+        getDolzUsername(from),
+    ]);
+
+    const username = (usernameData[0]?.duUsername ?? "").split("#")[0];
+
+    const embed = new EmbedBuilder()
+        .setURL(`https://dolz.io/marketplace/profile/${from}`)
+        .setTimestamp()
+        .addFields({
+            name: `🙋‍♂️ Wallet: ${getWhaleEmoji(totalAssetsWallet, dolzBalanceWallet)} ${username}`,
+            value:
+                `🔗 [${from}](https://dolz.io/marketplace/profile/${from})\n` +
+                `Total Assets: ${totalAssetsWallet}\n` +
+                `Total DOLZ: ${formatNumber(dolzBalanceWallet)}\n` +
+                `Total BabyDOLZ: ${formatNumber(babyDolzBalanceWallet)}\n`,
+        });
+
+    return embed;
+}

@@ -204,7 +204,6 @@ export async function getTotalAssetsForWallet(address) {
     }
 }
 
-
 export async function getDolzUsername(address) {
     try {
         // Envoi de la requête POST à l'API avec l'adresse du wallet

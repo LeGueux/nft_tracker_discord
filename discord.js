@@ -13,6 +13,7 @@ import { callComethApiForLastListings, callComethApiForLastSales } from "./comet
 import { handleSnipeForSeason } from "./snipe.js";
 import { handleNftHoldersForSeason } from "./nft-holders.js";
 import { handleNftTrackingForModel } from "./nft-tracking.js";
+import { handleGetDataForWallet } from "./command-wallet-data.js";
 
 export const discordClient = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -142,8 +143,8 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
-                const nftHoldersEmbed = await handleNftHoldersForSeason(7);
-                const nftTrackingEmbed = await handleNftTrackingForModel('g0122');
+                // const nftHoldersEmbed = await handleNftHoldersForSeason(7);
+                // const nftTrackingEmbed = await handleNftTrackingForModel('g0122');
                 // const data = await getNFTData("51618"); // Limited
                 // const data = await getNFTData("51520"); // Rare
                 // const data = await getNFTData("51495"); // Epic
@@ -156,6 +157,7 @@ export function eventBotReady(discordClient) {
                 //     "51690",
                 //     "sale",
                 // );
+                const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS);
 
                 const thread = await discordClient.channels.fetch(getThreadIdForToken("default"));
                 if (thread?.isTextBased()) {
@@ -170,8 +172,9 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedAllSeasons] });
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
-                    await thread.send({ embeds: [nftHoldersEmbed] });
-                    await thread.send({ embeds: [nftTrackingEmbed] });
+                    // await thread.send({ embeds: [nftHoldersEmbed] });
+                    // await thread.send({ embeds: [nftTrackingEmbed] });
+                    await thread.send({ embeds: [walletFranckEmbed] });
                     // await thread.send({
                     //     content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
                     //     embeds: [embed],
@@ -182,7 +185,7 @@ export function eventBotReady(discordClient) {
                     //         ],
                     //     },
                     // });
-                    // process.exit(0);
+                    process.exit(0);
                 }
             } catch (e) {
                 console.error("Erreur envoi test embed :", e);
@@ -233,6 +236,10 @@ export function eventBotReady(discordClient) {
             } else if (interaction.commandName === 'nft_tracking') {
                 const modelId = interaction.options.getString('modelid');
                 const embed = await handleNftTrackingForModel(modelId);
+                await interaction.editReply({ embeds: [embed] });
+            } else if (interaction.commandName === 'get_wallet_data') {
+                const address = interaction.options.getString('address');
+                const embed = await handleGetDataForWallet(address);
                 await interaction.editReply({ embeds: [embed] });
             }
         } else if (interaction.isButton()) {
