@@ -105,3 +105,39 @@ export function getContentTagsDependsOnNFT(data, price, type) {
     }
     return "";
 }
+
+export function calculateBBDRewardNftByNFTData(nftData) {
+    const rarityLabel = nftData.rarity;
+    const serialRaw = nftData.serial_number;
+
+    const rarityTable = {
+        Limited: { rarity: 2, minRarity: 0 },
+        Rare: { rarity: 3, minRarity: 1 },
+        Epic: { rarity: 6, minRarity: 2 },
+        Legendary: { rarity: 8, minRarity: 4 },
+    };
+
+    const rarityValues = rarityTable[rarityLabel];
+
+    if (!rarityValues) {
+        throw new Error(`Unknown rarity label: ${rarityLabel}`);
+    }
+
+    const [serialStr, supplyStr] = serialRaw.split('/');
+    const serial = parseInt(serialStr, 10);
+    const supply = parseInt(supplyStr, 10);
+
+    if (isNaN(serial) || isNaN(supply) || serial < 1 || supply < 1) {
+        throw new Error(`Invalid serial format: ${serialRaw}`);
+    }
+
+    const { rarity, minRarity } = rarityValues;
+
+    const numerator = Math.log10(1 + ((serial - 1) / supply * 1000));
+    const denominator = Math.log10(1000);
+
+    const bbd = rarity * (1 - (numerator / denominator)) + minRarity;
+
+    // Tu peux arrondir ou pas selon le besoin :
+    return Math.round(bbd * 100) / 100;
+}

@@ -5,7 +5,12 @@ import {
     getBabyDolzBalance,
 } from "./cometh-api.js";
 import { getDolzBalance } from "./alchemy-api.js";
-import { getNFTSeasonByCardNumber, getNFTData, weiToDolz } from "./utils.js";
+import {
+    getNFTSeasonByCardNumber,
+    getNFTData,
+    weiToDolz,
+    calculateBBDRewardNftByNFTData,
+} from "./utils.js";
 import { RARITY_ORDER } from "./config.js";
 
 const formatNumber = (num) => new Intl.NumberFormat('fr-FR').format(num);
@@ -383,27 +388,70 @@ export async function buildNftBBDRewardCalculatorEmbed(modelId, data) {
         .setTimestamp();
 
     try {
-        const assetsLines = [];
+        // Étape 1 : préparer toutes les lignes dans un tableau temporaire
+        const assetStats = [];
+
         for (const asset of data) {
             const priceWei = asset.orderbookStats?.lowestListingPrice;
-            console.log(`Processing asset: ${asset.tokenId} with price ${priceWei}`);
             const priceDolz = parseInt(weiToDolz(priceWei));
-            console.log(`Processing asset: ${asset.tokenId} with priceDolz ${priceDolz}`);
-            // const nbWallets = walletsPerModel[modelId] || 0;
-            // const nbCards = cardsPerModel[modelId] || 0;
-            // const avg = nbWallets > 0 ? (nbCards / nbWallets).toFixed(1) : '0.0';
+            const nftData = await getNFTData(asset.tokenId);
+            const bbdRewardNft = calculateBBDRewardNftByNFTData(nftData);
+            const ratio = bbdRewardNft / priceDolz;
 
-            // const nftData = await getNFTData(asset.tokenId);
-
-            // assetsLines.push(`${medal} | ${total} assets | ${percent}%`);
-            // assetsLines.push(`🎖️ ${nftData.rarity}\n`);
-            assetsLines.push(`📦 ${0} BBD | 🪪 ${0} DOLZ | 📊 Ratio: ${0}`);
+            assetStats.push({
+                nftData,
+                priceDolz,
+                bbdRewardNft,
+                ratio,
+            });
         }
-        embed.addFields({
-            name: 'Assets',
-            value: assetsLines.join('\n') + '\u200B',
-            inline: false,
+
+        // Étape 2 : classement des ratios sans toucher à l’ordre
+        const sortedRatios = [...assetStats].map(a => a.ratio).sort((a, b) => b - a); // trié du plus grand au plus petit
+
+        function getColorEmojiFromRatio(ratio) {
+            const rank = sortedRatios.findIndex(r => r === ratio) / sortedRatios.length;
+            if (rank < 0.2) return '🟩';
+            if (rank < 0.5) return '🟨';
+            if (rank < 0.8) return '🟧';
+            return '🟥';
+        }
+
+        const assetsLines = assetStats.map(item => {
+            const { nftData, priceDolz, bbdRewardNft, ratio } = item;
+            const emoji = getColorEmojiFromRatio(ratio);
+            const ratioFormatted = formatNumber(ratio * 10000);
+            return `${emoji} ${nftData.rarity} ${nftData.serial_number}: ${bbdRewardNft} BBD | 💵 ${priceDolz} DOLZ | 📊 Ratio: ${ratioFormatted}`;
         });
+
+
+        const maxFieldLength = 1024;
+        let currentChunk = '';
+        const fields = [];
+
+        for (const line of assetsLines) {
+            if ((currentChunk + line + '\n').length > maxFieldLength) {
+                fields.push({ name: 'Assets', value: currentChunk, inline: false });
+                currentChunk = '';
+            }
+            currentChunk += line + '\n';
+        }
+
+        if (currentChunk) {
+            fields.push({ name: 'Assets', value: currentChunk, inline: false });
+        }
+
+        if (fields.length > 25) {
+            // Trop de champs, on tronque
+            fields.splice(24);
+            fields.push({
+                name: 'Warning',
+                value: 'Too many assets to display. Truncated.',
+                inline: false,
+            });
+        }
+
+        embed.addFields(fields);
 
         // Sécurité : éviter débordement Discord
         console.log(`Embed length: ${embed.length} characters`);
