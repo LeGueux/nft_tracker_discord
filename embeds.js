@@ -438,18 +438,23 @@ export async function buildNftBBDRewardCalculatorEmbed(modelId, data) {
 
             const rarity = nftData.rarity.padEnd(9);                // Limited  
             const serial = nftData.serial_number.padStart(7);       // 006/370
-            const bbdStr = `${bbdRewardNft.toFixed(2)}BBD`.padStart(8); //    1.23 BBD
-            const priceStr = `${priceDolz} DOLZ`.padStart(10);      //   9900 DOLZ
+            const bbdStr = `${bbdRewardNft.toFixed(2)}`.padStart(5); //    1.23 BBD
+            const priceStr = `${priceDolz}`.padStart(5);      //   9900 DOLZ
             const ratioStr = `${ratioFormatted}`;            // Ratio: 1.242
 
-            return `${emoji} ${rarity} ${serial} ${bbdStr} 💵${priceStr} 📊${ratioStr}`;
+            return `${emoji} ${rarity} ${serial} ${bbdStr} 💵 ${priceStr} 📊 ${ratioStr}`;
         });
+        formattedLines.unshift(`   Rarity        S/N   BBD      DOLZ    Ratio`);
 
         // Construction des champs embed avec blocs de code Discord
         const codeBlock = '```' + formattedLines.join('\n') + '```';
 
         if (codeBlock.length <= 1024) {
-            embed.addFields([{ name: 'Assets', value: codeBlock, inline: false }]);
+            embed.addFields([{
+                name: `Assets - total: ${assetStats.length} - model ${modelId}`,
+                value: codeBlock,
+                inline: false,
+            }]);
         } else {
             // Si trop long, on split intelligemment en blocs < 1024
             let currentChunk = '';
