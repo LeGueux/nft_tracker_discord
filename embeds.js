@@ -186,11 +186,11 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
     } = analysisResult;
 
     const rarityShort = {
-        "Limited": "L",
-        "Rare": "R",
-        "Epic": "E",
-        "Legendary": "LG",
-        "Not Revealed": "NR"
+        "Limited": `🟢L`,
+        "Rare": "🟡R",
+        "Epic": "💎E",
+        "Legendary": "👑LG",
+        "Not Revealed": "❔ NR"
     };
 
     const embed = new EmbedBuilder()
@@ -207,33 +207,38 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
             const nbCards = cardsPerModel[modelId] || 0;
             const avg = nbWallets > 0 ? (nbCards / nbWallets).toFixed(1) : '0.0';
 
-            lines.push(`📦 ${nbCards} cartes | 🪪 ${nbWallets} wallets | 📊 Moy: ${avg}`);
+            const linkCards = `${getPrefixNameEmojiBySeason(season)} ${modelNames?.[modelId]} ${modelId}`;
+            const top3Links = [];
+            lines.push(`📦 ${nbCards} cartes 🪪 ${nbWallets} wallets 📊 Moy: ${avg}`);
 
             for (const [i, holder] of topList.entries()) {
                 const holderUsernameData = await getDolzUsername(holder.wallet);
-                const holderUsername = (holderUsernameData[0]?.duUsername ?? "").split("#")[0];
+                const holderUsername = (holderUsernameData[0]?.duUsername ?? '').split("#")[0];
                 const percent = holder.percentOwned;
                 const total = holder.total;
 
                 const rarityStr = RARITY_ORDER
-                    .filter(r => (holder[r] ?? 0) > 0) // ✅ Supprime les 0
+                    .filter(r => (holder[r] ?? 0) > 0)
                     .map(r => `${rarityShort[r]}: ${holder[r]}`)
-                    .join(' | ');
+                    .join('  ');
 
-                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+                // Ajouter le lien cliquable si dans le top 3
+                if (i < 3) {
+                    const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+                    top3Links.push(`${medal} [${holderUsername}](https://dolz.io/marketplace/profile/${holder.wallet})`);
+                }
 
-                lines.push(`${medal} [${holderUsername}](https://dolz.io/marketplace/profile/${holder.wallet}) ${total} | ${percent}%`);
-                lines.push(`🎖️ ${rarityStr}\n`);
+                lines.push(`${holderUsername.padEnd(13)}: ${total} ${percent.toString().padStart(5)}% ${rarityStr}`);
             }
 
             embed.addFields({
-                name: `${getPrefixNameEmojiBySeason(season)} ${modelNames?.[modelId]} ${modelId}`,
-                value: lines.join('\n') + '\u200B',
-                inline: true,
+                name: ``,
+                value: linkCards + ' ' + top3Links + '```text\n' + lines.join('\n') + '\n```',
+                inline: false,
             });
         }
 
-        // Sécurité : éviter débordement Discord
+        // Sécurité : vérifier la taille de l'embed
         console.log(`Embed length: ${embed.length} characters`);
         if (embed.length > 6000) {
             console.warn("Embed too large, truncating...");
@@ -245,7 +250,7 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
 
         return embed;
     } catch (error) {
-        console.warn("Embed builder error...");
+        console.warn("Embed builder error...", error);
         embed.setFields({
             name: "Warning",
             value: `Embed builder error. Please check the logs for details. ${error}`,
@@ -253,6 +258,7 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
         return embed;
     }
 }
+
 
 // Helper pour chunker un texte en morceaux <= maxLength sans couper au milieu d'une ligne
 function chunkText(text, maxLength = 1000) {
