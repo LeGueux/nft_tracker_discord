@@ -254,6 +254,23 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
     }
 }
 
+// Helper pour chunker un texte en morceaux <= maxLength sans couper au milieu d'une ligne
+function chunkText(text, maxLength = 1000) {
+    const lines = text.split('\n');
+    const chunks = [];
+    let currentChunk = '';
+
+    for (const line of lines) {
+        if ((currentChunk + line + '\n').length > maxLength) {
+            chunks.push(currentChunk);
+            currentChunk = '';
+        }
+        currentChunk += line + '\n';
+    }
+    if (currentChunk) chunks.push(currentChunk);
+    return chunks;
+}
+
 export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId) {
     const {
         modelNames,
@@ -262,12 +279,12 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
         walletsPerModel,
     } = nftHoldersStats;
 
-    const rarityShort = {
-        "Limited": "L",
-        "Rare": "R",
-        "Epic": "E",
-        "Legendary": "LG",
-        "Not Revealed": "NR"
+    const rarityEmojis = {
+        "Limited": `🟢 L`,
+        "Rare": "🟡 R",
+        "Epic": "💎 E",
+        "Legendary": "👑 LG",
+        "Not Revealed": "❔ NR"
     };
 
     const embed = new EmbedBuilder()
@@ -276,14 +293,11 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
         .setTimestamp();
 
     try {
-        for (const [index, item] of snipeStats.entries()) {
-            // Filtrer uniquement les gaps valides
+        // Ajout des champs snipeStats (probablement pas très longs, mais chunk si besoin)
+        for (const item of snipeStats) {
             const simulatedGaps = item.simulatedGaps
-                .map((g, i) => {
-                    const gap = g?.priceGapPercent;
-                    return gap !== null && gap !== undefined ? `${gap.toFixed(1)}%` : null;
-                })
-                .filter(Boolean); // Retire les nulls
+                .map(g => (g?.priceGapPercent != null ? `${g.priceGapPercent.toFixed(1)}%` : null))
+                .filter(Boolean);
 
             const snipeLines = [];
             snipeLines.push(`[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`);
@@ -292,47 +306,56 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
                 `FP Rare ${item.floorRare ?? '-'}`,
                 `**Prices (${item.countLimitedBeforeRare})** ${item.prices.join(', ')}`,
                 '**Gaps:**',
-                `${item.priceGapPercent?.toFixed(1) ?? '-'}% ${simulatedGaps.length > 0 ? ` | ${simulatedGaps.join(' | ')}` : ''}` // Ajoute les simulated gaps seulement s'il y en a au moins un
+                `${item.priceGapPercent?.toFixed(1) ?? '-'}%${simulatedGaps.length > 0 ? ` | ${simulatedGaps.join(' | ')}` : ''}`
             );
 
-            embed.addFields({
-                name: `Snipe ${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'} ${item.name}`,
-                value: `${snipeLines.join('\n')}\u200B`,
-                inline: false,
-            });
+            const chunks = chunkText(snipeLines.join('\n'));
+            for (const chunk of chunks) {
+                embed.addFields({
+                    name: `Snipe ${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'} ${item.name}`,
+                    value: chunk + '\u200B',
+                    inline: false,
+                });
+            }
         }
 
+        // Ajout des champs topWalletsPerModel (chunk obligatoire car potentiellement très long)
         for (const [modelId, topList] of Object.entries(topWalletsPerModel)) {
             const holdersLines = [];
-
             const nbWallets = walletsPerModel[modelId] || 0;
             const nbCards = cardsPerModel[modelId] || 0;
             const avg = nbWallets > 0 ? (nbCards / nbWallets).toFixed(1) : '0.0';
 
             holdersLines.push(`📦 ${nbCards} cartes | 🪪 ${nbWallets} wallets | 📊 Moy: ${avg}`);
+            holdersLines.push('');
+            holdersLines.push(
+                `Rank Name          | 📦  | %     | Détail`,
+                `----------------------------------------------`
+            );
 
             for (const [i, holder] of topList.entries()) {
                 const holderUsernameData = await getDolzUsername(holder.wallet);
                 const holderUsername = (holderUsernameData[0]?.duUsername ?? "").split("#")[0];
-                const percent = holder.percentOwned;
-                const total = holder.total;
 
+                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`.padEnd(4);
+                const totalStr = `${holder.total}`.padStart(2);
+                const percentStr = `${parseFloat(holder.percentOwned).toFixed(1)}%`.padEnd(5);
                 const rarityStr = RARITY_ORDER
-                    .filter(r => (holder[r] ?? 0) > 0) // ✅ Supprime les 0
-                    .map(r => `${rarityShort[r]}: ${holder[r]}`)
-                    .join(' | ');
+                    .filter(r => (holder[r] ?? 0) > 0)
+                    .map(r => `${rarityEmojis[r]}:${holder[r]}`)
+                    .join(' ');
 
-                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
-
-                holdersLines.push(`${medal} ${holderUsername} | ${total} assets | ${percent}%`);
-                holdersLines.push(`🎖️ ${rarityStr}\n`);
+                holdersLines.push(`${medal.padEnd(4)} ${holderUsername.padEnd(13)} | ${totalStr}  | ${percentStr} | ${rarityStr}`);
             }
 
-            embed.addFields({
-                name: 'Holders',
-                value: holdersLines.join('\n') + '\u200B',
-                inline: false,
-            });
+            const chunks = chunkText(holdersLines.join('\n'));
+            for (const chunk of chunks) {
+                embed.addFields({
+                    name: 'Holders',
+                    value: '```text\n' + chunk + '\n```',
+                    inline: false,
+                });
+            }
         }
 
         // Sécurité : éviter débordement Discord
@@ -347,7 +370,7 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
 
         return embed;
     } catch (error) {
-        console.warn("Embed builder error...");
+        console.warn("Embed builder error...", error);
         embed.setFields({
             name: "Warning",
             value: `Embed builder error. Please check the logs for details. ${error}`,
