@@ -280,10 +280,10 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
     } = nftHoldersStats;
 
     const rarityEmojis = {
-        "Limited": `🟢 L`,
-        "Rare": "🟡 R",
-        "Epic": "💎 E",
-        "Legendary": "👑 LG",
+        "Limited": `🟢L`,
+        "Rare": "🟡R",
+        "Epic": "💎E",
+        "Legendary": "👑LG",
         "Not Revealed": "❔ NR"
     };
 
