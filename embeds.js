@@ -407,51 +407,73 @@ export async function buildNftBBDRewardCalculatorEmbed(modelId, data) {
         }
 
         // Étape 2 : classement des ratios sans toucher à l’ordre
-        const sortedRatios = [...assetStats].map(a => a.ratio).sort((a, b) => b - a); // trié du plus grand au plus petit
+        const filteredRatios = assetStats
+            .filter(a => a.nftData.rarity === 'Limited' || a.nftData.rarity === 'Rare')
+            .map(a => a.ratio)
+            .sort((a, b) => b - a); // tri décroissant
 
         function getColorEmojiFromRatio(ratio) {
-            const rank = sortedRatios.findIndex(r => r === ratio) / sortedRatios.length;
+            const index = filteredRatios.findIndex(r => r === ratio);
+            const rank = index / filteredRatios.length;
+
+            if (index === -1) return ''; // Cas de sécurité si le ratio ne fait pas partie du classement
             if (rank < 0.2) return '🟩';
             if (rank < 0.5) return '🟨';
             if (rank < 0.8) return '🟧';
             return '🟥';
         }
 
-        const assetsLines = assetStats.map(item => {
+        // Formatage en monospace avec alignement manuel
+        const formattedLines = assetStats.map(item => {
             const { nftData, priceDolz, bbdRewardNft, ratio } = item;
-            const emoji = getColorEmojiFromRatio(ratio);
-            const ratioFormatted = formatNumber(ratio * 10000);
-            return `${emoji} ${nftData.rarity} ${nftData.serial_number}: ${bbdRewardNft} BBD | 💵 ${priceDolz} DOLZ | 📊 Ratio: ${ratioFormatted}`;
+
+            let emoji = '';
+            if (nftData.rarity === 'Limited' || nftData.rarity === 'Rare') {
+                emoji = getColorEmojiFromRatio(ratio);
+            }
+            if (nftData.rarity === 'Epic') emoji = '💎';
+            if (nftData.rarity === 'Legendary') emoji = '👑';
+
+            const ratioFormatted = formatNumber(ratio * 10000, 3); // Ex: 1.242
+
+            const rarity = nftData.rarity.padEnd(9);                // Limited  
+            const serial = nftData.serial_number.padStart(7);       // 006/370
+            const bbdStr = `${bbdRewardNft.toFixed(2)}BBD`.padStart(8); //    1.23 BBD
+            const priceStr = `${priceDolz} DOLZ`.padStart(10);      //   9900 DOLZ
+            const ratioStr = `${ratioFormatted}`;            // Ratio: 1.242
+
+            return `${emoji} ${rarity} ${serial} ${bbdStr} 💵${priceStr} 📊${ratioStr}`;
         });
 
+        // Construction des champs embed avec blocs de code Discord
+        const codeBlock = '```' + formattedLines.join('\n') + '```';
 
-        const maxFieldLength = 1024;
-        let currentChunk = '';
-        const fields = [];
+        if (codeBlock.length <= 1024) {
+            embed.addFields([{ name: 'Assets', value: codeBlock, inline: false }]);
+        } else {
+            // Si trop long, on split intelligemment en blocs < 1024
+            let currentChunk = '';
+            const chunks = [];
 
-        for (const line of assetsLines) {
-            if ((currentChunk + line + '\n').length > maxFieldLength) {
-                fields.push({ name: 'Assets', value: currentChunk, inline: false });
-                currentChunk = '';
+            for (const line of formattedLines) {
+                if ((currentChunk + line + '\n').length > 1000) {
+                    chunks.push('```' + currentChunk.trimEnd() + '```');
+                    currentChunk = '';
+                }
+                currentChunk += line + '\n';
             }
-            currentChunk += line + '\n';
-        }
+            if (currentChunk) {
+                chunks.push('```' + currentChunk.trimEnd() + '```');
+            }
 
-        if (currentChunk) {
-            fields.push({ name: 'Assets', value: currentChunk, inline: false });
-        }
-
-        if (fields.length > 25) {
-            // Trop de champs, on tronque
-            fields.splice(24);
-            fields.push({
-                name: 'Warning',
-                value: 'Too many assets to display. Truncated.',
-                inline: false,
+            chunks.slice(0, 25).forEach((chunk, index) => {
+                embed.addFields([{ name: index === 0 ? 'Assets' : '\u200B', value: chunk, inline: false }]);
             });
-        }
 
-        embed.addFields(fields);
+            if (chunks.length > 25) {
+                embed.addFields([{ name: 'Warning', value: 'Too many assets to display. Truncated.', inline: false }]);
+            }
+        }
 
         // Sécurité : éviter débordement Discord
         console.log(`Embed length: ${embed.length} characters`);
