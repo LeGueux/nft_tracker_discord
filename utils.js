@@ -1,15 +1,15 @@
-import { COMETH_API_INTERVAL, NFT_LIST_BY_SEASON } from "./config.js";
+import { COMETH_API_INTERVAL, NFT_LIST_BY_SEASON } from './config.js';
 
 function getRarityColor(rarity) {
     switch (rarity) {
-        case "Rare":
-            return "#FFFFFF";
-        case "Epic":
-            return "#D1AC09";
-        case "Legendary":
-            return "#BF55EC";
+        case 'Rare':
+            return '#FFFFFF';
+        case 'Epic':
+            return '#D1AC09';
+        case 'Legendary':
+            return '#BF55EC';
         default:
-            return "#000000";
+            return '#000000';
     }
 }
 
@@ -32,11 +32,11 @@ export async function getNFTData(tokenId) {
         return {
             name: data.name,
             image: data.image,
-            rarity: data.attributes.find((attr) => attr.trait_type === "Rarity")?.value,
-            rarity_color: getRarityColor(data.attributes.find((attr) => attr.trait_type === "Rarity")?.value),
-            season: data.attributes.find((attr) => attr.trait_type === "Season")?.value,
-            card_number: data.attributes.find((attr) => attr.trait_type === "Card Number")?.value,
-            serial_number: data.attributes.find((attr) => attr.trait_type === "Serial Number")?.value,
+            rarity: data.attributes.find((attr) => attr.trait_type === 'Rarity')?.value,
+            rarity_color: getRarityColor(data.attributes.find((attr) => attr.trait_type === 'Rarity')?.value),
+            season: data.attributes.find((attr) => attr.trait_type === 'Season')?.value,
+            card_number: data.attributes.find((attr) => attr.trait_type === 'Card Number')?.value,
+            serial_number: data.attributes.find((attr) => attr.trait_type === 'Serial Number')?.value,
         };
     } catch (error) {
         console.error(`Erreur lors de la récupération du token ${tokenId}:`, error);
@@ -50,7 +50,7 @@ export function getNFTSeasonByCardNumber(cardNumber) {
             return season;
         }
     }
-    return "Special Edition";
+    return 'Special Edition';
 }
 
 export function getContentTagsDependsOnNFT(data, price, type) {
@@ -58,13 +58,13 @@ export function getContentTagsDependsOnNFT(data, price, type) {
     const FRANCK = `<@${process.env.FRANCK_DISCORD_USER_ID}>`;
     const NICO = `<@${process.env.NICO_DISCORD_USER_ID}>`;
 
-    const isListing = type === "listing";
-    const isSale = type === "sale";
-    const isStandardSeason = !["Special Edition", "Off-Season"].includes(data.season);
-    const isLimited = data.rarity === "Limited";
-    const isRare = data.rarity === "Rare";
-    const isEpic = data.rarity === "Epic";
-    const isRareOrLimited = ["Limited", "Rare"].includes(data.rarity);
+    const isListing = type === 'listing';
+    const isSale = type === 'sale';
+    const isStandardSeason = !['Special Edition', 'Off-Season'].includes(data.season);
+    const isLimited = data.rarity === 'Limited';
+    const isRare = data.rarity === 'Rare';
+    const isEpic = data.rarity === 'Epic';
+    const isRareOrLimited = ['Limited', 'Rare'].includes(data.rarity);
 
     if (isListing && isStandardSeason) {
         // FRANCK ONLY
@@ -78,32 +78,27 @@ export function getContentTagsDependsOnNFT(data, price, type) {
         // Listing | S7                                   | Price <= 2000 | Rare
         if (price <= 800 ||
             (isEpic && price <= 6000) ||
-            (data.season === "1" && price <= 5000) ||
-            (data.season === "2" && price <= 4000) ||
-            (data.season === "6" && (price <= 1000 || (isRare && price <= 2000))) ||
-            (data.season === "7" && (price <= 1000 || (isRare && price <= 2000)))
+            (data.season === '1' && price <= 5000) ||
+            (data.season === '2' && price <= 4000) ||
+            (data.season === '6' && (price <= 1000 || (isRare && price <= 2000))) ||
+            (data.season === '7' && (price <= 1000 || (isRare && price <= 2000)))
         ) {
             return FRANCK;
         }
-
-        // FRANCK + NICO
-        // Listing | S6 Octokuro g0065     | Price <= 5000
-        // Listing | S7 Emiri Momota g0125 | Price <= 3500
-        // Listing | S7 Emiri Momota g0125 | Price <= 5000 | Rare
-        if ((["g0125"].includes(data.card_number) && (price <= 3500 || (isRare && price <= 5000))) ||
-            (["g0065"].includes(data.card_number) && price <= 5000)
-        ) {
-            return `${FRANCK} ${NICO}`;
-        }
+    }
+    // FRANCK ONLY
+    // Listing + Sale | S6 Octokuro     g0065
+    // Listing + Sale | S7 Emiri Momota g0125
+    // Listing + Sale | S7 Polly Yangs  g0126
+    if (['g0065', 'g0126', 'g0126'].includes(data.card_number)) {
+        return FRANCK;
     }
     // NICO ONLY
-    // S3 Kelly Zelda g0092      | Limited
-    // Listing | S1
-    if (["g0092"].includes(data.card_number) ||
-        data.season === "1") {
+    // Listing + Sale | S1
+    if (data.season === '1') {
         return NICO;
     }
-    return "";
+    return '';
 }
 
 export function calculateBBDRewardNftByNFTData(nftData) {
