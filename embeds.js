@@ -126,7 +126,7 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
                 .filter(Boolean); // Retire les nulls
 
             const lines = [];
-            if (index < 15) {
+            if (index < 10) {
                 lines.push(`[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`);
             }
             lines.push(
@@ -157,7 +157,7 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
             });
         }
 
-        // console.log(`Embed length: ${embed.length} characters`);
+        console.log(`Embed length: ${embed.length} characters`);
         if (embed.length > 6000) {
             console.warn("Embed too large, truncating...");
             embed.setFields({
