@@ -138,10 +138,10 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbed3 = await handleSnipeForSeason(3);
                 // const snipeEmbed4 = await handleSnipeForSeason(4);
                 // const snipeEmbed5 = await handleSnipeForSeason(5);
-                // const snipeEmbed6 = await handleSnipeForSeason(6);
+                const snipeEmbed6 = await handleSnipeForSeason(6);
                 // const snipeEmbed7 = await handleSnipeForSeason(7);
                 // const snipeEmbedAll = await handleSnipeForSeason(100);
-                const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
+                // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
                 // const nftHoldersEmbed = await handleNftHoldersForSeason(7);
@@ -168,10 +168,10 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbed3] });
                     // await thread.send({ embeds: [snipeEmbed4] });
                     // await thread.send({ embeds: [snipeEmbed5] });
-                    // await thread.send({ embeds: [snipeEmbed6] });
+                    await thread.send({ embeds: [snipeEmbed6] });
                     // await thread.send({ embeds: [snipeEmbed7] });
                     // await thread.send({ embeds: [snipeEmbedAll] });
-                    await thread.send({ embeds: [snipeEmbedAllSeasons] });
+                    // await thread.send({ embeds: [snipeEmbedAllSeasons] });
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
                     // await thread.send({ embeds: [nftHoldersEmbed] });

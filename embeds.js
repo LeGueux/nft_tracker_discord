@@ -125,16 +125,15 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
                 })
                 .filter(Boolean); // Retire les nulls
 
+            const labelPad = 7; // longueur max des libellés (pour aligner les ":")
             const lines = [];
-            if (index < 10) {
-                lines.push(`[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`);
-            }
+
             lines.push(
-                `FP Limited ${item.floor}`,
-                `FP Rare ${item.floorRare ?? '-'}`,
-                `**Prices (${item.countLimitedBeforeRare})** ${item.prices.join(', ')}`,
-                '**Gaps:**',
-                `${item.priceGapPercent?.toFixed(1) ?? '-'}% ${simulatedGaps.length > 0 ? ` | ${simulatedGaps.join(' | ')}` : ''}` // Ajoute les simulated gaps seulement s'il y en a au moins un
+                `${"FP L".padEnd(labelPad)}: ${item.floor ?? '-'}`,
+                `${"FP R".padEnd(labelPad)}: ${item.floorRare ?? '-'}`,
+                `${`$$ (${item.countLimitedBeforeRare})`.padEnd(labelPad)}: ${item.prices.join(', ')}`,
+                `${"Gaps".padEnd(labelPad)}: ${item.priceGapPercent?.toFixed(1) ?? '-'}%` +
+                (simulatedGaps.length > 0 ? `, ${simulatedGaps.join(', ')}` : '')
             );
 
             // ➕ Ajouter au total si saison < 100
@@ -143,10 +142,17 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
                 if (typeof item.floorRare === 'number') totalFloorRare += item.floorRare;
             }
 
+            let blocTitle = `${getPrefixNameEmojiBySeason(getNFTSeasonByCardNumber(item.modelId))} ${item.isFragileLevel1 ? '🔥' : '🧊'}${item.isFragileLevel2 ? '🔥' : '🧊'} `;
+            if (season < 100) {
+                blocTitle += `[${item.name}](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`;
+            } else {
+                blocTitle += `${item.name}`;
+            }
+
             embed.addFields({
-                name: `${getPrefixNameEmojiBySeason(getNFTSeasonByCardNumber(item.modelId))} ${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'} ${item.name}`,
-                value: `${lines.join('\n')}\u200B`,
-                inline: true,
+                name: '',
+                value: blocTitle + ' ' + '```text\n' + lines.join('\n') + '\n```',
+                inline: false,
             });
         }
 
@@ -259,7 +265,6 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
     }
 }
 
-
 // Helper pour chunker un texte en morceaux <= maxLength sans couper au milieu d'une ligne
 function chunkText(text, maxLength = 1000) {
     const lines = text.split('\n');
@@ -318,7 +323,7 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
             const chunks = chunkText(snipeLines.join('\n'));
             for (const chunk of chunks) {
                 embed.addFields({
-                    name: `Snipe ${item.isFragileLevel1 ? '✅' : '❌'}${item.isFragileLevel2 ? '⚠️' : '❌'} ${item.name}`,
+                    name: `Snipe ${item.isFragileLevel1 ? '🔥' : '🧊'}${item.isFragileLevel2 ? '🔥' : '🧊'} ${item.name}`,
                     value: chunk + '\u200B',
                     inline: false,
                 });
