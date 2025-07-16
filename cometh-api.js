@@ -165,8 +165,21 @@ export async function callComethApiForLastListings(discordClient) {
     }
 }
 
-export async function getTotalAssetsForWallet(address) {
+export async function getTotalAssetsForWallet(address, onSaleOnly = false) {
     try {
+        const body = {
+            contractAddress: process.env.NFT_CONTRACT_ADDRESS, // Filtrage par contrat NFT
+            owner: address,
+            limit: 1, // On ne récupère qu'un seul résultat car seul le total nous intéresse
+            orderBy: "LISTING_DATE",
+            direction: "DESC"
+        };
+
+        // Ajouter la condition isOnSale si onSaleOnly est true
+        if (onSaleOnly) {
+            body.isOnSale = true;
+        }
+
         // Envoi de la requête POST à l'API Cometh avec les paramètres de recherche
         const response = await fetch(
             "https://api.marketplace.cometh.io/v1/assets/search",
@@ -177,13 +190,7 @@ export async function getTotalAssetsForWallet(address) {
                     "content-type": "application/json",
                     apikey: process.env.COMETH_API_KEY, // Clé API sécurisée depuis les variables d'environnement
                 },
-                body: JSON.stringify({
-                    contractAddress: process.env.NFT_CONTRACT_ADDRESS, // Filtrage par contrat NFT
-                    owner: address,
-                    limit: 1, // On ne récupère qu'un seul résultat car seul le total nous intéresse
-                    orderBy: "LISTING_DATE",
-                    direction: "DESC"
-                }),
+                body: JSON.stringify(body),
             },
         );
 

@@ -52,8 +52,9 @@ function getPrefixNameEmojiBySeason(season) {
 }
 
 export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, type) {
-    const [totalAssetsSeller, babyDolzBalanceSeller, dolzBalanceSeller, sellerUsernameData] = await Promise.all([
+    const [totalAssetsSeller, totalAssetsOnSaleSeller, babyDolzBalanceSeller, dolzBalanceSeller, sellerUsernameData] = await Promise.all([
         getTotalAssetsForWallet(from),
+        getTotalAssetsForWallet(from, true),
         getBabyDolzBalance(from),
         getDolzBalance(from),
         getDolzUsername(from),
@@ -75,13 +76,15 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
                 value:
                     `🔗 [${from}](https://dolz.io/marketplace/profile/${from})\n` +
                     `Total Assets: ${totalAssetsSeller}\n` +
+                    `Total Assets On Sale: ${totalAssetsOnSaleSeller}\n` +
                     `Total DOLZ: ${formatNumber(dolzBalanceSeller)}\n` +
                     `Total BabyDOLZ: ${formatNumber(babyDolzBalanceSeller)}\n`,
             }
         );
     if (['sale', 'offer'].includes(type)) {
-        const [totalAssetsBuyer, babyDolzBalanceBuyer, dolzBalanceBuyer, buyerUsernameData] = await Promise.all([
+        const [totalAssetsBuyer, totalAssetsOnSaleBuyer, babyDolzBalanceBuyer, dolzBalanceBuyer, buyerUsernameData] = await Promise.all([
             getTotalAssetsForWallet(to),
+            getTotalAssetsForWallet(to, true),
             getBabyDolzBalance(to),
             getDolzBalance(to),
             getDolzUsername(to),
@@ -93,6 +96,7 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
             value:
                 `🔗 [${to}](https://dolz.io/marketplace/profile/${to})\n` +
                 `Total Assets: ${totalAssetsBuyer}\n` +
+                `Total Assets On Sale: ${totalAssetsOnSaleBuyer}\n` +
                 `Total DOLZ: ${formatNumber(dolzBalanceBuyer)}\n` +
                 `Total BabyDOLZ: ${formatNumber(babyDolzBalanceBuyer)}\n`,
         });
@@ -391,8 +395,9 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
 }
 
 export async function buildWalletDataEmbed(from) {
-    const [totalAssetsWallet, babyDolzBalanceWallet, dolzBalanceWallet, usernameData] = await Promise.all([
+    const [totalAssetsWallet, totalAssetsOnSaleWallet, babyDolzBalanceWallet, dolzBalanceWallet, usernameData] = await Promise.all([
         getTotalAssetsForWallet(from),
+        getTotalAssetsForWallet(from, true),
         getBabyDolzBalance(from),
         getDolzBalance(from),
         getDolzUsername(from),
@@ -408,6 +413,7 @@ export async function buildWalletDataEmbed(from) {
             value:
                 `🔗 [${from}](https://dolz.io/marketplace/profile/${from})\n` +
                 `Total Assets: ${totalAssetsWallet}\n` +
+                `Total Assets On Sale: ${totalAssetsOnSaleWallet}\n` +
                 `Total DOLZ: ${formatNumber(dolzBalanceWallet)}\n` +
                 `Total BabyDOLZ: ${formatNumber(babyDolzBalanceWallet)}\n`,
         });
