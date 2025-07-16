@@ -24,7 +24,7 @@ export async function handleNftHoldersForSeason(season) {
         console.log(`🐋 Top whales (min 5 cartes) par modèle :`);
         for (const [modelId, topList] of Object.entries(stats.topWalletsPerModel)) {
             console.log(`\n📦 ${modelId} – ${stats.cardsPerModel[modelId]} cartes totales`);
-            console.table(topList, ["wallet", "total", "percentOwned", ...RARITY_ORDER]);
+            console.table(topList, ["wallet", "total", "listed", "percentOwned", ...RARITY_ORDER]);
         }
     }
 
@@ -53,6 +53,7 @@ export function computeNftHoldersStats(data, options = {}, ignoreUnrevealed = tr
         const animationUrl = asset?.metadata?.animation_url;
         let modelId = ignoreUnrevealed ? null : 'Unknown';
         let rarity = 'Not Revealed';
+        const isListed = asset.orderbookStats?.lowestListingPrice != null;
         if (animationUrl) {
             const getModelAndRarityData = getModelAndRarity(animationUrl);
             modelId = getModelAndRarityData.modelId;
@@ -78,10 +79,11 @@ export function computeNftHoldersStats(data, options = {}, ignoreUnrevealed = tr
         if (!modelWalletCounts.has(modelId)) modelWalletCounts.set(modelId, new Map());
         const walletMap = modelWalletCounts.get(modelId);
 
-        if (!walletMap.has(owner)) walletMap.set(owner, { total: 0 });
+        if (!walletMap.has(owner)) walletMap.set(owner, { total: 0, listed: 0 });
         const countObj = walletMap.get(owner);
 
         countObj.total += 1;
+        if (isListed) countObj.listed += 1;
         countObj[rarity] = (countObj[rarity] || 0) + 1;
 
         cardsPerModel.set(modelId, (cardsPerModel.get(modelId) || 0) + 1);
@@ -108,6 +110,7 @@ export function computeNftHoldersStats(data, options = {}, ignoreUnrevealed = tr
             const result = {
                 wallet,
                 total: counts.total,
+                listed: counts.listed || 0,
                 percentOwned: parseFloat(((counts.total / cardsPerModel.get(modelId)) * 100).toFixed(2)),
             };
 

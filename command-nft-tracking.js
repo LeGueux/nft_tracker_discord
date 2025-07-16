@@ -27,7 +27,7 @@ export async function handleNftTrackingForModel(modelId) {
         console.log(`🐋 Top whales (min X cartes) par modèle:`);
         for (const [modelId, topList] of Object.entries(nftHoldersStats.topWalletsPerModel)) {
             console.log(`\n📦 ${modelId} – ${nftHoldersStats.cardsPerModel[modelId]} cartes totales`);
-            console.table(topList, ["wallet", "total", "percentOwned", ...RARITY_ORDER]);
+            console.table(topList, ['wallet', 'total', 'listed', 'percentOwned', ...RARITY_ORDER]);
         }
     }
 

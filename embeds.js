@@ -75,8 +75,7 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
                 name: `🙋‍♂️ Seller: ${getWhaleEmoji(totalAssetsSeller, dolzBalanceSeller)} ${sellerUsername}`,
                 value:
                     `🔗 [${from}](https://dolz.io/marketplace/profile/${from})\n` +
-                    `Total Assets: ${totalAssetsSeller}\n` +
-                    `Total Assets On Sale: ${totalAssetsOnSaleSeller}\n` +
+                    `Total Assets: ${totalAssetsSeller}🔒 ${totalAssetsOnSaleSeller}🛒\n` +
                     `Total DOLZ: ${formatNumber(dolzBalanceSeller)}\n` +
                     `Total BabyDOLZ: ${formatNumber(babyDolzBalanceSeller)}\n`,
             }
@@ -95,8 +94,7 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
             name: `🙋‍♂️ Buyer: ${getWhaleEmoji(totalAssetsBuyer, dolzBalanceBuyer)} ${buyerUsername}`,
             value:
                 `🔗 [${to}](https://dolz.io/marketplace/profile/${to})\n` +
-                `Total Assets: ${totalAssetsBuyer}\n` +
-                `Total Assets On Sale: ${totalAssetsOnSaleBuyer}\n` +
+                `Total Assets: ${totalAssetsBuyer}🔒 ${totalAssetsOnSaleBuyer}🛒\n` +
                 `Total DOLZ: ${formatNumber(dolzBalanceBuyer)}\n` +
                 `Total BabyDOLZ: ${formatNumber(babyDolzBalanceBuyer)}\n`,
         });
@@ -207,7 +205,7 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
         .setTitle(`🐋 Top Whales Saison ${season}`)
         .setColor(0x00ffcc)
         .setTimestamp()
-        .setFooter({ text: `✅ Saison complète : ${numberOfFullCollectors} wallets` });
+        .setFooter({ text: `✅ Full season : ${numberOfFullCollectors}` });
 
     try {
         for (const [modelId, topList] of Object.entries(topWalletsPerModel)) {
@@ -219,18 +217,18 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
 
             const linkCards = `${getPrefixNameEmojiBySeason(season)} ${modelNames?.[modelId]} ${modelId}`;
             const top3Links = [];
-            lines.push(`📦 ${nbCards} cartes 🪪 ${nbWallets} wallets 📊 Moy: ${avg}`);
+            lines.push(`📦${nbCards} 🪪${nbWallets} 📊Moy: ${avg}`);
 
             for (const [i, holder] of topList.entries()) {
                 const holderUsernameData = await getDolzUsername(holder.wallet);
                 const holderUsername = (holderUsernameData[0]?.duUsername ?? '').split("#")[0];
                 const percent = holder.percentOwned;
-                const total = holder.total;
+                const totalStr = `${holder.total}🔒 ${holder.listed}🛒`;
 
                 const rarityStr = RARITY_ORDER
                     .filter(r => (holder[r] ?? 0) > 0)
-                    .map(r => `${rarityShort[r]}: ${holder[r]}`)
-                    .join('  ');
+                    .map(r => `${rarityShort[r]}${holder[r]}`)
+                    .join(' ');
 
                 // Ajouter le lien cliquable si dans le top 3
                 if (i < 3) {
@@ -238,12 +236,12 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
                     top3Links.push(`${medal} [${holderUsername}](https://dolz.io/marketplace/profile/${holder.wallet})`);
                 }
 
-                lines.push(`${holderUsername.padEnd(13)}: ${total} ${percent.toString().padStart(5)}% ${rarityStr}`);
+                lines.push(`${holderUsername.padEnd(10)} ${totalStr.padStart(8)}${percent.toString().padStart(4)}% ${rarityStr}`);
             }
 
             embed.addFields({
                 name: ``,
-                value: linkCards + ' ' + top3Links + '```text\n' + lines.join('\n') + '\n```',
+                value: linkCards + ' ' + top3Links.join('') + '```text\n' + lines.join('\n') + '\n```',
                 inline: false,
             });
         }
@@ -353,14 +351,14 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
                 const holderUsername = (holderUsernameData[0]?.duUsername ?? "").split("#")[0];
 
                 const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`.padEnd(4);
-                const totalStr = `${holder.total}`.padStart(2);
+                const totalStr = `${holder.total}🔒 ${holder.listed}🛒`;
                 const percentStr = `${parseFloat(holder.percentOwned).toFixed(1)}%`.padEnd(5);
                 const rarityStr = RARITY_ORDER
                     .filter(r => (holder[r] ?? 0) > 0)
                     .map(r => `${rarityEmojis[r]}:${holder[r]}`)
                     .join(' ');
 
-                holdersLines.push(`${medal.padEnd(4)} ${holderUsername.padEnd(13)} | ${totalStr}  | ${percentStr} | ${rarityStr}`);
+                holdersLines.push(`${medal.padEnd(4)} ${holderUsername.padEnd(13)} | ${totalStr.padStart(8)}  | ${percentStr} | ${rarityStr}`);
             }
 
             const chunks = chunkText(holdersLines.join('\n'));
@@ -412,8 +410,7 @@ export async function buildWalletDataEmbed(from) {
             name: `🙋‍♂️ Wallet: ${getWhaleEmoji(totalAssetsWallet, dolzBalanceWallet)} ${username}`,
             value:
                 `🔗 [${from}](https://dolz.io/marketplace/profile/${from})\n` +
-                `Total Assets: ${totalAssetsWallet}\n` +
-                `Total Assets On Sale: ${totalAssetsOnSaleWallet}\n` +
+                `Total Assets: ${totalAssetsWallet}🔒 ${totalAssetsOnSaleWallet}🛒\n` +
                 `Total DOLZ: ${formatNumber(dolzBalanceWallet)}\n` +
                 `Total BabyDOLZ: ${formatNumber(babyDolzBalanceWallet)}\n`,
         });
