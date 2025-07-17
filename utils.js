@@ -70,7 +70,6 @@ export function getContentTagsDependsOnNFT(data, price, type) {
         // FRANCK ONLY
         // Listing | All seasons                          | Price <= 800
         // Listing | All seasons                          | Price <= 6000 | Epic
-        // Listing | S1                                   | Price <= 5000
         // Listing | S2                                   | Price <= 4000
         // Listing | S6                                   | Price <= 1000
         // Listing | S6                                   | Price <= 2000 | Rare
@@ -78,7 +77,6 @@ export function getContentTagsDependsOnNFT(data, price, type) {
         // Listing | S7                                   | Price <= 2000 | Rare
         if (price <= 800 ||
             (isEpic && price <= 6000) ||
-            (data.season === '1' && price <= 5000) ||
             (data.season === '2' && price <= 4000) ||
             (data.season === '6' && (price <= 1000 || (isRare && price <= 2000))) ||
             (data.season === '7' && (price <= 1000 || (isRare && price <= 2000)))
