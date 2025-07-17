@@ -89,8 +89,7 @@ export function getContentTagsDependsOnNFT(data, price, type) {
     // FRANCK ONLY
     // Listing + Sale | S6 Octokuro     g0065
     // Listing + Sale | S7 Emiri Momota g0125
-    // Listing + Sale | S7 Polly Yangs  g0126
-    if (['g0065', 'g0126', 'g0126'].includes(data.card_number)) {
+    if (['g0065', 'g0126'].includes(data.card_number)) {
         return FRANCK;
     }
     // NICO ONLY

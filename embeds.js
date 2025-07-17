@@ -355,10 +355,10 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
                 const percentStr = `${parseFloat(holder.percentOwned).toFixed(1)}%`.padEnd(5);
                 const rarityStr = RARITY_ORDER
                     .filter(r => (holder[r] ?? 0) > 0)
-                    .map(r => `${rarityEmojis[r]}:${holder[r]}`)
+                    .map(r => `${rarityEmojis[r]}${holder[r]}`)
                     .join(' ');
 
-                holdersLines.push(`${medal.padEnd(4)} ${holderUsername.padEnd(13)} | ${totalStr.padStart(8)}  | ${percentStr} | ${rarityStr}`);
+                holdersLines.push(`${medal.padEnd(4)} ${holderUsername.padEnd(13)} ${totalStr.padStart(8)} ${percentStr} ${rarityStr}`);
             }
 
             const chunks = chunkText(holdersLines.join('\n'));
