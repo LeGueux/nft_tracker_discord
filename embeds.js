@@ -12,7 +12,7 @@ import {
     weiToDolz,
     calculateBBDRewardNftByNFTData,
 } from './utils.js';
-import { RARITY_ORDER, NFT_LIST_BY_SEASON } from './config.js';
+import { IS_TEST_MODE, RARITY_ORDER, NFT_LIST_BY_SEASON } from './config.js';
 
 const formatNumber = (num) => new Intl.NumberFormat('fr-FR').format(num);
 
