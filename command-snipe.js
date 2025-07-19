@@ -1,30 +1,45 @@
-import { getListingsBySeasonAndRarity } from "./cometh-api.js";
-import { buildSnipeEmbed } from "./embeds.js";
-import { IS_TEST_MODE } from "./config.js";
-import { weiToDolz } from "./utils.js";
+import { searchCardsByCriterias } from './cometh-api.js';
+import { buildSnipeEmbed } from './embeds.js';
+import { IS_TEST_MODE } from './config.js';
+import { weiToDolz } from './utils.js';
 
 export async function handleSnipeForSeason(season) {
-    let dataListings = null;
+    console.log(`handleSnipeForSeason for season code ${season}`);
+
+    let seasonList = [];
     let isSnipeOnly = false;
-    if (season === 100) {
-        console.log("handleSnipeForSeason for ALL cards");
-        dataListings = await getListingsBySeasonAndRarity(["Off-Season", "Special Edition", "1", "2", "3", "4", "5", "6", "7"], ["Limited", "Rare"]);
-        isSnipeOnly = true;
-    } else if (season === 110) {
-        console.log("handleSnipeForSeason for All Seasons");
-        dataListings = await getListingsBySeasonAndRarity(["1", "2", "3", "4", "5", "6", "7"], ["Limited", "Rare"]);
-        isSnipeOnly = true;
-    } else if (season === 120) {
-        console.log("handleSnipeForSeason for Season Edition");
-        dataListings = await getListingsBySeasonAndRarity(["Special Edition"], ["Limited", "Rare"]);
-        isSnipeOnly = true;
-    } else if (season === 130) {
-        console.log("handleSnipeForSeason for Off-Season");
-        dataListings = await getListingsBySeasonAndRarity(["Off-Season"], ["Limited", "Rare"]);
-    } else {
-        console.log(`handleSnipeForSeason for Season ${season}`);
-        dataListings = await getListingsBySeasonAndRarity([season], ["Limited", "Rare"]);
+
+    switch (season) {
+        case 100:
+            seasonList = ['Off-Season', 'Special Edition', '1', '2', '3', '4', '5', '6', '7'];
+            isSnipeOnly = true;
+            break;
+        case 110:
+            seasonList = ['1', '2', '3', '4', '5', '6', '7'];
+            isSnipeOnly = true;
+            break;
+        case 120:
+            seasonList = ['Special Edition'];
+            isSnipeOnly = true;
+            break;
+        case 130:
+            seasonList = ['Off-Season'];
+            break;
+        default:
+            seasonList = [season];
     }
+
+    const dataListings = await searchCardsByCriterias({
+        attributes: [{
+            Season: seasonList,
+            Rarity: ['Limited', 'Rare'],
+        }],
+        onSaleOnly: true,
+        limit: 10000,
+        orderBy: 'PRICE',
+        direction: 'ASC',
+    });
+
     const dataFormatted = analyzeListingsFragility(dataListings, isSnipeOnly);
     if (IS_TEST_MODE) {
         // console.dir(dataFormatted, { depth: null, colors: true });
@@ -68,7 +83,7 @@ export function analyzeListingsFragility(data, snipeOnly = false) {
         if (!name || !priceWei || !animationUrl) continue;
 
         // Extraire rarity et modelId depuis animation_url
-        let rarity = "Limited";
+        let rarity = 'Limited';
         let modelId = null;
 
         const match = animationUrl.match(/\/(g\d+)\/\d+\/(Limited|Rare)\//);
@@ -78,7 +93,7 @@ export function analyzeListingsFragility(data, snipeOnly = false) {
 
         let priceDolz = parseInt(weiToDolz(priceWei));
 
-        if (rarity === "Rare" && modelId) {
+        if (rarity === 'Rare' && modelId) {
             if (!rareFloorsByModel[modelId]) {
                 rareFloorsByModel[modelId] = [];
             }
@@ -91,7 +106,7 @@ export function analyzeListingsFragility(data, snipeOnly = false) {
             grouped[keyName] = { prices: [], rarity, modelId };
         }
         if ([process.env.FRANCK_ADDRESS.toLowerCase(), process.env.NICO_ADDRESS.toLowerCase()].includes(asset?.owner.toLowerCase())) {
-            priceDolz += asset.owner.toLowerCase() === process.env.FRANCK_ADDRESS.toLowerCase() ? "-F" : "-N";
+            priceDolz += asset.owner.toLowerCase() === process.env.FRANCK_ADDRESS.toLowerCase() ? '-F' : '-N';
         }
 
         grouped[keyName].prices.push(priceDolz);
@@ -126,7 +141,7 @@ export function analyzeListingsFragility(data, snipeOnly = false) {
         const next = filteredPrices[1] ?? null;
         const priceGap = next && floor ? ((next - floor) / floor) * 100 : null;
 
-        if (rarity === "Limited" && floorRare !== null && floor >= floorRare) continue;
+        if (rarity === 'Limited' && floorRare !== null && floor >= floorRare) continue;
 
         const simulatedGaps = simulateGapAfterPurchases(filteredPrices, 5);
         const isFragileLevel2 = simulatedGaps.some(s => s.priceGapPercent !== null && s.priceGapPercent >= 25);

@@ -1,4 +1,4 @@
-import { getAllCardsBySeason } from "./cometh-api.js";
+import { searchCardsByCriterias } from "./cometh-api.js";
 import { buildNftHoldersEmbed } from "./embeds.js";
 import { IS_TEST_MODE, RARITY_ORDER } from "./config.js";
 
@@ -9,7 +9,10 @@ export async function handleNftHoldersForSeason(season) {
     let dataCardsBySeason = null;
 
     console.log(`handleNftHoldersForSeason for Season ${season}`);
-    dataCardsBySeason = await getAllCardsBySeason([season]);
+    dataCardsBySeason = await searchCardsByCriterias({
+            attributes: [{ Season: [season] }],
+            limit: 20000,
+        });
     console.log(`handleNftHoldersForSeason for Season ${season} - Cards found: ${dataCardsBySeason.total}`);
 
     const stats = computeNftHoldersStats(dataCardsBySeason, {

@@ -165,52 +165,6 @@ export async function callComethApiForLastListings(discordClient) {
     }
 }
 
-export async function getTotalAssetsForWallet(address, onSaleOnly = false) {
-    try {
-        const body = {
-            contractAddress: process.env.NFT_CONTRACT_ADDRESS, // Filtrage par contrat NFT
-            owner: address,
-            limit: 1, // On ne récupère qu'un seul résultat car seul le total nous intéresse
-            orderBy: "LISTING_DATE",
-            direction: "DESC"
-        };
-
-        // Ajouter la condition isOnSale si onSaleOnly est true
-        if (onSaleOnly) {
-            body.isOnSale = true;
-        }
-
-        // Envoi de la requête POST à l'API Cometh avec les paramètres de recherche
-        const response = await fetch(
-            "https://api.marketplace.cometh.io/v1/assets/search",
-            {
-                method: "POST",
-                headers: {
-                    accept: "application/json",
-                    "content-type": "application/json",
-                    apikey: process.env.COMETH_API_KEY, // Clé API sécurisée depuis les variables d'environnement
-                },
-                body: JSON.stringify(body),
-            },
-        );
-
-        // Parsing de la réponse JSON
-        const data = await response.json();
-
-        // Retourne le nombre total d'actifs appartenant au wallet
-        return data.total;
-    } catch (error) {
-        // Gestion des erreurs (réseau, parsing, etc.)
-        console.error(
-            `Erreur lors de la récupération du nombre de cartes de ${address}:`,
-            error,
-        );
-
-        // Retourne 0 par défaut en cas d'erreur
-        return 0;
-    }
-}
-
 export async function getDolzUsername(address) {
     try {
         // Envoi de la requête POST à l'API avec l'adresse du wallet
@@ -274,96 +228,38 @@ export async function getBabyDolzBalance(address) {
     }
 }
 
-export async function getListingsBySeasonAndRarity(seasonCtriteria, rarityCriteria) {
+export async function searchCardsByCriterias({
+    owner = null,
+    attributes = [],
+    onSaleOnly = false,
+    limit = 1,
+    skip = 0,
+    orderBy = 'PRICE',
+    direction = 'ASC',
+    returnOnlyTotal = false,
+} = {}) {
     try {
-        console.log(`getListingsBySeasonAndRarity à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}, criterias: ${seasonCtriteria}, ${rarityCriteria}`);
-        // https://api.marketplace.cometh.io/v1/doc#tag/asset/operation/searchAssets
-        const response = await fetch(
-            "https://api.marketplace.cometh.io/v1/assets/search",
-            {
-                method: "POST",
-                headers: {
-                    accept: "application/json",
-                    "content-type": "application/json",
-                    apikey: process.env.COMETH_API_KEY,
-                },
-                body: JSON.stringify({
-                    contractAddress: process.env.NFT_CONTRACT_ADDRESS,
-                    attributes: [{ Season: seasonCtriteria, Rarity: rarityCriteria }],
-                    limit: 9999,
-                    skip: 0,
-                    isOnSale: true,
-                    orderBy: "PRICE",
-                    direction: "ASC",
-                }),
-            },
-        );
-        const data = await response.json();
-
-        return data;
-    } catch (e) {
-        console.error("Erreur lors de la récupération des cartes:", e);
-        await sendStatusMessage(
-            discordClient,
-            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur lors de la récupération des cartes - getListingsBySeasonAndRarity - Rejection : \`${e}\``,
-        );
-    }
-}
-
-export async function getAllCardsBySeason(seasonCtriteria) {
-    try {
-        console.log(`getAllCardsBySeason à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}, criterias: ${seasonCtriteria}`);
-        // https://api.marketplace.cometh.io/v1/doc#tag/asset/operation/searchAssets
-        const response = await fetch(
-            "https://api.marketplace.cometh.io/v1/assets/search",
-            {
-                method: "POST",
-                headers: {
-                    accept: "application/json",
-                    "content-type": "application/json",
-                    apikey: process.env.COMETH_API_KEY,
-                },
-                body: JSON.stringify({
-                    contractAddress: process.env.NFT_CONTRACT_ADDRESS,
-                    attributes: [{ Season: seasonCtriteria }],
-                    limit: 20000,
-                    skip: 0,
-                }),
-            },
-        );
-        const data = await response.json();
-
-        return data;
-    } catch (e) {
-        console.error("Erreur lors de la récupération des cartes:", e);
-        await sendStatusMessage(
-            discordClient,
-            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur lors de la récupération des cartes - getAllCardsBySeason - Rejection : \`${e}\``,
-        );
-    }
-}
-
-export async function getAllCardsByModelId(modelId, onSaleOnly = false) {
-    try {
-        console.log(`getAllCardsByModelId à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}, modelId: ${modelId}`);
+        console.log(`🔍 searchCardsByCriterias lancé à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`);
+        console.log(`🧪 Paramètres : ${JSON.stringify({ attributes, onSaleOnly, limit, skip, orderBy, direction })}`);
 
         const body = {
             contractAddress: process.env.NFT_CONTRACT_ADDRESS,
-            attributes: [{ 'Card Number': [modelId] }],
-            limit: 2000,
-            skip: 0,
-            orderBy: "PRICE",
-            direction: "ASC",
+            attributes, // tableau d’objets : ex [{ Season: "S1" }, { Rarity: "Rare" }]
+            limit,
+            skip,
+            orderBy,
+            direction,
         };
 
-        // Ajouter la condition isOnSale si onSaleOnly est true
         if (onSaleOnly) {
             body.isOnSale = true;
         }
 
-        // https://api.marketplace.cometh.io/v1/doc#tag/asset/operation/searchAssets
-        const response = await fetch(
-            "https://api.marketplace.cometh.io/v1/assets/search",
+        if (owner) {
+            body.owner = owner.toLowerCase();
+        }
+
+        const response = await fetch('https://api.marketplace.cometh.io/v1/assets/search',
             {
                 method: "POST",
                 headers: {
@@ -374,15 +270,16 @@ export async function getAllCardsByModelId(modelId, onSaleOnly = false) {
                 body: JSON.stringify(body),
             },
         );
+
         const data = await response.json();
-        console.log(`getAllCardsByModelId à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}, modelId: ${modelId}`);
-        console.log(`getAllCardsByModelId - Cards found: ${data.total} à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`);
-        return data;
-    } catch (e) {
-        console.error("Erreur lors de la récupération des cartes:", e);
+        return returnOnlyTotal ? data.total : data;
+    } catch (error) {
+        console.error("❌ Erreur dans searchCardsByCriterias:", error);
         await sendStatusMessage(
             discordClient,
-            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur lors de la récupération des cartes - getAllCardsByModelId - Rejection : \`${e}\``,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans searchCardsByCriterias - Rejection : \`${error}\``,
         );
+        return { assets: [], total: 0 };
     }
 }
+

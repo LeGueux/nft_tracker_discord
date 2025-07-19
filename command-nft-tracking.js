@@ -1,4 +1,4 @@
-import { getAllCardsByModelId } from "./cometh-api.js";
+import { searchCardsByCriterias } from "./cometh-api.js";
 import { computeNftHoldersStats } from "./command-nft-holders.js";
 import { analyzeListingsFragility } from "./command-snipe.js";
 import { buildNftTrackingEmbed } from "./embeds.js";
@@ -13,7 +13,10 @@ export async function handleNftTrackingForModel(modelId) {
     // In case API is too slow or down, we can use a local mock file
     // const dataRaw = await fs.readFile(path.resolve('./mocks/card_' + modelId + '.json'), 'utf-8');
     // dataCard = JSON.parse(dataRaw);
-    dataCard = await getAllCardsByModelId(modelId);
+    dataCard = await searchCardsByCriterias({
+        attributes: [{ 'Card Number': [modelId] }],
+        limit: 2000,
+    });
     console.log(`handleNftTrackingForModel for modelId ${modelId} - Cards found: ${dataCard.total}`);
 
     const nftHoldersStats = computeNftHoldersStats(dataCard, {

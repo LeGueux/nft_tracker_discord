@@ -1,6 +1,6 @@
 import { EmbedBuilder } from "discord.js";
 import {
-    getTotalAssetsForWallet,
+    searchCardsByCriterias,
     getDolzUsername,
     getBabyDolzBalance,
 } from "./cometh-api.js";
@@ -53,8 +53,15 @@ function getPrefixNameEmojiBySeason(season) {
 
 export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, type) {
     const [totalAssetsSeller, totalAssetsOnSaleSeller, babyDolzBalanceSeller, dolzBalanceSeller, sellerUsernameData] = await Promise.all([
-        getTotalAssetsForWallet(from),
-        getTotalAssetsForWallet(from, true),
+        searchCardsByCriterias({
+            owner: from,
+            returnOnlyTotal: true,
+        }),
+        searchCardsByCriterias({
+            owner: from,
+            onSaleOnly: true,
+            returnOnlyTotal: true,
+        }),
         getBabyDolzBalance(from),
         getDolzBalance(from),
         getDolzUsername(from),
@@ -82,8 +89,15 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
         );
     if (['sale', 'offer'].includes(type)) {
         const [totalAssetsBuyer, totalAssetsOnSaleBuyer, babyDolzBalanceBuyer, dolzBalanceBuyer, buyerUsernameData] = await Promise.all([
-            getTotalAssetsForWallet(to),
-            getTotalAssetsForWallet(to, true),
+            searchCardsByCriterias({
+                owner: to,
+                returnOnlyTotal: true,
+            }),
+            searchCardsByCriterias({
+                owner: to,
+                onSaleOnly: true,
+                returnOnlyTotal: true,
+            }),
             getBabyDolzBalance(to),
             getDolzBalance(to),
             getDolzUsername(to),
@@ -108,8 +122,9 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
 }
 
 export async function buildSnipeEmbed(dataFormatted, season = 0) {
+    const embedTitle = `💹 Sniping ${season < 100 ? 'S' + season : ''}`;
     const embed = new EmbedBuilder()
-        .setTitle(`💹 Sniping`)
+        .setTitle(embedTitle)
         .setTimestamp()
         .setColor(0x00ff99);
 
@@ -394,8 +409,15 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
 
 export async function buildWalletDataEmbed(from) {
     const [totalAssetsWallet, totalAssetsOnSaleWallet, babyDolzBalanceWallet, dolzBalanceWallet, usernameData] = await Promise.all([
-        getTotalAssetsForWallet(from),
-        getTotalAssetsForWallet(from, true),
+        searchCardsByCriterias({
+            owner: from,
+            returnOnlyTotal: true,
+        }),
+        searchCardsByCriterias({
+            owner: from,
+            onSaleOnly: true,
+            returnOnlyTotal: true,
+        }),
         getBabyDolzBalance(from),
         getDolzBalance(from),
         getDolzUsername(from),

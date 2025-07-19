@@ -145,7 +145,7 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
                 // const nftHoldersEmbed = await handleNftHoldersForSeason(6);
-                const nftTrackingEmbed = await handleNftTrackingForModel('g0126');
+                // const nftTrackingEmbed = await handleNftTrackingForModel('g0126');
                 // const data = await getNFTData("51618"); // Limited
                 // const data = await getNFTData("51520"); // Rare
                 // const data = await getNFTData("51495"); // Epic
@@ -175,7 +175,7 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
                     // await thread.send({ embeds: [nftHoldersEmbed] });
-                    await thread.send({ embeds: [nftTrackingEmbed] });
+                    // await thread.send({ embeds: [nftTrackingEmbed] });
                     // await thread.send({ embeds: [walletFranckEmbed] });
                     // await thread.send({ embeds: [nftBBDRewardCalculatorEmbed] });
                     // await thread.send({
