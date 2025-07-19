@@ -1,5 +1,5 @@
-import { buildNftBBDRewardCalculatorEmbed } from "./embeds.js";
-import { searchCardsByCriterias } from "./cometh-api.js";
+import { buildNftBBDRewardCalculatorEmbed } from './embeds.js';
+import { searchCardsByCriterias } from './cometh-api.js';
 
 export async function handleGetBBDRewardCalculatorForModel(modelId) {
     console.log(`handleGetBBDRewardCalculatorForModel for modelId ${modelId}`);

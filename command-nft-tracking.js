@@ -1,8 +1,8 @@
-import { searchCardsByCriterias } from "./cometh-api.js";
-import { computeNftHoldersStats } from "./command-nft-holders.js";
-import { analyzeListingsFragility } from "./command-snipe.js";
-import { buildNftTrackingEmbed } from "./embeds.js";
-import { IS_TEST_MODE, RARITY_ORDER } from "./config.js";
+import { searchCardsByCriterias } from './cometh-api.js';
+import { computeNftHoldersStats } from './command-nft-holders.js';
+import { analyzeListingsFragility } from './command-snipe.js';
+import { buildNftTrackingEmbed } from './embeds.js';
+import { IS_TEST_MODE, RARITY_ORDER } from './config.js';
 import fs from 'fs/promises';
 import path from 'path';
 

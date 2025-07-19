@@ -1,6 +1,6 @@
-import { searchCardsByCriterias } from "./cometh-api.js";
-import { buildNftHoldersEmbed } from "./embeds.js";
-import { IS_TEST_MODE, RARITY_ORDER } from "./config.js";
+import { searchCardsByCriterias } from './cometh-api.js';
+import { buildNftHoldersEmbed } from './embeds.js';
+import { IS_TEST_MODE, RARITY_ORDER } from './config.js';
 
 const rarityOrder = ['Not Revealed', 'Limited', 'Rare', 'Epic', 'Legendary'];
 
@@ -27,7 +27,7 @@ export async function handleNftHoldersForSeason(season) {
         console.log(`🐋 Top whales (min 5 cartes) par modèle :`);
         for (const [modelId, topList] of Object.entries(stats.topWalletsPerModel)) {
             console.log(`\n📦 ${modelId} – ${stats.cardsPerModel[modelId]} cartes totales`);
-            console.table(topList, ["wallet", "total", "listed", "percentOwned", ...RARITY_ORDER]);
+            console.table(topList, ['wallet', 'total', 'listed', 'percentOwned', ...RARITY_ORDER]);
         }
     }
 

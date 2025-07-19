@@ -4,17 +4,17 @@ import {
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
-} from "discord.js";
-import { buildSaleListingNFTEmbed } from "./embeds.js";
-import { getNFTData } from "./utils.js";
-import { IS_TEST_MODE, ALIVE_PING_INTERVAL, COMETH_API_INTERVAL } from "./config.js";
-import { sendStatusMessage } from "./error-handler.js";
-import { callComethApiForLastListings, callComethApiForLastSales } from "./cometh-api.js";
-import { handleSnipeForSeason } from "./command-snipe.js";
-import { handleNftHoldersForSeason } from "./command-nft-holders.js";
-import { handleNftTrackingForModel } from "./command-nft-tracking.js";
-import { handleGetDataForWallet } from "./command-wallet-data.js";
-import { handleGetBBDRewardCalculatorForModel } from "./command-nft-bbd-reward-calculator.js";
+} from 'discord.js';
+import { buildSaleListingNFTEmbed } from './embeds.js';
+import { getNFTData } from './utils.js';
+import { IS_TEST_MODE, ALIVE_PING_INTERVAL, COMETH_API_INTERVAL } from './config.js';
+import { sendStatusMessage } from './error-handler.js';
+import { callComethApiForLastListings, callComethApiForLastSales } from './cometh-api.js';
+import { handleSnipeForSeason } from './command-snipe.js';
+import { handleNftHoldersForSeason } from './command-nft-holders.js';
+import { handleNftTrackingForModel } from './command-nft-tracking.js';
+import { handleGetDataForWallet } from './command-wallet-data.js';
+import { handleGetBBDRewardCalculatorForModel } from './command-nft-bbd-reward-calculator.js';
 
 export const discordClient = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -111,11 +111,11 @@ export function getThreadIdForToken(type, from) {
     }
 
     switch (type) {
-        case "listing":
+        case 'listing':
             return process.env.THREAD_ID_1;
-        case "sale":
+        case 'sale':
             return process.env.THREAD_ID_2;
-        case "offer":
+        case 'offer':
             return process.env.THREAD_ID_3;
         default:
             return process.env.STATUS_THREAD_ID;
@@ -124,11 +124,11 @@ export function getThreadIdForToken(type, from) {
 
 // Discord bot ready
 export function eventBotReady(discordClient) {
-    discordClient.once("ready", async () => {
-        console.log(`✅ Bot démarré à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`);
+    discordClient.once('ready', async () => {
+        console.log(`✅ Bot démarré à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
         await sendStatusMessage(
             discordClient,
-            `✅ Bot démarré à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`,
+            `✅ Bot démarré à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`,
         );
 
         if (IS_TEST_MODE) {
@@ -146,22 +146,22 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
                 // const nftHoldersEmbed = await handleNftHoldersForSeason(6);
                 // const nftTrackingEmbed = await handleNftTrackingForModel('g0126');
-                // const data = await getNFTData("51618"); // Limited
-                // const data = await getNFTData("51520"); // Rare
-                // const data = await getNFTData("51495"); // Epic
-                // const data = await getNFTData("51490"); // Legendary
+                // const data = await getNFTData('51618'); // Limited
+                // const data = await getNFTData('51520'); // Rare
+                // const data = await getNFTData('51495'); // Epic
+                // const data = await getNFTData('51490'); // Legendary
                 // const embedSale = await buildSaleListingNFTEmbed(
                 //     data,
                 //     process.env.NICO_ADDRESS,
                 //     process.env.FRANCK_ADDRESS,
                 //     50000,
-                //     "51690",
-                //     "sale",
+                //     '51690',
+                //     'sale',
                 // );
                 // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS);
                 // const nftBBDRewardCalculatorEmbed = await handleGetBBDRewardCalculatorForModel('g0065');
 
-                const thread = await discordClient.channels.fetch(getThreadIdForToken("default"));
+                const thread = await discordClient.channels.fetch(getThreadIdForToken('default'));
                 if (thread?.isTextBased()) {
                     // await thread.send({ embeds: [snipeEmbed1] });
                     // await thread.send({ embeds: [snipeEmbed2] });
@@ -191,7 +191,7 @@ export function eventBotReady(discordClient) {
                     process.exit(0);
                 }
             } catch (e) {
-                console.error("Erreur envoi test embed :", e);
+                console.error('Erreur envoi test embed :', e);
                 await sendStatusMessage(
                     discordClient,
                     `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Rejection : \`${e}\``,
@@ -208,10 +208,10 @@ export function eventBotReady(discordClient) {
 
         // Alive ping
         setInterval(async () => {
-            console.log(`🟢 Alive - ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`);
+            console.log(`🟢 Alive - ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
             await sendStatusMessage(
                 discordClient,
-                `🟢 Alive - ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`,
+                `🟢 Alive - ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`,
             );
         }, ALIVE_PING_INTERVAL);
     });
@@ -254,8 +254,8 @@ export function eventBotReady(discordClient) {
             if (!match) return;
 
             const season = parseInt(match[1]);
-            const context = match[2]; // "snipe" ou "nft_holders"
-            console.log("interaction.customId Match", match, context, season);
+            const context = match[2]; // 'snipe' ou 'nft_holders'
+            console.log('interaction.customId Match', match, context, season);
             await interaction.deferUpdate(); // Important pour éviter "Échec de l'interaction"
             if (context === 'snipe') {
                 const snipeEmbedSeason = await handleSnipeForSeason(season);

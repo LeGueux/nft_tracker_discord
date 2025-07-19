@@ -1,8 +1,8 @@
-import { getThreadIdForToken } from "./discord.js";
+import { getThreadIdForToken } from './discord.js';
 
 export async function sendStatusMessage(discordClient, content) {
     try {
-        const thread = await discordClient.channels.fetch(getThreadIdForToken("default"));
+        const thread = await discordClient.channels.fetch(getThreadIdForToken('default'));
         if (thread?.isTextBased()) {
             await thread.send({
                 content,
@@ -20,8 +20,8 @@ export async function sendStatusMessage(discordClient, content) {
 }
 
 export function setupErrorHandlers(discordClient) {
-    process.on("uncaughtException", async (err) => {
-        console.error("Uncaught Exception:", err);
+    process.on('uncaughtException', async (err) => {
+        console.error('Uncaught Exception:', err);
         await sendStatusMessage(
             discordClient,
             `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Exception : \`${err.message}\``,
@@ -29,8 +29,8 @@ export function setupErrorHandlers(discordClient) {
         process.exit(1);
     });
 
-    process.on("unhandledRejection", async (reason) => {
-        console.error("Unhandled Rejection:", reason);
+    process.on('unhandledRejection', async (reason) => {
+        console.error('Unhandled Rejection:', reason);
         await sendStatusMessage(
             discordClient,
             `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Rejection : \`${reason}\``,

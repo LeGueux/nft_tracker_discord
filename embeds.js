@@ -1,29 +1,29 @@
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder } from 'discord.js';
 import {
     searchCardsByCriterias,
     getDolzUsername,
     getBabyDolzBalance,
-} from "./cometh-api.js";
-import { getDolzBalance } from "./alchemy-api.js";
+} from './cometh-api.js';
+import { getDolzBalance } from './alchemy-api.js';
 import {
     getNFTSeasonByCardNumber,
     getNFTData,
     weiToDolz,
     calculateBBDRewardNftByNFTData,
-} from "./utils.js";
-import { RARITY_ORDER } from "./config.js";
+} from './utils.js';
+import { RARITY_ORDER } from './config.js';
 
 const formatNumber = (num) => new Intl.NumberFormat('fr-FR').format(num);
 
 function getPriceStringFormatted(price) {
-    const dolzPrice = parseFloat(process.env.DOLZ_PRICE ?? "0");
+    const dolzPrice = parseFloat(process.env.DOLZ_PRICE ?? '0');
     const priceInDollars = price * dolzPrice;
     return `${formatNumber(parseInt(price))} DOLZ ($ ${priceInDollars.toFixed(2)})`;
 }
 
 function getTitle(type, name) {
-    if (type === "sale") return `🛒 Sale: ${name}`;
-    if (type === "offer") return `📩 Received Offer: ${name}`;
+    if (type === 'sale') return `🛒 Sale: ${name}`;
+    if (type === 'offer') return `📩 Received Offer: ${name}`;
     return `📢 Listing: ${name}`;
 }
 
@@ -31,24 +31,24 @@ function getWhaleEmoji(totalAssets, dolzBalance) {
     const isDolzWhale = dolzBalance >= 100000;
     const isCardWhale = totalAssets >= 150;
 
-    if (isDolzWhale && isCardWhale) return "🐋 🔴";
-    if (isDolzWhale) return "🐋 🟣";
-    if (isCardWhale) return "🐋 🟡";
-    return "";
+    if (isDolzWhale && isCardWhale) return '🐋 🔴';
+    if (isDolzWhale) return '🐋 🟣';
+    if (isCardWhale) return '🐋 🟡';
+    return '';
 }
 
 function getPrefixNameEmojiBySeason(season) {
     const emojiMap = {
-        "1": "1️⃣",
-        "2": "2️⃣",
-        "3": "3️⃣",
-        "4": "4️⃣",
-        "5": "5️⃣",
-        "6": "6️⃣",
-        "7": "7️⃣",
+        '1': '1️⃣',
+        '2': '2️⃣',
+        '3': '3️⃣',
+        '4': '4️⃣',
+        '5': '5️⃣',
+        '6': '6️⃣',
+        '7': '7️⃣',
     };
 
-    return emojiMap[season] || "🃏";
+    return emojiMap[season] || '🃏';
 }
 
 export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, type) {
@@ -67,7 +67,7 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
         getDolzUsername(from),
     ]);
 
-    const sellerUsername = (sellerUsernameData[0]?.duUsername ?? "").split("#")[0];
+    const sellerUsername = (sellerUsernameData[0]?.duUsername ?? '').split('#')[0];
 
     const embed = new EmbedBuilder()
         .setTitle(getTitle(type, data.name))
@@ -75,9 +75,9 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
         .setImage(data.image)
         .setColor(data.rarity_color)
         .setTimestamp()
-        .setFooter({ text: "DOLZ marketplace Tracker" })
+        .setFooter({ text: 'DOLZ marketplace Tracker' })
         .addFields(
-            { name: "💰 Price:", value: getPriceStringFormatted(price) },
+            { name: '💰 Price:', value: getPriceStringFormatted(price) },
             {
                 name: `🙋‍♂️ Seller: ${getWhaleEmoji(totalAssetsSeller, dolzBalanceSeller)} ${sellerUsername}`,
                 value:
@@ -102,7 +102,7 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
             getDolzBalance(to),
             getDolzUsername(to),
         ]);
-        const buyerUsername = (buyerUsernameData[0]?.duUsername ?? "").split("#")[0];
+        const buyerUsername = (buyerUsernameData[0]?.duUsername ?? '').split('#')[0];
 
         embed.addFields({
             name: `🙋‍♂️ Buyer: ${getWhaleEmoji(totalAssetsBuyer, dolzBalanceBuyer)} ${buyerUsername}`,
@@ -114,9 +114,9 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
         });
     }
 
-    embed.addFields({ name: "Season:", value: data.season, inline: true });
-    embed.addFields({ name: "Rarity:", value: data.rarity, inline: true });
-    embed.addFields({ name: "Serial Number:", value: data.serial_number, inline: true });
+    embed.addFields({ name: 'Season:', value: data.season, inline: true });
+    embed.addFields({ name: 'Rarity:', value: data.rarity, inline: true });
+    embed.addFields({ name: 'Serial Number:', value: data.serial_number, inline: true });
 
     return embed;
 }
@@ -142,14 +142,14 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
                 })
                 .filter(Boolean); // Retire les nulls
 
-            const labelPad = 7; // longueur max des libellés (pour aligner les ":")
+            const labelPad = 7; // longueur max des libellés (pour aligner les ':')
             const lines = [];
 
             lines.push(
-                `${"FP L".padEnd(labelPad)}: ${item.floor ?? '-'}`,
-                `${"FP R".padEnd(labelPad)}: ${item.floorRare ?? '-'}`,
+                `${'FP L'.padEnd(labelPad)}: ${item.floor ?? '-'}`,
+                `${'FP R'.padEnd(labelPad)}: ${item.floorRare ?? '-'}`,
                 `${`$$ (${item.countLimitedBeforeRare})`.padEnd(labelPad)}: ${item.prices.join(', ')}`,
-                `${"Gaps".padEnd(labelPad)}: ${item.priceGapPercent?.toFixed(1) ?? '-'}%` +
+                `${'Gaps'.padEnd(labelPad)}: ${item.priceGapPercent?.toFixed(1) ?? '-'}%` +
                 (simulatedGaps.length > 0 ? `, ${simulatedGaps.join(', ')}` : '')
             );
 
@@ -182,17 +182,17 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
 
         console.log(`Embed length: ${embed.length} characters`);
         if (embed.length > 6000) {
-            console.warn("Embed too large, truncating...");
+            console.warn('Embed too large, truncating...');
             embed.setFields({
-                name: "Warning",
+                name: 'Warning',
                 value: `The embed content was too large and has been truncated. Please check the logs for details. ${embed.length} characters`,
             });
         }
         return embed;
     } catch (error) {
-        console.warn("Embed builder error...");
+        console.warn('Embed builder error...');
         embed.setFields({
-            name: "Warning",
+            name: 'Warning',
             value: `Embed builder error. Please check the logs for details. ${error}`,
         });
         return embed;
@@ -209,11 +209,11 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
     } = analysisResult;
 
     const rarityShort = {
-        "Limited": `🟢L`,
-        "Rare": "🟡R",
-        "Epic": "💎E",
-        "Legendary": "👑LG",
-        "Not Revealed": "❔ NR"
+        'Limited': `🟢L`,
+        'Rare': '🟡R',
+        'Epic': '💎E',
+        'Legendary': '👑LG',
+        'Not Revealed': '❔ NR'
     };
 
     const embed = new EmbedBuilder()
@@ -236,7 +236,7 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
 
             for (const [i, holder] of topList.entries()) {
                 const holderUsernameData = await getDolzUsername(holder.wallet);
-                const holderUsername = (holderUsernameData[0]?.duUsername ?? '').split("#")[0];
+                const holderUsername = (holderUsernameData[0]?.duUsername ?? '').split('#')[0];
                 const percent = holder.percentOwned;
                 const totalStr = `${holder.total}🔒 ${holder.listed}🛒`;
 
@@ -264,18 +264,18 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
         // Sécurité : vérifier la taille de l'embed
         console.log(`Embed length: ${embed.length} characters`);
         if (embed.length > 6000) {
-            console.warn("Embed too large, truncating...");
+            console.warn('Embed too large, truncating...');
             embed.setFields({
-                name: "Warning",
+                name: 'Warning',
                 value: `The embed content was too large and has been truncated. Please check les logs. ${embed.length} characters`,
             });
         }
 
         return embed;
     } catch (error) {
-        console.warn("Embed builder error...", error);
+        console.warn('Embed builder error...', error);
         embed.setFields({
-            name: "Warning",
+            name: 'Warning',
             value: `Embed builder error. Please check the logs for details. ${error}`,
         });
         return embed;
@@ -308,11 +308,11 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
     } = nftHoldersStats;
 
     const rarityEmojis = {
-        "Limited": `🟢L`,
-        "Rare": "🟡R",
-        "Epic": "💎E",
-        "Legendary": "👑LG",
-        "Not Revealed": "❔ NR"
+        'Limited': `🟢L`,
+        'Rare': '🟡R',
+        'Epic': '💎E',
+        'Legendary': '👑LG',
+        'Not Revealed': '❔ NR'
     };
 
     const embed = new EmbedBuilder()
@@ -363,7 +363,7 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
 
             for (const [i, holder] of topList.entries()) {
                 const holderUsernameData = await getDolzUsername(holder.wallet);
-                const holderUsername = (holderUsernameData[0]?.duUsername ?? "").split("#")[0];
+                const holderUsername = (holderUsernameData[0]?.duUsername ?? '').split('#')[0];
 
                 const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`.padEnd(4);
                 const totalStr = `${holder.total}🔒 ${holder.listed}🛒`;
@@ -389,18 +389,18 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
         // Sécurité : éviter débordement Discord
         console.log(`Embed length: ${embed.length} characters`);
         if (embed.length > 6000) {
-            console.warn("Embed too large, truncating...");
+            console.warn('Embed too large, truncating...');
             embed.setFields({
-                name: "Warning",
+                name: 'Warning',
                 value: `The embed content was too large and has been truncated. Please check les logs. ${embed.length} characters`,
             });
         }
 
         return embed;
     } catch (error) {
-        console.warn("Embed builder error...", error);
+        console.warn('Embed builder error...', error);
         embed.setFields({
-            name: "Warning",
+            name: 'Warning',
             value: `Embed builder error. Please check the logs for details. ${error}`,
         });
         return embed;
@@ -423,7 +423,7 @@ export async function buildWalletDataEmbed(from) {
         getDolzUsername(from),
     ]);
 
-    const username = (usernameData[0]?.duUsername ?? "").split("#")[0];
+    const username = (usernameData[0]?.duUsername ?? '').split('#')[0];
 
     const embed = new EmbedBuilder()
         .setURL(`https://dolz.io/marketplace/profile/${from}`)
@@ -542,18 +542,18 @@ export async function buildNftBBDRewardCalculatorEmbed(modelId, data) {
         // Sécurité : éviter débordement Discord
         console.log(`Embed length: ${embed.length} characters`);
         if (embed.length > 6000) {
-            console.warn("Embed too large, truncating...");
+            console.warn('Embed too large, truncating...');
             embed.setFields({
-                name: "Warning",
+                name: 'Warning',
                 value: `The embed content was too large and has been truncated. Please check les logs. ${embed.length} characters`,
             });
         }
 
         return embed;
     } catch (error) {
-        console.warn("Embed builder error...");
+        console.warn('Embed builder error...');
         embed.setFields({
-            name: "Warning",
+            name: 'Warning',
             value: `Embed builder error. Please check the logs for details. ${error}`,
         });
         return embed;

@@ -1,23 +1,23 @@
-import { buildSaleListingNFTEmbed } from "./embeds.js";
-import { getThreadIdForToken } from "./discord.js";
+import { buildSaleListingNFTEmbed } from './embeds.js';
+import { getThreadIdForToken } from './discord.js';
 import {
     getNFTData,
     weiToDolz,
     checkDateIsValidSinceLastOneInterval,
     getContentTagsDependsOnNFT,
-} from "./utils.js";
-import { sendStatusMessage } from "./error-handler.js";
+} from './utils.js';
+import { sendStatusMessage } from './error-handler.js';
 
 export async function callComethApiForLastSales(discordClient) {
     try {
-        console.log(`callComethApiForLastSales à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`);
+        console.log(`callComethApiForLastSales à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
         const response = await fetch(
-            "https://api.marketplace.cometh.io/v1/orders/filled-events/search",
+            'https://api.marketplace.cometh.io/v1/orders/filled-events/search',
             {
-                method: "POST",
+                method: 'POST',
                 headers: {
-                    accept: "application/json",
-                    "content-type": "application/json",
+                    accept: 'application/json',
+                    'content-type': 'application/json',
                     apikey: process.env.COMETH_API_KEY,
                 },
                 body: JSON.stringify({
@@ -35,21 +35,21 @@ export async function callComethApiForLastSales(discordClient) {
                 const tokenId = item.tokenId;
                 const data = await getNFTData(tokenId);
                 const price = parseInt(weiToDolz(item.erc20FillAmount)) / 0.9803;
-                const seller = item.direction === "sell" ? item.maker : item.taker;
-                const buyer = item.direction === "sell" ? item.taker : item.maker;
+                const seller = item.direction === 'sell' ? item.maker : item.taker;
+                const buyer = item.direction === 'sell' ? item.taker : item.maker;
                 const embed = await buildSaleListingNFTEmbed(
                     data,
                     seller,
                     buyer,
                     price,
                     tokenId,
-                    "sale",
+                    'sale',
                 );
-                const threadId = getThreadIdForToken("sale", seller);
+                const threadId = getThreadIdForToken('sale', seller);
                 const thread = await discordClient.channels.fetch(threadId);
                 if (thread?.isTextBased()) {
                     await thread.send({
-                        content: getContentTagsDependsOnNFT(data, price, "sale"),
+                        content: getContentTagsDependsOnNFT(data, price, 'sale'),
                         embeds: [embed],
                         allowedMentions: {
                             users: [
@@ -62,29 +62,29 @@ export async function callComethApiForLastSales(discordClient) {
             }
         };
     } catch (error) {
-        console.error("Erreur lors de la récupération des cartes:", error);
+        console.error('Erreur lors de la récupération des cartes:', error);
     }
 }
 
 export async function callComethApiForLastListings(discordClient) {
     try {
-        console.log(`callComethApiForLastListings à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`);
+        console.log(`callComethApiForLastListings à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
         // https://api.marketplace.cometh.io/v1/doc#tag/order/operation/searchOrders
         const response = await fetch(
-            "https://api.marketplace.cometh.io/v1/orders/search",
+            'https://api.marketplace.cometh.io/v1/orders/search',
             {
-                method: "POST",
+                method: 'POST',
                 headers: {
-                    accept: "application/json",
-                    "content-type": "application/json",
+                    accept: 'application/json',
+                    'content-type': 'application/json',
                     apikey: process.env.COMETH_API_KEY,
                 },
                 body: JSON.stringify({
                     tokenAddress: process.env.NFT_CONTRACT_ADDRESS,
-                    statuses: ["open"],
+                    statuses: ['open'],
                     limit: 50,
-                    orderBy: "UPDATED_AT",
-                    orderByDirection: "DESC",
+                    orderBy: 'UPDATED_AT',
+                    orderByDirection: 'DESC',
                 }),
             },
         );
@@ -96,7 +96,7 @@ export async function callComethApiForLastListings(discordClient) {
             if (!checkDateIsValidSinceLastOneInterval(new Date(item.signedAt))) {
                 break; // Sort complètement de la boucle si la condition est fausse
             }
-            if (item.direction == "sell") {
+            if (item.direction == 'sell') {
                 const tokenId = item.tokenId;
                 const data = await getNFTData(tokenId);
                 const price = parseInt(weiToDolz(item.totalPrice));
@@ -106,13 +106,13 @@ export async function callComethApiForLastListings(discordClient) {
                     null,
                     price,
                     tokenId,
-                    "listing",
+                    'listing',
                 );
-                const threadId = getThreadIdForToken("listing");
+                const threadId = getThreadIdForToken('listing');
                 const thread = await discordClient.channels.fetch(threadId);
                 if (thread?.isTextBased()) {
                     await thread.send({
-                        content: getContentTagsDependsOnNFT(data, price, "listing"),
+                        content: getContentTagsDependsOnNFT(data, price, 'listing'),
                         embeds: [embed],
                         allowedMentions: {
                             users: [
@@ -123,7 +123,7 @@ export async function callComethApiForLastListings(discordClient) {
                     });
                 }
             } else if (
-                item.direction == "buy" &&
+                item.direction == 'buy' &&
                 [
                     process.env.FRANCK_ADDRESS.toLowerCase(),
                     process.env.NICO_ADDRESS.toLowerCase(),
@@ -139,9 +139,9 @@ export async function callComethApiForLastListings(discordClient) {
                     item.maker,
                     price,
                     tokenId,
-                    "offer",
+                    'offer',
                 );
-                const threadId = getThreadIdForToken("offer");
+                const threadId = getThreadIdForToken('offer');
                 const thread = await discordClient.channels.fetch(threadId);
                 const contentTag = isForFranck
                     ? `<@${process.env.FRANCK_DISCORD_USER_ID}>`
@@ -161,21 +161,21 @@ export async function callComethApiForLastListings(discordClient) {
             }
         }
     } catch (error) {
-        console.error("Erreur lors de la récupération des cartes:", error);
+        console.error('Erreur lors de la récupération des cartes:', error);
     }
 }
 
 export async function getDolzUsername(address) {
     try {
         // Envoi de la requête POST à l'API avec l'adresse du wallet
-        const response = await fetch("https://back.dolz.io/api.php", {
-            method: "POST",
+        const response = await fetch('https://back.dolz.io/api.php', {
+            method: 'POST',
             headers: {
-                accept: "application/json",
-                "content-type": "application/json",
+                accept: 'application/json',
+                'content-type': 'application/json',
             },
             body: JSON.stringify({
-                command: "getDolzUsername",
+                command: 'getDolzUsername',
                 userAddress: address,
             }),
         });
@@ -193,21 +193,21 @@ export async function getDolzUsername(address) {
         );
 
         // Retourne une chaîne vide par défaut si une erreur survient
-        return "";
+        return '';
     }
 }
 
 export async function getBabyDolzBalance(address) {
     try {
         // Envoi de la requête POST à l'API avec le corps contenant le type de commande et l'adresse du portefeuille
-        const response = await fetch("https://back.dolz.io/api.php", {
-            method: "POST",
+        const response = await fetch('https://back.dolz.io/api.php', {
+            method: 'POST',
             headers: {
-                accept: "application/json",
-                "content-type": "application/json",
+                accept: 'application/json',
+                'content-type': 'application/json',
             },
             body: JSON.stringify({
-                command: "getBabyDolzBalance",
+                command: 'getBabyDolzBalance',
                 wallet: address,
             }),
         });
@@ -239,12 +239,12 @@ export async function searchCardsByCriterias({
     returnOnlyTotal = false,
 } = {}) {
     try {
-        console.log(`🔍 searchCardsByCriterias lancé à ${new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" })}`);
+        console.log(`🔍 searchCardsByCriterias lancé à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
         console.log(`🧪 Paramètres : ${JSON.stringify({ attributes, onSaleOnly, limit, skip, orderBy, direction })}`);
 
         const body = {
             contractAddress: process.env.NFT_CONTRACT_ADDRESS,
-            attributes, // tableau d’objets : ex [{ Season: "S1" }, { Rarity: "Rare" }]
+            attributes, // tableau d’objets : ex [{ Season: 'S1' }, { Rarity: 'Rare' }]
             limit,
             skip,
             orderBy,
@@ -261,10 +261,10 @@ export async function searchCardsByCriterias({
 
         const response = await fetch('https://api.marketplace.cometh.io/v1/assets/search',
             {
-                method: "POST",
+                method: 'POST',
                 headers: {
-                    accept: "application/json",
-                    "content-type": "application/json",
+                    accept: 'application/json',
+                    'content-type': 'application/json',
                     apikey: process.env.COMETH_API_KEY,
                 },
                 body: JSON.stringify(body),
@@ -274,7 +274,7 @@ export async function searchCardsByCriterias({
         const data = await response.json();
         return returnOnlyTotal ? data.total : data;
     } catch (error) {
-        console.error("❌ Erreur dans searchCardsByCriterias:", error);
+        console.error('❌ Erreur dans searchCardsByCriterias:', error);
         await sendStatusMessage(
             discordClient,
             `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans searchCardsByCriterias - Rejection : \`${error}\``,
