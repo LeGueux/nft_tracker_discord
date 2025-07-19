@@ -439,7 +439,9 @@ export async function buildWalletDataEmbed(from) {
             grouped[modelId] ??= { count: 0, rarity };
             grouped[modelId].count += 1;
         } else {
-            console.warn(`Ignoring asset with modelId ${modelId} and rarity ${rarity}`);
+            if (IS_TEST_MODE) {
+                console.log(`Ignoring asset with modelId ${modelId} and rarity ${rarity}`);
+            }
             others.push({ modelId, rarity });
         }
     }
@@ -468,7 +470,9 @@ export async function buildWalletDataEmbed(from) {
         const models = groupedBySeason[season];
         if (!models?.length) continue;
 
-        console.log(`📅 Saison ${season} :`);
+        if (IS_TEST_MODE) {
+            console.log(`📅 Saison ${season} :`);
+        }
         const modelOrder = [...(NFT_LIST_BY_SEASON[season] ?? [])];
 
         // Trier les modèles dans l’ordre du set (ou alphabetique pour Special Edition)
@@ -478,8 +482,10 @@ export async function buildWalletDataEmbed(from) {
             return iA !== -1 && iB !== -1 ? iA - iB : a.modelId.localeCompare(b.modelId);
         });
 
-        for (const { modelId, count, rarity, floor, value } of models) {
-            console.log(`   🧾 ${modelId} (${rarity}) — ${count}×${floor} DOLZ = ${value} DOLZ`);
+        if (IS_TEST_MODE) {
+            for (const { modelId, count, rarity, floor, value } of models) {
+                console.log(`   🧾 ${modelId} (${rarity}) — ${count}×${floor} DOLZ = ${value} DOLZ`);
+            }
         }
         let seasonTotal = 0;
         let seasonCount = 0;
@@ -490,7 +496,10 @@ export async function buildWalletDataEmbed(from) {
 
         seasonSummaries.push(`🧾 S${season} — ${seasonCount} cartes, ${formatNumber(seasonTotal)} DOLZ`);
     }
-    console.log(`📊 Total estimé toutes saisons : ${totalDolzEstimated} DOLZ`);
+
+    if (IS_TEST_MODE) {
+        console.log(`📊 Total estimé toutes saisons : ${totalDolzEstimated} DOLZ`);
+    }
 
     const embed = new EmbedBuilder()
         .setURL(`https://dolz.io/marketplace/profile/${from}`)
