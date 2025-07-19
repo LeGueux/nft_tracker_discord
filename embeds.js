@@ -3,6 +3,7 @@ import {
     searchCardsByCriterias,
     getDolzUsername,
     getBabyDolzBalance,
+    getFloorPricesForModelIds,
 } from './cometh-api.js';
 import { getDolzBalance } from './alchemy-api.js';
 import {
@@ -11,7 +12,7 @@ import {
     weiToDolz,
     calculateBBDRewardNftByNFTData,
 } from './utils.js';
-import { RARITY_ORDER } from './config.js';
+import { RARITY_ORDER, NFT_LIST_BY_SEASON } from './config.js';
 
 const formatNumber = (num) => new Intl.NumberFormat('fr-FR').format(num);
 
@@ -408,10 +409,10 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
 }
 
 export async function buildWalletDataEmbed(from) {
-    const [totalAssetsWallet, totalAssetsOnSaleWallet, babyDolzBalanceWallet, dolzBalanceWallet, usernameData] = await Promise.all([
+    const [allAssetsWallet, totalAssetsOnSaleWallet, babyDolzBalanceWallet, dolzBalanceWallet, usernameData] = await Promise.all([
         searchCardsByCriterias({
             owner: from,
-            returnOnlyTotal: true,
+            limit: 10000,
         }),
         searchCardsByCriterias({
             owner: from,
@@ -425,17 +426,91 @@ export async function buildWalletDataEmbed(from) {
 
     const username = (usernameData[0]?.duUsername ?? '').split('#')[0];
 
+    const grouped = {};
+    const others = [];
+    for (const asset of allAssetsWallet.assets) {
+        const animationUrl = asset.metadata?.animation_url;
+        if (!animationUrl) continue;
+        const match = animationUrl.match(/\/(g\d+)\/\d+\/(Limited|Rare|Epic|Legendary)\//);
+        const modelId = match[1];
+        const rarity = match[2];
+
+        if (['Limited', 'Rare'].includes(rarity)) {
+            grouped[modelId] ??= { count: 0, rarity };
+            grouped[modelId].count += 1;
+        } else {
+            console.warn(`Ignoring asset with modelId ${modelId} and rarity ${rarity}`);
+            others.push({ modelId, rarity });
+        }
+    }
+
+    const floorPrices = await getFloorPricesForModelIds(Object.keys(grouped));
+    let totalDolzEstimated = dolzBalanceWallet;
+    const groupedBySeason = {}; // { [season]: [ { modelId, count, rarity, floor, value } ] }
+
+    for (const modelId in grouped) {
+        const { count, rarity } = grouped[modelId];
+        const floor = floorPrices[modelId] ?? 0;
+        const value = count * floor;
+        totalDolzEstimated += value;
+
+        const season = getNFTSeasonByCardNumber(modelId);
+        groupedBySeason[season] ??= [];
+        groupedBySeason[season].push({ modelId, count, rarity, floor, value });
+    }
+
+    const displayOrder = [
+        '1', '2', '3', '4', '5', '6', '7', 'Off-Season', 'Special Edition'
+    ];
+    const seasonSummaries = [];
+
+    for (const season of displayOrder) {
+        const models = groupedBySeason[season];
+        if (!models?.length) continue;
+
+        console.log(`📅 Saison ${season} :`);
+        const modelOrder = [...(NFT_LIST_BY_SEASON[season] ?? [])];
+
+        // Trier les modèles dans l’ordre du set (ou alphabetique pour Special Edition)
+        models.sort((a, b) => {
+            const iA = modelOrder.indexOf(a.modelId);
+            const iB = modelOrder.indexOf(b.modelId);
+            return iA !== -1 && iB !== -1 ? iA - iB : a.modelId.localeCompare(b.modelId);
+        });
+
+        for (const { modelId, count, rarity, floor, value } of models) {
+            console.log(`   🧾 ${modelId} (${rarity}) — ${count}×${floor} DOLZ = ${value} DOLZ`);
+        }
+        let seasonTotal = 0;
+        let seasonCount = 0;
+        for (const { count, value } of models) {
+            seasonTotal += value;
+            seasonCount += count;
+        }
+
+        seasonSummaries.push(`🧾 S${season} — ${seasonCount} cartes, ${formatNumber(seasonTotal)} DOLZ`);
+    }
+    console.log(`📊 Total estimé toutes saisons : ${totalDolzEstimated} DOLZ`);
+
     const embed = new EmbedBuilder()
         .setURL(`https://dolz.io/marketplace/profile/${from}`)
         .setTimestamp()
-        .addFields({
-            name: `🙋‍♂️ Wallet: ${getWhaleEmoji(totalAssetsWallet, dolzBalanceWallet)} ${username}`,
-            value:
-                `🔗 [${from}](https://dolz.io/marketplace/profile/${from})\n` +
-                `Total Assets: ${totalAssetsWallet}🔒 ${totalAssetsOnSaleWallet}🛒\n` +
-                `Total DOLZ: ${formatNumber(dolzBalanceWallet)}\n` +
-                `Total BabyDOLZ: ${formatNumber(babyDolzBalanceWallet)}\n`,
-        });
+        .addFields([
+            {
+                name: `🙋‍♂️ Wallet: ${getWhaleEmoji(allAssetsWallet.total, dolzBalanceWallet)} ${username}`,
+                value:
+                    `🔗 [${from}](https://dolz.io/marketplace/profile/${from})\n` +
+                    `Total Assets: ${allAssetsWallet.total}🔒 ${totalAssetsOnSaleWallet}🛒\n` +
+                    `Total DOLZ: ${formatNumber(dolzBalanceWallet)}\n` +
+                    `Total BabyDOLZ: ${formatNumber(babyDolzBalanceWallet)}\n`,
+            },
+            {
+                name: '💰 Estimée en DOLZ (Rare/Limited évaluées)',
+                value: `${formatNumber(totalDolzEstimated)} DOLZ (au floor)\n` +
+                    `📦 Epic/Legendary/Not Revealed ignorées : ${others.length} cartes\n\n` +
+                    seasonSummaries.join('\n'),
+            }
+        ]);
 
     return embed;
 }

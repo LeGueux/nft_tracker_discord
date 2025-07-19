@@ -283,3 +283,31 @@ export async function searchCardsByCriterias({
     }
 }
 
+export async function getFloorPricesForModelIds(modelIds = []) {
+    const floorPrices = {};
+
+    for (const modelId of modelIds) {
+        try {
+            const result = await searchCardsByCriterias({
+                attributes: [{ 'Card Number': [modelId] }],
+                onSaleOnly: true,
+                limit: 1,
+                orderBy: 'PRICE',
+                direction: 'ASC',
+            });
+            // console.log(`Floor price for modelId ${modelId}:`, result);
+
+            const asset = result.assets?.[0];
+            if (asset?.orderbookStats?.lowestListingPrice) {
+                floorPrices[modelId] = parseInt(weiToDolz(asset.orderbookStats.lowestListingPrice));
+            } else {
+                floorPrices[modelId] = 0;
+            }
+        } catch (e) {
+            console.error(`Erreur pour modelId ${modelId} :`, e);
+            floorPrices[modelId] = 0;
+        }
+    }
+
+    return floorPrices;
+}
