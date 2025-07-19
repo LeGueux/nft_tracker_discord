@@ -3,7 +3,7 @@ import {
     searchCardsByCriterias,
     getDolzUsername,
     getBabyDolzBalance,
-    getFloorPricesForModelIds,
+    getFloorPricesByModelAndRarity,
 } from './cometh-api.js';
 import { getDolzBalance } from './alchemy-api.js';
 import {
@@ -426,8 +426,9 @@ export async function buildWalletDataEmbed(from) {
 
     const username = (usernameData[0]?.duUsername ?? '').split('#')[0];
 
-    const grouped = {};
+    const grouped = {}; // { [modelId]: { [rarity]: count } }
     const others = [];
+
     for (const asset of allAssetsWallet.assets) {
         const animationUrl = asset.metadata?.animation_url;
         if (!animationUrl) continue;
@@ -436,8 +437,9 @@ export async function buildWalletDataEmbed(from) {
         const rarity = match[2];
 
         if (['Limited', 'Rare'].includes(rarity)) {
-            grouped[modelId] ??= { count: 0, rarity };
-            grouped[modelId].count += 1;
+            grouped[modelId] ??= {};
+            grouped[modelId][rarity] ??= 0;
+            grouped[modelId][rarity] += 1;
         } else {
             if (IS_TEST_MODE) {
                 console.log(`Ignoring asset with modelId ${modelId} and rarity ${rarity}`);
@@ -445,20 +447,31 @@ export async function buildWalletDataEmbed(from) {
             others.push({ modelId, rarity });
         }
     }
+    const uniqueModelRarityPairs = [];
 
-    const floorPrices = await getFloorPricesForModelIds(Object.keys(grouped));
+    for (const modelId in grouped) {
+        for (const rarity in grouped[modelId]) {
+            uniqueModelRarityPairs.push({ modelId, rarity });
+        }
+    }
+
+    const floorPrices = await getFloorPricesByModelAndRarity(uniqueModelRarityPairs);
     let totalDolzEstimated = dolzBalanceWallet;
     const groupedBySeason = {}; // { [season]: [ { modelId, count, rarity, floor, value } ] }
 
     for (const modelId in grouped) {
-        const { count, rarity } = grouped[modelId];
-        const floor = floorPrices[modelId] ?? 0;
-        const value = count * floor;
-        totalDolzEstimated += value;
+        const rarityMap = grouped[modelId];
+        for (const rarity of Object.keys(rarityMap)) {
+            uniqueModelRarityPairs.push({ modelId, rarity });
+            const count = rarityMap[rarity];
+            const floor = floorPrices[`${modelId}-${rarity}`] ?? 0;
+            const value = count * floor;
+            totalDolzEstimated += value;
 
-        const season = getNFTSeasonByCardNumber(modelId);
-        groupedBySeason[season] ??= [];
-        groupedBySeason[season].push({ modelId, count, rarity, floor, value });
+            const season = getNFTSeasonByCardNumber(modelId);
+            groupedBySeason[season] ??= [];
+            groupedBySeason[season].push({ modelId, count, rarity, floor, value });
+        }
     }
 
     const displayOrder = [

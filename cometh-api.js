@@ -7,6 +7,7 @@ import {
     getContentTagsDependsOnNFT,
 } from './utils.js';
 import { sendStatusMessage } from './error-handler.js';
+import { IS_TEST_MODE } from './config.js';
 
 export async function callComethApiForLastSales(discordClient) {
     try {
@@ -283,29 +284,33 @@ export async function searchCardsByCriterias({
     }
 }
 
-export async function getFloorPricesForModelIds(modelIds = []) {
+export async function getFloorPricesByModelAndRarity(pairs = []) {
     const floorPrices = {};
 
-    for (const modelId of modelIds) {
+    for (const { modelId, rarity } of pairs) {
+        const key = `${modelId}-${rarity}`;
         try {
+            console.log(`Recherche pour modèle ${modelId} et rareté ${rarity} et key ${key}`);
             const result = await searchCardsByCriterias({
-                attributes: [{ 'Card Number': [modelId] }],
+                attributes: [{ 'Card Number': [modelId], 'Rarity': [rarity] }],
                 onSaleOnly: true,
                 limit: 1,
                 orderBy: 'PRICE',
                 direction: 'ASC',
             });
-            // console.log(`Floor price for modelId ${modelId}:`, result);
 
             const asset = result.assets?.[0];
+            if (IS_TEST_MODE) {
+                console.log(`Recherche pour modèle ${modelId} et rareté ${rarity}:`, asset?.metadata, asset?.orderbookStats);
+            }
             if (asset?.orderbookStats?.lowestListingPrice) {
-                floorPrices[modelId] = parseInt(weiToDolz(asset.orderbookStats.lowestListingPrice));
+                floorPrices[key] = parseInt(weiToDolz(asset.orderbookStats.lowestListingPrice));
             } else {
-                floorPrices[modelId] = 0;
+                floorPrices[key] = 0;
             }
         } catch (e) {
-            console.error(`Erreur pour modelId ${modelId} :`, e);
-            floorPrices[modelId] = 0;
+            console.error(`Erreur pour key ${key} :`, e);
+            floorPrices[key] = 0;
         }
     }
 
