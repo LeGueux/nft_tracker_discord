@@ -109,7 +109,8 @@ export async function callComethApiForLastListings(discordClient) {
                     tokenId,
                     'listing',
                 );
-                const threadId = getThreadIdForToken('listing');
+                const threadNameDependsOnPrice = price < 500 ? 'main' : 'listing';
+                const threadId = getThreadIdForToken(threadNameDependsOnPrice);
                 const thread = await discordClient.channels.fetch(threadId);
                 if (thread?.isTextBased()) {
                     await thread.send({

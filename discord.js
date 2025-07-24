@@ -111,6 +111,8 @@ export function getThreadIdForToken(type, from) {
     }
 
     switch (type) {
+        case 'main':
+            return process.env.MAIN_THREAD_ID;
         case 'listing':
             return process.env.THREAD_ID_1;
         case 'sale':
@@ -145,7 +147,7 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
                 // const nftHoldersEmbed = await handleNftHoldersForSeason(6);
-                // const nftTrackingEmbed = await handleNftTrackingForModel('g0126');
+                // const nftTrackingEmbed = await handleNftTrackingForModel('g0127');
                 // const data = await getNFTData('51618'); // Limited
                 // const data = await getNFTData('51520'); // Rare
                 // const data = await getNFTData('51495'); // Epic
@@ -154,7 +156,7 @@ export function eventBotReady(discordClient) {
                 //     data,
                 //     process.env.NICO_ADDRESS,
                 //     process.env.FRANCK_ADDRESS,
-                //     50000,
+                //     50,
                 //     '51690',
                 //     'sale',
                 // );

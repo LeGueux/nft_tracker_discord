@@ -1,4 +1,4 @@
-import { searchCardsByCriterias } from './cometh-api.js';
+import { searchCardsByCriterias, getDolzUsername } from './cometh-api.js';
 import { computeNftHoldersStats } from './command-nft-holders.js';
 import { analyzeListingsFragility } from './command-snipe.js';
 import { buildNftTrackingEmbed } from './embeds.js';
@@ -31,6 +31,11 @@ export async function handleNftTrackingForModel(modelId) {
         for (const [modelId, topList] of Object.entries(nftHoldersStats.topWalletsPerModel)) {
             console.log(`\n📦 ${modelId} – ${nftHoldersStats.cardsPerModel[modelId]} cartes totales`);
             console.table(topList, ['wallet', 'total', 'listed', 'percentOwned', ...RARITY_ORDER]);
+            // for (const item of topList) {
+            //     const holderUsernameData = await getDolzUsername(item.wallet);
+            //     const holderUsername = (holderUsernameData[0]?.duUsername ?? '').split('#')[0];
+            //     console.log(`\nWallet: ${item.wallet} - username: ${holderUsername} - Total: ${item.total} - Listed: ${item.listed}`);
+            // }
         }
     }
 
