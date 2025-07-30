@@ -69,6 +69,15 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
     ]);
 
     const sellerUsername = (sellerUsernameData[0]?.duUsername ?? '').split('#')[0];
+    // Cas où from correspond à un utilisateur spécifique
+    let priceString = getPriceStringFormatted(price);
+    if (from.toLowerCase() === process.env.FRANCK_ADDRESS.toLowerCase()) {
+        const tpInDolz = price * parseFloat(process.env.FRANCK_TP_RATIO) / 100;
+        priceString += `\nTP ${process.env.FRANCK_TP_RATIO}%: ${getPriceStringFormatted(tpInDolz)}\n`;
+    } else if (from.toLowerCase() === process.env.NICO_ADDRESS.toLowerCase()) {
+        const tpInDolz = price * parseFloat(process.env.NICO_TP_RATIO) / 100;
+        priceString += `\nTP ${process.env.NICO_TP_RATIO}%: ${getPriceStringFormatted(tpInDolz)}\n`;
+    }
 
     const embed = new EmbedBuilder()
         .setTitle(getTitle(type, data.name))
@@ -78,7 +87,7 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
         .setTimestamp()
         .setFooter({ text: 'DOLZ marketplace Tracker' })
         .addFields(
-            { name: '💰 Price:', value: getPriceStringFormatted(price) },
+            { name: '💰 Price:', value: priceString },
             {
                 name: `🙋‍♂️ Seller: ${getWhaleEmoji(totalAssetsSeller, dolzBalanceSeller)} ${sellerUsername}`,
                 value:

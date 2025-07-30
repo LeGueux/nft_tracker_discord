@@ -156,7 +156,7 @@ export function eventBotReady(discordClient) {
                 //     data,
                 //     process.env.NICO_ADDRESS,
                 //     process.env.FRANCK_ADDRESS,
-                //     50,
+                //     10000,
                 //     '51690',
                 //     'sale',
                 // );
