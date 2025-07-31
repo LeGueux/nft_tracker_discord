@@ -6,12 +6,14 @@
     "start": "node index.js"
   },
   "dependencies": {
+    "chartjs-node-canvas": "^5.0.0",
+    "dayjs": "^1.11.13",
     "discord.js": "^14.0.0",
     "dotenv": "^16.0.0",
     "ethers": "^6.0.0",
     "express": "^5.1.0"
   },
   "engines": {
-		"node": ">=24.0.0"
-	}
+    "node": ">=24.0.0"
+  }
 }

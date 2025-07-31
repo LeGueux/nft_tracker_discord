@@ -1,4 +1,4 @@
-import { EmbedBuilder } from 'discord.js';
+import { AttachmentBuilder, EmbedBuilder } from 'discord.js';
 import {
     searchCardsByCriterias,
     getDolzUsername,
@@ -664,4 +664,15 @@ export async function buildNftBBDRewardCalculatorEmbed(modelId, data) {
         });
         return embed;
     }
+}
+
+export async function buildChartSalesVolume(imageBuffer) {
+    const attachment = new AttachmentBuilder(imageBuffer, { name: 'sales_chart.png' });
+
+    const embed = new EmbedBuilder()
+        .setTitle('📊 30-Day Sales Volume')
+        .setImage('attachment://sales_chart.png')
+        .setTimestamp();
+
+    return { embeds: [embed], files: [attachment] };
 }

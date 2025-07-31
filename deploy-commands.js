@@ -68,6 +68,10 @@ const commands = [
                 .setRequired(true)
         )
         .toJSON(),
+    new SlashCommandBuilder()
+        .setName('get_chart_sales_volume')
+        .setDescription('Affiche le volume de transactions DOLZ sur 30 jours')
+        .toJSON(),
 ];
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);
