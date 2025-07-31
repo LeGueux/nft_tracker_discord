@@ -163,7 +163,7 @@ export function eventBotReady(discordClient) {
                 // );
                 // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS);
                 // const nftBBDRewardCalculatorEmbed = await handleGetBBDRewardCalculatorForModel('g0065');
-                const chartSalesVolumeEmbed = await handleGetChartSalesVolume(withMockData = true);
+                const chartSalesVolumeEmbed = await handleGetChartSalesVolume(true);
 
                 const thread = await discordClient.channels.fetch(getThreadIdForToken('default'));
                 if (thread?.isTextBased()) {
@@ -254,7 +254,7 @@ export function eventBotReady(discordClient) {
                 const embed = await handleGetBBDRewardCalculatorForModel(modelId);
                 await interaction.editReply({ embeds: [embed] });
             } else if (interaction.commandName === 'get_chart_sales_volume') {
-                const embedWithChart = await handleGetChartSalesVolume(withMockData = true);
+                const embedWithChart = await handleGetChartSalesVolume(true);
                 await interaction.editReply(embedWithChart);
             }
         } else if (interaction.isButton()) {
