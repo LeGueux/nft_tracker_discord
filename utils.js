@@ -70,14 +70,12 @@ export function getContentTagsDependsOnNFT(data, price, type) {
         // FRANCK ONLY
         // Listing | All seasons                          | Price <= 800
         // Listing | All seasons                          | Price <= 6000 | Epic
-        // Listing | S2                                   | Price <= 4000
         // Listing | S6                                   | Price <= 1000
         // Listing | S6                                   | Price <= 2000 | Rare
         // Listing | S7                                   | Price <= 1000
         // Listing | S7                                   | Price <= 2000 | Rare
         if (price <= 800 ||
             (isEpic && price <= 6000) ||
-            (data.season === '2' && price <= 4000) ||
             (data.season === '6' && (price <= 1000 || (isRare && price <= 2000))) ||
             (data.season === '7' && (price <= 1000 || (isRare && price <= 2000)))
         ) {
@@ -85,9 +83,9 @@ export function getContentTagsDependsOnNFT(data, price, type) {
         }
     }
     // FRANCK ONLY
-    // Listing + Sale | S6 Octokuro     g0065
-    // Listing + Sale | S7 Emiri Momota g0125
-    if (['g0065', 'g0125'].includes(data.card_number)) {
+    // Listing + Sale | S6 Octokuro     g0065             | Price <= 6000 | Limited, Rare
+    // Listing + Sale | S7 Emiri Momota g0125             | Price <= 6000 | Limited, Rare
+    if (['g0065', 'g0125'].includes(data.card_number) && price <= 6000 && isRareOrLimited) {
         return FRANCK;
     }
     // NICO ONLY
