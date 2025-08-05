@@ -84,14 +84,9 @@ export function getContentTagsDependsOnNFT(data, price, type) {
     }
     // FRANCK ONLY
     // Listing + Sale | S6 Octokuro     g0065             | Price <= 6000 | Limited, Rare
-    // Listing + Sale | S7 Emiri Momota g0125             | Price <= 6000 | Limited, Rare
+    // Listing + Sale | S7 Emiri Momota g0125             | Price <= 4500 | Limited, Rare
     if (['g0065', 'g0125'].includes(data.card_number) && price <= 6000 && isRareOrLimited) {
         return FRANCK;
-    }
-    // NICO ONLY
-    // Listing + Sale | S1
-    if (data.season === '1') {
-        return NICO;
     }
     return '';
 }
