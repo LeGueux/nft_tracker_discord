@@ -236,7 +236,8 @@ export async function getBabyDolzBalance(address) {
 }
 
 export async function searchFilledEventsByCriterias({
-    owner = null,
+    maker = null,
+    taker = null,
     attributes = [],
     limit = 1,
     returnOnlyTotal = false,
@@ -251,8 +252,12 @@ export async function searchFilledEventsByCriterias({
             limit,
         };
 
-        if (owner) {
-            body.owner = owner.toLowerCase();
+        if (maker) {
+            body.maker = maker.toLowerCase();
+        }
+
+        if (taker) {
+            body.taker = taker.toLowerCase();
         }
 
         if (attributes) {

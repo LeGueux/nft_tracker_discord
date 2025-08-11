@@ -15,7 +15,7 @@ import { handleNftHoldersForSeason } from './command-nft-holders.js';
 import { handleNftTrackingForModel } from './command-nft-tracking.js';
 import { handleGetDataForWallet } from './command-wallet-data.js';
 import { handleGetBBDRewardCalculatorForModel } from './command-nft-bbd-reward-calculator.js';
-import { handleGetChartSalesVolume } from './command-chart-sales-volume.js';
+import { handleGetChartSalesVolume, handleGetChartSalesVolumeBywallet } from './command-chart-sales-volume.js';
 
 export const discordClient = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -165,7 +165,8 @@ export function eventBotReady(discordClient) {
                 // );
                 // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1);
                 // const nftBBDRewardCalculatorEmbed = await handleGetBBDRewardCalculatorForModel('g0065');
-                const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
+                // const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
+                const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.NICO_ADDRESS_1);
 
                 const thread = await discordClient.channels.fetch(getThreadIdForToken('default'));
                 if (thread?.isTextBased()) {
@@ -184,7 +185,8 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [nftTrackingEmbed] });
                     // await thread.send({ embeds: [walletFranckEmbed] });
                     // await thread.send({ embeds: [nftBBDRewardCalculatorEmbed] });
-                    await thread.send(chartSalesVolumeEmbed);
+                    // await thread.send(chartSalesVolumeEmbed);
+                    await thread.send(chartSalesVolumeByWalletEmbed);
                     // await thread.send({
                     //     content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
                     //     embeds: [embedSale],
@@ -257,6 +259,10 @@ export function eventBotReady(discordClient) {
                 await interaction.editReply({ embeds: [embed] });
             } else if (interaction.commandName === 'get_chart_sales_volume') {
                 const embedWithChart = await handleGetChartSalesVolume(false);
+                await interaction.editReply(embedWithChart);
+            } else if (interaction.commandName === 'get_chart_sales_volume_by_wallet') {
+                const address = interaction.options.getString('address');
+                const embedWithChart = await handleGetChartSalesVolumeBywallet(address);
                 await interaction.editReply(embedWithChart);
             }
         } else if (interaction.isButton()) {
