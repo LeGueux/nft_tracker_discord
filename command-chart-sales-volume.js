@@ -1,3 +1,4 @@
+import { searchFilledEventsByCriterias } from './cometh-api.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { buildChartSalesVolume } from './embeds.js';
 import dayjs from 'dayjs';
@@ -97,8 +98,17 @@ async function generateSalesChart(salesData) {
 }
 
 export async function handleGetChartSalesVolume(withMockData = false) {
-    // Remplacer par appel réel à une API si besoin
-    const salesData = generateFakeSalesData(30);
+    console.log(`handleGetChartSalesVolume withMockData: ${withMockData}`);
+    let salesData;
+    if (withMockData) {
+        salesData = generateFakeSalesData(30);
+        console.log('Generated mock sales data:', salesData);
+    } else {
+        salesData = await searchFilledEventsByCriterias({
+            limit: 5000,
+        })
+        console.log('Sales data:', salesData);
+    }
     const imageBuffer = await generateSalesChart(salesData);
     return await buildChartSalesVolume(imageBuffer);
 }

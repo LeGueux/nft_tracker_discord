@@ -238,32 +238,25 @@ export async function getBabyDolzBalance(address) {
 export async function searchFilledEventsByCriterias({
     owner = null,
     attributes = [],
-    onSaleOnly = false,
     limit = 1,
-    skip = 0,
-    orderBy = 'PRICE',
-    direction = 'ASC',
     returnOnlyTotal = false,
 } = {}) {
     try {
         console.log(`🔍 searchCardsByCriterias lancé à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
-        console.log(`🧪 Paramètres : ${JSON.stringify({ attributes, onSaleOnly, limit, skip, orderBy, direction })}`);
+        console.log(`🧪 Paramètres : ${JSON.stringify({ attributes, limit })}`);
 
         const body = {
-            contractAddress: process.env.NFT_CONTRACT_ADDRESS,
-            attributes, // tableau d’objets : ex [{ Season: 'S1' }, { Rarity: 'Rare' }]
+            tokenAddress: process.env.NFT_CONTRACT_ADDRESS,
+            attributes,
             limit,
-            skip,
-            orderBy,
-            direction,
         };
-
-        if (onSaleOnly) {
-            body.isOnSale = true;
-        }
 
         if (owner) {
             body.owner = owner.toLowerCase();
+        }
+
+        if (attributes) {
+            body.attributes = attributes; // tableau d’objets : ex [{ Season: 'S1' }, { Rarity: 'Rare' }]
         }
 
         const response = await fetch('https://api.marketplace.cometh.io/v1/orders/filled-events/search',
@@ -279,7 +272,35 @@ export async function searchFilledEventsByCriterias({
         );
 
         const data = await response.json();
-        return returnOnlyTotal ? data.total : data;
+        console.log(data);
+        const nowMinus30Days = Date.now() - 30 * 24 * 60 * 60 * 1000;
+        const grouped = {};
+
+        for (const item of data.filledEvents) {
+            const eventDate = new Date(item.blockTimestamp);
+            if (eventDate.getTime() >= nowMinus30Days) {
+                const dateStr = eventDate.toISOString().split('T')[0]; // YYYY-MM-DD
+                const price = parseInt(weiToDolz(item.erc20FillAmount) / 0.9803);
+                if (!grouped[dateStr]) {
+                    grouped[dateStr] = { date: dateStr, volume: 0, count: 0 };
+                }
+                grouped[dateStr].volume += price;
+                grouped[dateStr].count += 1;
+                if (dateStr === '2025-08-11') {
+                    console.log(`Ajout de la vente pour ${dateStr} : volume=${grouped[dateStr].volume}, count=${grouped[dateStr].count}`);
+                }
+            } else {
+                break; // plus vieux que 30 jours, on arrête
+            }
+        }
+
+        // Transformation en tableau
+        const result = Object.values(grouped);
+
+        // Tri si nécessaire par date
+        result.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        return returnOnlyTotal ? result.total : result;
     } catch (error) {
         console.error('❌ Erreur dans searchCardsByCriterias:', error);
         await sendStatusMessage(
