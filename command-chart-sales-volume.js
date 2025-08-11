@@ -196,7 +196,7 @@ export async function handleGetChartSalesVolume(withMockData = false) {
         salesData = await searchFilledEventsByCriterias({
             limit: 5000,
         });
-        console.log('Sales data:', salesData);
+        // console.log('Sales data:', salesData);
     }
     const imageBuffer = await generateSalesChart(salesData);
     return await buildChartSalesVolume(imageBuffer);
@@ -242,11 +242,11 @@ export async function handleGetChartSalesVolumeBywallet(address) {
         taker: address,
         limit: 5000,
     });
-    console.log('Maker Sales data:', makerSalesData);
-    console.log('Taker Sales data:', takerSalesData);
+    // console.log('Maker Sales data:', makerSalesData);
+    // console.log('Taker Sales data:', takerSalesData);
 
     const mergedData = mergeSales(makerSalesData, takerSalesData);
-    console.log('All Sales data:', mergedData);
+    // console.log('All Sales data:', mergedData);
     const imageBuffer = await generateSalesChartByWallet(mergedData);
     return await buildChartSalesVolume(imageBuffer);
 }

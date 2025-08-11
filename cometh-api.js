@@ -277,7 +277,7 @@ export async function searchFilledEventsByCriterias({
         );
 
         const data = await response.json();
-        console.log(data);
+        // console.log(data);
         const nowMinus30Days = Date.now() - 30 * 24 * 60 * 60 * 1000;
         const grouped = {};
 
