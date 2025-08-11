@@ -208,21 +208,25 @@ export async function handleGetChartSalesVolumeBywallet(address) {
         const map = {};
 
         // Ajout des Maker (ventes)
-        makerSales.forEach(({ date, volume, count }) => {
+        makerSales.forEach(({ date, volumeAchats, nbAchats, volumeVentes, nbVentes }) => {
             if (!map[date]) {
                 map[date] = { date, volumeAchats: 0, nbAchats: 0, volumeVentes: 0, nbVentes: 0 };
             }
-            map[date].volumeVentes = volume;
-            map[date].nbVentes = count;
+            map[date].volumeAchats = volumeAchats;
+            map[date].nbAchats = nbAchats;
+            map[date].volumeVentes = volumeVentes;
+            map[date].nbVentes = nbVentes;
         });
 
         // Ajout des Taker (achats)
-        takerSales.forEach(({ date, volume, count }) => {
+        takerSales.forEach(({ date, volumeAchats, nbAchats, volumeVentes, nbVentes }) => {
             if (!map[date]) {
                 map[date] = { date, volumeAchats: 0, nbAchats: 0, volumeVentes: 0, nbVentes: 0 };
             }
-            map[date].volumeAchats = volume;
-            map[date].nbAchats = count;
+            map[date].volumeAchats = volumeAchats;
+            map[date].nbAchats = nbAchats;
+            map[date].volumeVentes = volumeVentes;
+            map[date].nbVentes = nbVentes;
         });
 
         // Conversion en tableau + tri par date

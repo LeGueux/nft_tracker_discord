@@ -166,7 +166,7 @@ export function eventBotReady(discordClient) {
                 // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1);
                 // const nftBBDRewardCalculatorEmbed = await handleGetBBDRewardCalculatorForModel('g0065');
                 // const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
-                const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.NICO_ADDRESS_1);
+                // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
                 const thread = await discordClient.channels.fetch(getThreadIdForToken('default'));
                 if (thread?.isTextBased()) {
@@ -186,7 +186,7 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [walletFranckEmbed] });
                     // await thread.send({ embeds: [nftBBDRewardCalculatorEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
-                    await thread.send(chartSalesVolumeByWalletEmbed);
+                    // await thread.send(chartSalesVolumeByWalletEmbed);
                     // await thread.send({
                     //     content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
                     //     embeds: [embedSale],

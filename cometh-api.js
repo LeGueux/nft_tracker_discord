@@ -287,12 +287,24 @@ export async function searchFilledEventsByCriterias({
                 const dateStr = eventDate.toISOString().split('T')[0]; // YYYY-MM-DD
                 const price = parseInt(weiToDolz(item.erc20FillAmount) / 0.9803);
                 if (!grouped[dateStr]) {
-                    grouped[dateStr] = { date: dateStr, volume: 0, count: 0 };
+                    if (maker || taker) {
+                        grouped[dateStr] = { date: dateStr, volumeAchats: 0, nbAchats: 0, volumeVentes: 0, nbVentes: 0 };
+                    } else {
+                        grouped[dateStr] = { date: dateStr, volume: 0, count: 0 };
+                    }
                 }
-                grouped[dateStr].volume += price;
-                grouped[dateStr].count += 1;
-                if (dateStr === '2025-08-11') {
-                    console.log(`Ajout de la vente pour ${dateStr} : volume=${grouped[dateStr].volume}, count=${grouped[dateStr].count}`);
+                if (maker || taker) {
+                    const isTransactionSale = (item.direction === 'sell' && maker) || (item.direction === 'buy' && taker);
+                    if (isTransactionSale) {
+                        grouped[dateStr].volumeVentes += price;
+                        grouped[dateStr].nbVentes += 1;
+                    } else {
+                        grouped[dateStr].volumeAchats += price;
+                        grouped[dateStr].nbAchats += 1;
+                    }
+                } else {
+                    grouped[dateStr].volume += price;
+                    grouped[dateStr].count += 1;
                 }
             } else {
                 break; // plus vieux que 30 jours, on arrête
