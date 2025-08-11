@@ -104,10 +104,12 @@ function buildSeasonButtons(suffix, currentSeason, includeAllRecap = true, inclu
 export function getThreadIdForToken(type, from) {
     if (from) {
         // Cas où from correspond à un utilisateur spécifique
-        if (from.toLowerCase() === process.env.FRANCK_ADDRESS.toLowerCase()) {
+        if ([process.env.FRANCK_ADDRESS_1.toLowerCase(), process.env.FRANCK_ADDRESS_2.toLowerCase()].includes(from.toLowerCase())) {
             return process.env.THREAD_ID_FRANCK;
-        } else if (from.toLowerCase() === process.env.NICO_ADDRESS.toLowerCase()) {
-            return process.env.THREAD_ID_NICO;
+        } else if (from.toLowerCase() === process.env.NICO_ADDRESS_1.toLowerCase()) {
+            return process.env.THREAD_ID_NICO_1;
+        } else if (from.toLowerCase() === process.env.NICO_ADDRESS_2.toLowerCase()) {
+            return process.env.THREAD_ID_NICO_2;
         }
     }
 
@@ -155,13 +157,13 @@ export function eventBotReady(discordClient) {
                 // const data = await getNFTData('51490'); // Legendary
                 // const embedSale = await buildSaleListingNFTEmbed(
                 //     data,
-                //     process.env.NICO_ADDRESS,
-                //     process.env.FRANCK_ADDRESS,
+                //     process.env.NICO_ADDRESS_1,
+                //     process.env.FRANCK_ADDRESS_1,
                 //     10000,
                 //     '51690',
                 //     'sale',
                 // );
-                // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS);
+                // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1);
                 // const nftBBDRewardCalculatorEmbed = await handleGetBBDRewardCalculatorForModel('g0065');
                 const chartSalesVolumeEmbed = await handleGetChartSalesVolume(true);
 

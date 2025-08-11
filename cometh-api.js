@@ -127,11 +127,16 @@ export async function callComethApiForLastListings(discordClient) {
             } else if (
                 item.direction == 'buy' &&
                 [
-                    process.env.FRANCK_ADDRESS.toLowerCase(),
-                    process.env.NICO_ADDRESS.toLowerCase(),
+                    process.env.FRANCK_ADDRESS_1.toLowerCase(),
+                    process.env.FRANCK_ADDRESS_2.toLowerCase(),
+                    process.env.NICO_ADDRESS_1.toLowerCase(),
+                    process.env.NICO_ADDRESS_2.toLowerCase(),
                 ].includes(item.asset?.owner.toLowerCase())
             ) {
-                const isForFranck = item.asset.owner.toLowerCase() === process.env.FRANCK_ADDRESS.toLowerCase();
+                const isForFranck = [
+                    process.env.FRANCK_ADDRESS_1.toLowerCase(),
+                    process.env.FRANCK_ADDRESS_2.toLowerCase(),
+                ].includes(item.asset.owner.toLowerCase();
                 const tokenId = item.tokenId;
                 const data = await getNFTData(tokenId);
                 const price = parseInt(weiToDolz(item.totalPrice));
@@ -227,6 +232,61 @@ export async function getBabyDolzBalance(address) {
         );
         // Retourne 0 par défaut en cas d'erreur
         return 0;
+    }
+}
+
+export async function searchFilledEventsByCriterias({
+    owner = null,
+    attributes = [],
+    onSaleOnly = false,
+    limit = 1,
+    skip = 0,
+    orderBy = 'PRICE',
+    direction = 'ASC',
+    returnOnlyTotal = false,
+} = {}) {
+    try {
+        console.log(`🔍 searchCardsByCriterias lancé à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
+        console.log(`🧪 Paramètres : ${JSON.stringify({ attributes, onSaleOnly, limit, skip, orderBy, direction })}`);
+
+        const body = {
+            contractAddress: process.env.NFT_CONTRACT_ADDRESS,
+            attributes, // tableau d’objets : ex [{ Season: 'S1' }, { Rarity: 'Rare' }]
+            limit,
+            skip,
+            orderBy,
+            direction,
+        };
+
+        if (onSaleOnly) {
+            body.isOnSale = true;
+        }
+
+        if (owner) {
+            body.owner = owner.toLowerCase();
+        }
+
+        const response = await fetch('https://api.marketplace.cometh.io/v1/orders/filled-events/search',
+            {
+                method: 'POST',
+                headers: {
+                    accept: 'application/json',
+                    'content-type': 'application/json',
+                    apikey: process.env.COMETH_API_KEY,
+                },
+                body: JSON.stringify(body),
+            },
+        );
+
+        const data = await response.json();
+        return returnOnlyTotal ? data.total : data;
+    } catch (error) {
+        console.error('❌ Erreur dans searchCardsByCriterias:', error);
+        await sendStatusMessage(
+            discordClient,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans searchCardsByCriterias - Rejection : \`${error}\``,
+        );
+        return { assets: [], total: 0 };
     }
 }
 

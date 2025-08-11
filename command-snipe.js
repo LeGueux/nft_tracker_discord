@@ -105,8 +105,17 @@ export function analyzeListingsFragility(data, snipeOnly = false) {
         if (!grouped[keyName]) {
             grouped[keyName] = { prices: [], rarity, modelId };
         }
-        if ([process.env.FRANCK_ADDRESS.toLowerCase(), process.env.NICO_ADDRESS.toLowerCase()].includes(asset?.owner.toLowerCase())) {
-            priceDolz += asset.owner.toLowerCase() === process.env.FRANCK_ADDRESS.toLowerCase() ? '-F' : '-N';
+
+        const ownerMap = {
+            [process.env.FRANCK_ADDRESS_1.toLowerCase()]: '-F1',
+            [process.env.FRANCK_ADDRESS_2.toLowerCase()]: '-F2',
+            [process.env.NICO_ADDRESS_1.toLowerCase()]: '-N1',
+            [process.env.NICO_ADDRESS_2.toLowerCase()]: '-N2',
+        };
+
+        const suffix = ownerMap[asset?.owner?.toLowerCase()];
+        if (suffix) {
+            priceDolz += suffix;
         }
 
         grouped[keyName].prices.push(priceDolz);
