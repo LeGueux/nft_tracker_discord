@@ -136,7 +136,7 @@ export async function callComethApiForLastListings(discordClient) {
                 const isForFranck = [
                     process.env.FRANCK_ADDRESS_1.toLowerCase(),
                     process.env.FRANCK_ADDRESS_2.toLowerCase(),
-                ].includes(item.asset.owner.toLowerCase();
+                ].includes(item.asset.owner.toLowerCase());
                 const tokenId = item.tokenId;
                 const data = await getNFTData(tokenId);
                 const price = parseInt(weiToDolz(item.totalPrice));
