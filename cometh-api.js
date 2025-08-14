@@ -415,3 +415,21 @@ export async function getFloorPricesByModelAndRarity(pairs = []) {
 
     return floorPrices;
 }
+
+export async function getFloorPriceByModelAndRarity(modelId, rarity) {
+    console.log(`Recherche FP pour modèle ${modelId} et rareté ${rarity}`);
+    const result = await searchCardsByCriterias({
+        attributes: [{ 'Card Number': [modelId], 'Rarity': [rarity] }],
+        onSaleOnly: true,
+        limit: 1,
+        orderBy: 'PRICE',
+        direction: 'ASC',
+    });
+
+    const asset = result.assets?.[0];
+    if (asset?.orderbookStats?.lowestListingPrice) {
+        return parseInt(weiToDolz(asset.orderbookStats.lowestListingPrice));
+    } else {
+        return 0;
+    }
+}

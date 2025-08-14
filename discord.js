@@ -151,16 +151,17 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
                 // const nftHoldersEmbed = await handleNftHoldersForSeason(6);
                 // const nftTrackingEmbed = await handleNftTrackingForModel('g0127');
-                // const data = await getNFTData('51618'); // Limited
-                // const data = await getNFTData('51520'); // Rare
-                // const data = await getNFTData('51495'); // Epic
-                // const data = await getNFTData('51490'); // Legendary
+                // const tokenId = '51618';  // Limited
+                // const tokenId = '51520';  // Rare
+                // const tokenId = '51495';  // Epic
+                // const tokenId = '51490';  // Legendary
+                // const data = await getNFTData(tokenId);
                 // const embedSale = await buildSaleListingNFTEmbed(
                 //     data,
                 //     process.env.NICO_ADDRESS_1,
                 //     process.env.FRANCK_ADDRESS_1,
-                //     10000,
-                //     '51690',
+                //     100,
+                //     tokenId,
                 //     'sale',
                 // );
                 // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1);
