@@ -92,10 +92,10 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
         'Not Revealed': '❔ NR'
     };
     if (topListSeller) {
-        const totalStr = `${assetsSellerForThisModel.total}🃏 ${topListSeller[0]['listed']}🛒`;
+        const totalStr = `${assetsSellerForThisModel.total}🃏 ${topListSeller[0]?.listed || 0}🛒`;
         const rarityStr = RARITY_ORDER
-            .filter(r => (topListSeller[0][r] ?? 0) > 0)
-            .map(r => `${rarityShort[r]}${topListSeller[0][r]}`)
+            .filter(r => (topListSeller[0]?.r ?? 0) > 0)
+            .map(r => `${rarityShort[r]}${topListSeller[0]?.r}`)
             .join(' ');
         assetsSellerForThisModelDetailStr = `${totalStr} ${rarityStr}`;
     }
@@ -125,9 +125,9 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
                 value:
                     `🔗 [${from}](https://dolz.io/marketplace/profile/${from})\n` +
                     `Total Assets: ${totalAssetsSeller}🃏 ${totalAssetsOnSaleSeller}🛒\n` +
+                    `Assets ${data.card_number}: ${assetsSellerForThisModelDetailStr}\n` +
                     `Total DOLZ: ${formatNumber(dolzBalanceSeller)}\n` +
-                    `Total BabyDOLZ: ${formatNumber(babyDolzBalanceSeller)}\n` +
-                    `Assets ${data.card_number}: ${assetsSellerForThisModelDetailStr}\n`,
+                    `Total BabyDOLZ: ${formatNumber(babyDolzBalanceSeller)}\n`,
             }
         );
     if (['sale', 'offer'].includes(type)) {
@@ -161,10 +161,10 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
         const topListBuyer = nftBuyerStats.topWalletsPerModel[data.card_number] || [];
         let assetsBuyerForThisModelDetailStr = '—';
         if (topListBuyer) {
-            const totalStr = `${assetsBuyerForThisModel.total}🃏 ${topListBuyer[0]['listed']}🛒`;
+            const totalStr = `${assetsBuyerForThisModel.total}🃏 ${topListBuyer[0]?.listed || 0}🛒`;
             const rarityStr = RARITY_ORDER
-                .filter(r => (topListBuyer[0][r] ?? 0) > 0)
-                .map(r => `${rarityShort[r]}${topListBuyer[0][r]}`)
+                .filter(r => (topListBuyer[0]?.r ?? 0) > 0)
+                .map(r => `${rarityShort[r]}${topListBuyer[0]?.r}`)
                 .join(' ');
             assetsBuyerForThisModelDetailStr = `${totalStr} ${rarityStr}`;
         }
@@ -174,9 +174,9 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
             value:
                 `🔗 [${to}](https://dolz.io/marketplace/profile/${to})\n` +
                 `Total Assets: ${totalAssetsBuyer}🃏 ${totalAssetsOnSaleBuyer}🛒\n` +
+                `Assets ${data.card_number}: ${assetsBuyerForThisModelDetailStr}\n` +
                 `Total DOLZ: ${formatNumber(dolzBalanceBuyer)}\n` +
-                `Total BabyDOLZ: ${formatNumber(babyDolzBalanceBuyer)}\n` +
-                `Assets ${data.card_number}: ${assetsBuyerForThisModelDetailStr}\n`,
+                `Total BabyDOLZ: ${formatNumber(babyDolzBalanceBuyer)}\n`,
         });
     }
 
