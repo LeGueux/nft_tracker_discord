@@ -94,10 +94,10 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
     if (topListSeller) {
         const totalStr = `${assetsSellerForThisModel.total}🃏 ${topListSeller[0]?.listed || 0}🛒`;
         const rarityStr = RARITY_ORDER
-            .filter(r => (topListSeller[0]?.r ?? 0) > 0)
-            .map(r => `${rarityShort[r]}${topListSeller[0]?.r}`)
+            .filter(r => (topListSeller[0]?.[r] ?? 0) > 0)
+            .map(r => `${rarityShort[r]}${topListSeller[0]?.[r]}`)
             .join(' ');
-        assetsSellerForThisModelDetailStr = `${totalStr} ${rarityStr}`;
+        assetsSellerForThisModelDetailStr = `${totalStr} ${assetsSellerForThisModel.total ? rarityStr : ''}`;
     }
 
     const sellerUsername = (sellerUsernameData[0]?.duUsername ?? '').split('#')[0];
@@ -163,10 +163,10 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
         if (topListBuyer) {
             const totalStr = `${assetsBuyerForThisModel.total}🃏 ${topListBuyer[0]?.listed || 0}🛒`;
             const rarityStr = RARITY_ORDER
-                .filter(r => (topListBuyer[0]?.r ?? 0) > 0)
-                .map(r => `${rarityShort[r]}${topListBuyer[0]?.r}`)
+                .filter(r => (topListBuyer[0]?.[r] ?? 0) > 0)
+                .map(r => `${rarityShort[r]}${topListBuyer[0]?.[r]}`)
                 .join(' ');
-            assetsBuyerForThisModelDetailStr = `${totalStr} ${rarityStr}`;
+            assetsBuyerForThisModelDetailStr = `${totalStr} ${assetsSellerForThisModel.total ? rarityStr : ''}`;
         }
 
         embed.addFields({
