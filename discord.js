@@ -188,16 +188,16 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [nftBBDRewardCalculatorEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
-                    // await thread.send({
-                    //     content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
-                    //     embeds: [embedSale],
-                    //     allowedMentions: {
-                    //         users: [
-                    //             process.env.FRANCK_DISCORD_USER_ID,
-                    //             process.env.NICO_DISCORD_USER_ID,
-                    //         ],
-                    //     },
-                    // });
+                    await thread.send({
+                        content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
+                        embeds: [embedSale],
+                        allowedMentions: {
+                            users: [
+                                process.env.FRANCK_DISCORD_USER_ID,
+                                process.env.NICO_DISCORD_USER_ID,
+                            ],
+                        },
+                    });
                     process.exit(0);
                 }
             } catch (e) {

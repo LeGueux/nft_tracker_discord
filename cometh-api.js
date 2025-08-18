@@ -47,6 +47,7 @@ export async function callComethApiForLastSales(discordClient) {
                     'sale',
                 );
                 const threadId = getThreadIdForToken('sale', seller);
+                console.log(`Thread ID pour la vente (sale): Token ID : ${tokenId}, Seller : ${seller}`);
                 const thread = await discordClient.channels.fetch(threadId);
                 if (thread?.isTextBased()) {
                     await thread.send({
@@ -149,6 +150,7 @@ export async function callComethApiForLastListings(discordClient) {
                     'offer',
                 );
                 const threadId = getThreadIdForToken('offer');
+                console.log(`Thread ID pour l'offre (offer): Token ID: ${tokenId}, Owner: ${item.asset.owner}`);
                 const thread = await discordClient.channels.fetch(threadId);
                 const contentTag = isForFranck
                     ? `<@${process.env.FRANCK_DISCORD_USER_ID}>`
