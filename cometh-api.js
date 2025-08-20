@@ -399,6 +399,34 @@ export async function searchCardsByCriterias({
     }
 }
 
+export async function getListingPriceByTokenId(tokenId) {
+    try {
+        console.log(`🔍 getListingPriceByTokenId lancé à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
+
+        const response = await fetch(`https://api.marketplace.cometh.io/v1/assets/${process.env.NFT_CONTRACT_ADDRESS}/${tokenId}`,
+            {
+                method: 'GET',
+                headers: {
+                    accept: 'application/json',
+                    'content-type': 'application/json',
+                    apikey: process.env.COMETH_API_KEY,
+                },
+            },
+        );
+
+        const data = await response.json();
+        console.log(`getListingPriceByTokenId - Token ID: ${tokenId}, Data:`, data);
+        return data;
+    } catch (error) {
+        console.error('❌ Erreur dans getListingPriceByTokenId:', error);
+        await sendStatusMessage(
+            discordClient,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans getListingPriceByTokenId - Rejection : \`${error}\``,
+        );
+        return {};
+    }
+}
+
 export async function getFloorPricesByModelAndRarity(pairs = []) {
     const floorPrices = {};
 

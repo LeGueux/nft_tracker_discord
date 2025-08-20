@@ -5,6 +5,7 @@ import {
     getBabyDolzBalance,
     getFloorPricesByModelAndRarity,
     getFloorPriceByModelAndRarity,
+    getListingPriceByTokenId,
 } from './cometh-api.js';
 import { getDolzBalance } from './alchemy-api.js';
 import { computeNftHoldersStats } from './command-nft-holders.js';
@@ -142,7 +143,7 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
             }
         );
     if (['sale', 'offer'].includes(type)) {
-        const [totalAssetsBuyer, totalAssetsOnSaleBuyer, babyDolzBalanceBuyer, dolzBalanceBuyer, buyerUsernameData, assetsBuyerForThisModel] = await Promise.all([
+        const [totalAssetsBuyer, totalAssetsOnSaleBuyer, babyDolzBalanceBuyer, dolzBalanceBuyer, buyerUsernameData, assetsBuyerForThisModel, assetDataForListingPrice] = await Promise.all([
             searchCardsByCriterias({
                 owner: to,
                 returnOnlyTotal: true,
@@ -162,8 +163,14 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
                 orderBy: 'PRICE',
                 direction: 'ASC',
             }),
+            getListingPriceByTokenId(tokenId),
         ]);
         const buyerUsername = (buyerUsernameData[0]?.duUsername ?? '').split('#')[0];
+
+        if (assetDataForListingPrice?.orderbookStats?.lowestListingPrice) {
+            const listingPrice = parseInt(weiToDolz(assetDataForListingPrice.orderbookStats.lowestListingPrice));
+            embed.addFields({ name: '💰 Listing Price:', value: `${getPriceStringFormatted(listingPrice)} DOLZ` });
+        }
 
         const nftBuyerStats = computeNftHoldersStats(assetsBuyerForThisModel, {
             topX: 1,
