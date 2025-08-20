@@ -57,6 +57,7 @@ export function getContentTagsDependsOnNFT(data, price, type) {
     // Exemple DATA: https://cardsdata.dolz.io/jsons/51690.json
     const FRANCK = `<@${process.env.FRANCK_DISCORD_USER_ID}>`;
     const NICO = `<@${process.env.NICO_DISCORD_USER_ID}>`;
+    const BOB = `<@${process.env.BOB_DISCORD_USER_ID}>`;
 
     const isListing = type === 'listing';
     const isSale = type === 'sale';
@@ -74,20 +75,18 @@ export function getContentTagsDependsOnNFT(data, price, type) {
         // Listing | S6                                   | Price <= 2000 | Rare
         // Listing | S7                                   | Price <= 1000
         // Listing | S7                                   | Price <= 2000 | Rare
+        // Listing | S6 Octokuro     g0065                | Price <= 6000 | Limited, Rare
+        // Listing | S7 Emiri Momota g0125                | Price <= 4500 | Limited, Rare
         if (price <= 800 ||
             (isEpic && price <= 6000) ||
             (data.season === '6' && (price <= 1000 || (isRare && price <= 2000))) ||
-            (data.season === '7' && (price <= 1000 || (isRare && price <= 2000)))
+            (data.season === '7' && (price <= 1000 || (isRare && price <= 2000))) ||
+            (['g0065', 'g0125'].includes(data.card_number) && price <= 6000 && isRareOrLimited)
         ) {
             return FRANCK;
         }
     }
     // FRANCK ONLY
-    // Listing + Sale | S6 Octokuro     g0065             | Price <= 6000 | Limited, Rare
-    // Listing + Sale | S7 Emiri Momota g0125             | Price <= 4500 | Limited, Rare
-    if (['g0065', 'g0125'].includes(data.card_number) && price <= 6000 && isRareOrLimited) {
-        return FRANCK;
-    }
     return '';
 }
 

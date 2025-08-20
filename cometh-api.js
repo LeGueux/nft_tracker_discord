@@ -57,6 +57,7 @@ export async function callComethApiForLastSales(discordClient) {
                             users: [
                                 process.env.FRANCK_DISCORD_USER_ID,
                                 process.env.NICO_DISCORD_USER_ID,
+                                process.env.BOB_DISCORD_USER_ID,
                             ],
                         },
                     });
@@ -121,6 +122,7 @@ export async function callComethApiForLastListings(discordClient) {
                             users: [
                                 process.env.FRANCK_DISCORD_USER_ID,
                                 process.env.NICO_DISCORD_USER_ID,
+                                process.env.BOB_DISCORD_USER_ID,
                             ],
                         },
                     });
@@ -132,11 +134,19 @@ export async function callComethApiForLastListings(discordClient) {
                     process.env.FRANCK_ADDRESS_2.toLowerCase(),
                     process.env.NICO_ADDRESS_1.toLowerCase(),
                     process.env.NICO_ADDRESS_2.toLowerCase(),
+                    process.env.BOB_ADDRESS_1.toLowerCase(),
                 ].includes(item.asset?.owner.toLowerCase())
             ) {
                 const isForFranck = [
                     process.env.FRANCK_ADDRESS_1.toLowerCase(),
                     process.env.FRANCK_ADDRESS_2.toLowerCase(),
+                ].includes(item.asset.owner.toLowerCase());
+                const isForNico = [
+                    process.env.NICO_ADDRESS_1.toLowerCase(),
+                    process.env.NICO_ADDRESS_2.toLowerCase(),
+                ].includes(item.asset.owner.toLowerCase());
+                const isForBob = [
+                    process.env.BOB_ADDRESS_1.toLowerCase(),
                 ].includes(item.asset.owner.toLowerCase());
                 const tokenId = item.tokenId;
                 const data = await getNFTData(tokenId);
@@ -152,9 +162,12 @@ export async function callComethApiForLastListings(discordClient) {
                 const threadId = getThreadIdForToken('offer');
                 console.log(`Thread ID pour l'offre (offer): Token ID: ${tokenId}, Owner: ${item.asset.owner}`);
                 const thread = await discordClient.channels.fetch(threadId);
-                const contentTag = isForFranck
-                    ? `<@${process.env.FRANCK_DISCORD_USER_ID}>`
-                    : `<@${process.env.NICO_DISCORD_USER_ID}>`;
+                let contentTag = `<@${process.env.FRANCK_DISCORD_USER_ID}>`;
+                if (isForNico) {
+                    contentTag = `<@${process.env.NICO_DISCORD_USER_ID}>`;
+                } else if (isForBob) {
+                    contentTag = `<@${process.env.BOB_DISCORD_USER_ID}>`;
+                }
                 if (thread?.isTextBased()) {
                     await thread.send({
                         content: contentTag,
@@ -163,6 +176,7 @@ export async function callComethApiForLastListings(discordClient) {
                             users: [
                                 process.env.FRANCK_DISCORD_USER_ID,
                                 process.env.NICO_DISCORD_USER_ID,
+                                process.env.BOB_DISCORD_USER_ID,
                             ],
                         },
                     });

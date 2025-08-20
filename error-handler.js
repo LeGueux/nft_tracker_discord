@@ -10,6 +10,7 @@ export async function sendStatusMessage(discordClient, content) {
                     users: [
                         process.env.FRANCK_DISCORD_USER_ID,
                         process.env.NICO_DISCORD_USER_ID,
+                        process.env.BOB_DISCORD_USER_ID,
                     ],
                 },
             });

@@ -111,6 +111,7 @@ export function analyzeListingsFragility(data, snipeOnly = false) {
             [process.env.FRANCK_ADDRESS_2.toLowerCase()]: '-F2',
             [process.env.NICO_ADDRESS_1.toLowerCase()]: '-N1',
             [process.env.NICO_ADDRESS_2.toLowerCase()]: '-N2',
+            [process.env.BOB_ADDRESS_1.toLowerCase()]: '-B1',
         };
 
         const suffix = ownerMap[asset?.owner?.toLowerCase()];
