@@ -41,7 +41,7 @@ function buildSeasonButtons(suffix, currentSeason, includeAllRecap = true, inclu
         // All Season Snipe ONLY Buttons ID=110
         const buttonAllSeasonsOnly = new ButtonBuilder()
             .setCustomId(`select_season_110_${suffix}`)
-            .setLabel(`S1-S7`)
+            .setLabel(`S1-S8`)
             .setStyle(110 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
 
         if (currentRow.components.length === 5) {
@@ -51,7 +51,7 @@ function buildSeasonButtons(suffix, currentSeason, includeAllRecap = true, inclu
         currentRow.addComponents(buttonAllSeasonsOnly);
     }
 
-    for (let i = 1; i <= 7; i++) {
+    for (let i = 1; i <= 8; i++) {
         const button = new ButtonBuilder()
             .setCustomId(`select_season_${i}_${suffix}`)
             .setLabel(`S${i}`)
@@ -147,24 +147,25 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbed5 = await handleSnipeForSeason(5);
                 // const snipeEmbed6 = await handleSnipeForSeason(6);
                 // const snipeEmbed7 = await handleSnipeForSeason(7);
+                // const snipeEmbed8 = await handleSnipeForSeason(8);
                 // const snipeEmbedAll = await handleSnipeForSeason(100);
                 // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
                 // const nftHoldersEmbed = await handleNftHoldersForSeason(6);
                 // const nftTrackingEmbed = await handleNftTrackingForModel('g0127');
-                // const tokenId = '51618';  // Limited
+                // const tokenId = '51623';  // Limited
                 // const tokenId = '51520';  // Rare
                 // const tokenId = '51495';  // Epic
                 // const tokenId = '51490';  // Legendary
                 // const data = await getNFTData(tokenId);
                 // const embedSale = await buildSaleListingNFTEmbed(
                 //     data,
-                //     process.env.NICO_ADDRESS_1,
                 //     process.env.FRANCK_ADDRESS_1,
-                //     100,
+                //     process.env.NICO_ADDRESS_1,
+                //     1000,
                 //     tokenId,
-                //     'sale',
+                //     'offer',
                 // );
                 // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1);
                 // const nftBBDRewardCalculatorEmbed = await handleGetBBDRewardCalculatorForModel('g0065');
@@ -180,6 +181,7 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbed5] });
                     // await thread.send({ embeds: [snipeEmbed6] });
                     // await thread.send({ embeds: [snipeEmbed7] });
+                    // await thread.send({ embeds: [snipeEmbed8] });
                     // await thread.send({ embeds: [snipeEmbedAll] });
                     // await thread.send({ embeds: [snipeEmbedAllSeasons] });
                     // await thread.send({ embeds: [snipeEmbedSE] });
@@ -190,17 +192,17 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [nftBBDRewardCalculatorEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
-                    await thread.send({
-                        content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
-                        embeds: [embedSale],
-                        allowedMentions: {
-                            users: [
-                                process.env.FRANCK_DISCORD_USER_ID,
-                                process.env.NICO_DISCORD_USER_ID,
-                                process.env.BOB_DISCORD_USER_ID,
-                            ],
-                        },
-                    });
+                    // await thread.send({
+                    //     content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
+                    //     embeds: [embedSale],
+                    //     allowedMentions: {
+                    //         users: [
+                    //             process.env.FRANCK_DISCORD_USER_ID,
+                    //             process.env.NICO_DISCORD_USER_ID,
+                    //             process.env.BOB_DISCORD_USER_ID,
+                    //         ],
+                    //     },
+                    // });
                     process.exit(0);
                 }
             } catch (e) {

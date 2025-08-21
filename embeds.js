@@ -50,6 +50,9 @@ function getPrefixNameEmojiBySeason(season) {
         '5': '5️⃣',
         '6': '6️⃣',
         '7': '7️⃣',
+        '8': '8️⃣',
+        '9': '9️⃣',
+        '10': '🔟',
     };
 
     return emojiMap[season] || '🃏';
@@ -558,7 +561,7 @@ export async function buildWalletDataEmbed(from) {
     }
 
     const displayOrder = [
-        '1', '2', '3', '4', '5', '6', '7', 'Off-Season', 'Special Edition'
+        '1', '2', '3', '4', '5', '6', '7', '8', 'Off-Season', 'Special Edition'
     ];
     const seasonSummaries = [];
 

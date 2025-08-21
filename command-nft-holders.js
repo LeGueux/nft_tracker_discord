@@ -5,7 +5,7 @@ import { IS_TEST_MODE, RARITY_ORDER } from './config.js';
 const rarityOrder = ['Not Revealed', 'Limited', 'Rare', 'Epic', 'Legendary'];
 
 export async function handleNftHoldersForSeason(season) {
-    if (season < 1 || season > 7) return null;
+    if (season < 1 || season > 8) return null;
     let dataCardsBySeason = null;
 
     console.log(`handleNftHoldersForSeason for Season ${season}`);

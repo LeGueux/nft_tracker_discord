@@ -11,11 +11,11 @@ export async function handleSnipeForSeason(season) {
 
     switch (season) {
         case 100:
-            seasonList = ['Off-Season', 'Special Edition', '1', '2', '3', '4', '5', '6', '7'];
+            seasonList = ['Off-Season', 'Special Edition', '1', '2', '3', '4', '5', '6', '7', '8'];
             isSnipeOnly = true;
             break;
         case 110:
-            seasonList = ['1', '2', '3', '4', '5', '6', '7'];
+            seasonList = ['1', '2', '3', '4', '5', '6', '7', '8'];
             isSnipeOnly = true;
             break;
         case 120:
