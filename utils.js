@@ -58,6 +58,7 @@ export function getContentTagsDependsOnNFT(data, price, type) {
     const FRANCK = `<@${process.env.FRANCK_DISCORD_USER_ID}>`;
     const NICO = `<@${process.env.NICO_DISCORD_USER_ID}>`;
     const BOB = `<@${process.env.BOB_DISCORD_USER_ID}>`;
+    const COCH = `<@${process.env.COCH_DISCORD_USER_ID}>`;
 
     const isListing = type === 'listing';
     const isSale = type === 'sale';

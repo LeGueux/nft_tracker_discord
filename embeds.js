@@ -124,6 +124,11 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
     ].includes(from.toLowerCase())) {
         const tpInDolz = price * parseFloat(process.env.BOB_TP_RATIO) / 100;
         priceString += `\nTP ${process.env.BOB_TP_RATIO}%: ${getPriceStringFormatted(tpInDolz)}\n`;
+    } else if ([
+        process.env.COCH_ADDRESS_1.toLowerCase(),
+    ].includes(from.toLowerCase())) {
+        const tpInDolz = price * parseFloat(process.env.COCH_TP_RATIO) / 100;
+        priceString += `\nTP ${process.env.COCH_TP_RATIO}%: ${getPriceStringFormatted(tpInDolz)}\n`;
     }
 
     const embed = new EmbedBuilder()

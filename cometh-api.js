@@ -58,6 +58,7 @@ export async function callComethApiForLastSales(discordClient) {
                                 process.env.FRANCK_DISCORD_USER_ID,
                                 process.env.NICO_DISCORD_USER_ID,
                                 process.env.BOB_DISCORD_USER_ID,
+                                process.env.COCH_DISCORD_USER_ID,
                             ],
                         },
                     });
@@ -123,6 +124,7 @@ export async function callComethApiForLastListings(discordClient) {
                                 process.env.FRANCK_DISCORD_USER_ID,
                                 process.env.NICO_DISCORD_USER_ID,
                                 process.env.BOB_DISCORD_USER_ID,
+                                process.env.COCH_DISCORD_USER_ID,
                             ],
                         },
                     });
@@ -135,6 +137,7 @@ export async function callComethApiForLastListings(discordClient) {
                     process.env.NICO_ADDRESS_1.toLowerCase(),
                     process.env.NICO_ADDRESS_2.toLowerCase(),
                     process.env.BOB_ADDRESS_1.toLowerCase(),
+                    process.env.COCH_ADDRESS_1.toLowerCase(),
                 ].includes(item.asset?.owner.toLowerCase())
             ) {
                 const isForFranck = [
@@ -147,6 +150,9 @@ export async function callComethApiForLastListings(discordClient) {
                 ].includes(item.asset.owner.toLowerCase());
                 const isForBob = [
                     process.env.BOB_ADDRESS_1.toLowerCase(),
+                ].includes(item.asset.owner.toLowerCase());
+                const isForCoch = [
+                    process.env.COCH_ADDRESS_1.toLowerCase(),
                 ].includes(item.asset.owner.toLowerCase());
                 const tokenId = item.tokenId;
                 const data = await getNFTData(tokenId);
@@ -167,6 +173,8 @@ export async function callComethApiForLastListings(discordClient) {
                     contentTag = `<@${process.env.NICO_DISCORD_USER_ID}>`;
                 } else if (isForBob) {
                     contentTag = `<@${process.env.BOB_DISCORD_USER_ID}>`;
+                } else if (isForCoch) {
+                    contentTag = `<@${process.env.COCH_DISCORD_USER_ID}>`;
                 }
                 if (thread?.isTextBased()) {
                     await thread.send({

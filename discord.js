@@ -112,6 +112,8 @@ export function getThreadIdForToken(type, from) {
             return process.env.THREAD_ID_NICO_2;
         } else if (from.toLowerCase() === process.env.BOB_ADDRESS_1.toLowerCase()) {
             return process.env.THREAD_ID_BOB;
+        } else if (from.toLowerCase() === process.env.COCH_ADDRESS_1.toLowerCase()) {
+            return process.env.THREAD_ID_COCH;
         }
     }
 
@@ -200,6 +202,7 @@ export function eventBotReady(discordClient) {
                     //             process.env.FRANCK_DISCORD_USER_ID,
                     //             process.env.NICO_DISCORD_USER_ID,
                     //             process.env.BOB_DISCORD_USER_ID,
+                    //             process.env.COCH_DISCORD_USER_ID,
                     //         ],
                     //     },
                     // });
