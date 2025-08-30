@@ -14,7 +14,6 @@ import { handleSnipeForSeason } from './command-snipe.js';
 import { handleNftHoldersForSeason } from './command-nft-holders.js';
 import { handleNftTrackingForModel } from './command-nft-tracking.js';
 import { handleGetDataForWallet } from './command-wallet-data.js';
-import { handleGetBBDRewardCalculatorForModel } from './command-nft-bbd-reward-calculator.js';
 import { handleGetChartSalesVolume, handleGetChartSalesVolumeBywallet } from './command-chart-sales-volume.js';
 
 export const discordClient = new Client({
@@ -155,7 +154,7 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
                 // const nftHoldersEmbed = await handleNftHoldersForSeason(6);
-                // const nftTrackingEmbed = await handleNftTrackingForModel('g0127');
+                const nftTrackingEmbed = await handleNftTrackingForModel('g0124');
                 // const tokenId = '51623';  // Limited
                 // const tokenId = '51520';  // Rare
                 // const tokenId = '51495';  // Epic
@@ -170,7 +169,6 @@ export function eventBotReady(discordClient) {
                 //     'sale',
                 // );
                 // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1);
-                // const nftBBDRewardCalculatorEmbed = await handleGetBBDRewardCalculatorForModel('g0065');
                 // const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
@@ -189,9 +187,8 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
                     // await thread.send({ embeds: [nftHoldersEmbed] });
-                    // await thread.send({ embeds: [nftTrackingEmbed] });
+                    await thread.send({ embeds: [nftTrackingEmbed] });
                     // await thread.send({ embeds: [walletFranckEmbed] });
-                    // await thread.send({ embeds: [nftBBDRewardCalculatorEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
                     // await thread.send({
@@ -261,10 +258,6 @@ export function eventBotReady(discordClient) {
             } else if (interaction.commandName === 'get_wallet_data') {
                 const address = interaction.options.getString('address');
                 const embed = await handleGetDataForWallet(address);
-                await interaction.editReply({ embeds: [embed] });
-            } else if (interaction.commandName === 'nft_bbd_reward_calculator') {
-                const modelId = interaction.options.getString('modelid');
-                const embed = await handleGetBBDRewardCalculatorForModel(modelId);
                 await interaction.editReply({ embeds: [embed] });
             } else if (interaction.commandName === 'get_chart_sales_volume') {
                 const embedWithChart = await handleGetChartSalesVolume(false);

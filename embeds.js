@@ -407,7 +407,7 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
         'Not Revealed': '❔ NR'
     };
 
-    const embed = new EmbedBuilder()
+    let embed = new EmbedBuilder()
         .setTitle(`<:snipe:1310218808123723829> Tracking card ${modelId}`)
         .setColor(0x00ffcc)
         .setTimestamp();
@@ -477,6 +477,9 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
                 });
             }
         }
+
+        // Ajout du calculateur de BBD Reward
+        embed = buildNftBBDRewardCalculatorEmbedField(modelId, embed);
 
         // Sécurité : éviter débordement Discord
         console.log(`Embed length: ${embed.length} characters`);
@@ -628,17 +631,20 @@ export async function buildWalletDataEmbed(from) {
     return embed;
 }
 
-export async function buildNftBBDRewardCalculatorEmbed(modelId, data) {
-    const embed = new EmbedBuilder()
-        .setTitle(`<:snipe:1310218808123723829> BBD Calculator card ${modelId}`)
-        .setColor(0x00ffcc)
-        .setTimestamp();
+export async function buildNftBBDRewardCalculatorEmbedField(modelId, embed) {
+    console.log(`buildNftBBDRewardCalculatorEmbedField for modelId ${modelId}`);
+    const dataCard = await searchCardsByCriterias({
+        attributes: [{ 'Card Number': [modelId] }],
+        onSaleOnly: true,
+        limit: 2000,
+    });
+    console.log(`buildNftBBDRewardCalculatorEmbedField for modelId ${modelId} - Cards found: ${dataCard.total}`);
 
     try {
         // Étape 1 : préparer toutes les lignes dans un tableau temporaire
         const assetStats = [];
 
-        for (const asset of data) {
+        for (const asset of dataCard.assets) {
             const priceWei = asset.orderbookStats?.lowestListingPrice;
             const priceDolz = parseInt(weiToDolz(priceWei));
             const nftData = await getNFTData(asset.tokenId);

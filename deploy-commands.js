@@ -45,7 +45,7 @@ const commands = [
         .toJSON(),
     new SlashCommandBuilder()
         .setName('nft_tracking')
-        .setDescription('Affiche les listings et les holders pour une carte donnée (ex: g0100)')
+        .setDescription('Affiche les listings, les holders et le ratio BBD/DOLZ pour une carte donnée (ex: g0100)')
         .addStringOption(option =>
             option.setName('modelid')
                 .setDescription('L\'identifiant du modèle de la carte (ex: g0100)')
@@ -58,15 +58,6 @@ const commands = [
         .addStringOption(option =>
             option.setName('address')
                 .setDescription('L\'adresse du wallet (ex: 0x1234567890abcdef1234567890abcdef12345678)')
-                .setRequired(true)
-        )
-        .toJSON(),
-    new SlashCommandBuilder()
-        .setName('nft_bbd_reward_calculator')
-        .setDescription('Affiche le ratio BBD/DOLZ pour les cartes listées d\'un modèle donné (ex: g0100)')
-        .addStringOption(option =>
-            option.setName('modelid')
-                .setDescription('L\'identifiant du modèle de la carte (ex: g0100)')
                 .setRequired(true)
         )
         .toJSON(),
