@@ -76,15 +76,16 @@ export function getContentTagsDependsOnNFT(data, price, type) {
         // Listing | S6                                     | Price <= 2000 | Rare
         // Listing | S7                                     | Price <= 1000
         // Listing | S7                                     | Price <= 2000 | Rare
-        // Listing | S6 Octokuro       g0065                | Price <= 6000 | Limited, Rare
-        // Listing | S7 Emiri Momota   g0125                | Price <= 4500 | Limited, Rare
-        // Listing | S8 Alexis Crystal g0124                | Price <= 1600
+        // Listing | S6 Octokuro       g0065                | Price <= 5000 | Limited, Rare
+        // Listing | S7 Emiri Momota   g0125                | Price <= 4000 | Limited, Rare
+        // Listing | S8 Alexis Crystal g0124                | Price <= 1500
         if (price <= 800 ||
             (isEpic && price <= 6000) ||
             (data.season === '6' && (price <= 1000 || (isRare && price <= 2000))) ||
             (data.season === '7' && (price <= 1000 || (isRare && price <= 2000))) ||
-            (['g0065', 'g0125'].includes(data.card_number) && price <= 6000 && isRareOrLimited) ||
-            (['g0124'].includes(data.card_number) && price <= 1600)
+            (['g0065'].includes(data.card_number) && price <= 5000) ||
+            (['g0125'].includes(data.card_number) && price <= 4000) ||
+            (['g0124'].includes(data.card_number) && price <= 1500)
         ) {
             return FRANCK;
         }
