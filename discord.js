@@ -253,9 +253,9 @@ export function eventBotReady(discordClient) {
                 });
             } else if (interaction.commandName === 'nft_tracking') {
                 const modelId = interaction.options.getString('modelid');
-                const nbHolders = interaction.options.getInteger('nb_holders');
-                const withAddress = interaction.options.getString('with_address');
-                const embed = await handleNftTrackingForModel(modelId, parseInt(nbHolders, 15), withAddress === 'true');
+                const nbHolders = interaction.options.getInteger('nb_holders') ?? 15;
+                const withAddress = interaction.options.getBoolean('with_address') ?? false;
+                const embed = await handleNftTrackingForModel(modelId, nbHolders, withAddress);
                 await interaction.editReply({ embeds: [embed] });
             } else if (interaction.commandName === 'get_wallet_data') {
                 const address = interaction.options.getString('address');
