@@ -253,7 +253,7 @@ export function eventBotReady(discordClient) {
                 });
             } else if (interaction.commandName === 'nft_tracking') {
                 const modelId = interaction.options.getString('modelid');
-                const nbHolders = interaction.options.getString('nb_holders');
+                const nbHolders = interaction.options.getInteger('nb_holders');
                 const withAddress = interaction.options.getString('with_address');
                 const embed = await handleNftTrackingForModel(modelId, parseInt(nbHolders, 15), withAddress === 'true');
                 await interaction.editReply({ embeds: [embed] });
