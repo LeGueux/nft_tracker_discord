@@ -2,14 +2,15 @@ import { searchCardsByCriterias, getDolzUsername } from './cometh-api.js';
 import { computeNftHoldersStats } from './command-nft-holders.js';
 import { analyzeListingsFragility } from './command-snipe.js';
 import { buildNftTrackingEmbed } from './embeds.js';
+import { getNFTData } from './utils.js';
 import { IS_TEST_MODE, RARITY_ORDER } from './config.js';
 import fs from 'fs/promises';
 import path from 'path';
 
-export async function handleNftTrackingForModel(modelId) {
+export async function handleNftTrackingForModel(modelId, nbHolders = 15, withAddress = false) {
     let dataCard = null;
 
-    console.log(`handleNftTrackingForModel for modelId ${modelId}`);
+    console.log(`handleNftTrackingForModel for modelId ${modelId} nbHolders: ${nbHolders} withAddress: ${withAddress}`);
     // In case API is too slow or down, we can use a local mock file
     // const dataRaw = await fs.readFile(path.resolve('./mocks/card_' + modelId + '.json'), 'utf-8');
     // dataCard = JSON.parse(dataRaw);
@@ -20,7 +21,7 @@ export async function handleNftTrackingForModel(modelId) {
     console.log(`handleNftTrackingForModel for modelId ${modelId} - Cards found: ${dataCard.total}`);
 
     const nftHoldersStats = computeNftHoldersStats(dataCard, {
-        topX: 15,
+        topX: nbHolders,
         minCardsPerModel: 1,
     }, false);
 
@@ -66,6 +67,8 @@ export async function handleNftTrackingForModel(modelId) {
             };
         }));
     }
+    const dataFirstAssetOfCards = await getNFTData(dataCard.assets[0]?.tokenId);
+    const isUnrevealed = dataFirstAssetOfCards?.rarity === 'Not revealed';
 
-    return await buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId);
+    return await buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId, isUnrevealed, withAddress);
 }

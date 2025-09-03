@@ -51,6 +51,14 @@ const commands = [
                 .setDescription('L\'identifiant du modèle de la carte (ex: g0100)')
                 .setRequired(true)
         )
+        .addIntegerOption(option =>
+            option.setName('nb_holders')
+                .setDescription('Le nombre de holders à afficher (défaut: 15)')
+        )
+        .addBooleanOption(option =>
+            option.setName('with_address')
+                .setDescription('Affiche les adresses des holders (défaut: false)')
+        )
         .toJSON(),
     new SlashCommandBuilder()
         .setName('get_wallet_data')

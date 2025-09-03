@@ -154,7 +154,7 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
                 // const nftHoldersEmbed = await handleNftHoldersForSeason(6);
-                const nftTrackingEmbed = await handleNftTrackingForModel('g0124');
+                const nftTrackingEmbed = await handleNftTrackingForModel('g0143', 30, true);
                 // const tokenId = '51623';  // Limited
                 // const tokenId = '51520';  // Rare
                 // const tokenId = '51495';  // Epic
@@ -253,7 +253,9 @@ export function eventBotReady(discordClient) {
                 });
             } else if (interaction.commandName === 'nft_tracking') {
                 const modelId = interaction.options.getString('modelid');
-                const embed = await handleNftTrackingForModel(modelId);
+                const nbHolders = interaction.options.getString('nb_holders');
+                const withAddress = interaction.options.getString('with_address');
+                const embed = await handleNftTrackingForModel(modelId, parseInt(nbHolders, 15), withAddress === 'true');
                 await interaction.editReply({ embeds: [embed] });
             } else if (interaction.commandName === 'get_wallet_data') {
                 const address = interaction.options.getString('address');

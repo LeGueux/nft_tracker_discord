@@ -391,7 +391,7 @@ function chunkText(text, maxLength = 1000) {
     return chunks;
 }
 
-export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId) {
+export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId, isUnrevealed = false, withAddress = false) {
     const {
         modelNames,
         cardsPerModel,
@@ -466,6 +466,9 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
                     .join(' ');
 
                 holdersLines.push(`${medal.padEnd(4)} ${holderUsername.padEnd(13)} ${totalStr.padStart(8)} ${percentStr} ${rarityStr}`);
+                if (withAddress) {
+                    holdersLines.push(`${holder.wallet}\n`);
+                }
             }
 
             const chunks = chunkText(holdersLines.join('\n'));
@@ -478,8 +481,10 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
             }
         }
 
-        // Ajout du calculateur de BBD Reward
-        embed = buildNftBBDRewardCalculatorEmbedField(modelId, embed);
+        // Ajout du calculateur de BBD Reward si revealed card
+        if (!isUnrevealed) {
+            embed = buildNftBBDRewardCalculatorEmbedField(modelId, embed);
+        }
 
         // Sécurité : éviter débordement Discord
         console.log(`Embed length: ${embed.length} characters`);
