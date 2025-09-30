@@ -391,7 +391,7 @@ function chunkText(text, maxLength = 1000) {
     return chunks;
 }
 
-export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId, isUnrevealed = false, withAddress = false) {
+export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId, isUnrevealed = false, nbHolders = 15, withAddress = false) {
     const {
         modelNames,
         cardsPerModel,
@@ -446,7 +446,20 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
             const nbCards = cardsPerModel[modelId] || 0;
             const avg = nbWallets > 0 ? (nbCards / nbWallets).toFixed(1) : '0.0';
 
+            // Comptage du nombre de wallets distincts par rareté
+            const rarityWalletsCount = {};
+            for (const rarity of Object.keys(rarityEmojis)) {
+                rarityWalletsCount[rarity] = topList.filter(holder => (holder[rarity] ?? 0) > 0).length;
+            }
+
             holdersLines.push(`📦 ${nbCards} cartes | 🪪 ${nbWallets} wallets | 📊 Moy: ${avg}`);
+            holdersLines.push(
+                Object.entries(rarityWalletsCount)
+                    .filter(([r, count]) => count > 0)
+                    .map(([r, count]) => `${rarityEmojis[r]}: ${count} wallet${count > 1 ? 's' : ''}`)
+                    .join(' | ')
+            );
+
             holdersLines.push('');
             holdersLines.push(
                 `Rank Name          | 📦  | %     | Détail`,
@@ -454,6 +467,8 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
             );
 
             for (const [i, holder] of topList.entries()) {
+                if (i >= nbHolders) break; // 🔥 stoppe après nbHolders lignes
+
                 const holderUsernameData = await getDolzUsername(holder.wallet);
                 const holderUsername = (holderUsernameData[0]?.duUsername ?? '').split('#')[0];
 

@@ -21,7 +21,7 @@ export async function handleNftTrackingForModel(modelId, nbHolders = 15, withAdd
     console.log(`handleNftTrackingForModel for modelId ${modelId} - Cards found: ${dataCard.total}`);
 
     const nftHoldersStats = computeNftHoldersStats(dataCard, {
-        topX: nbHolders,
+        topX: 10000,
         minCardsPerModel: 1,
     }, false);
 
@@ -70,5 +70,5 @@ export async function handleNftTrackingForModel(modelId, nbHolders = 15, withAdd
     const dataFirstAssetOfCards = await getNFTData(dataCard.assets[0]?.tokenId);
     const isUnrevealed = dataFirstAssetOfCards?.rarity === 'Not revealed';
 
-    return await buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId, isUnrevealed, withAddress);
+    return await buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId, isUnrevealed, nbHolders, withAddress);
 }
