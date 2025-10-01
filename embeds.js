@@ -19,6 +19,14 @@ import { IS_TEST_MODE, RARITY_ORDER, NFT_LIST_BY_SEASON } from './config.js';
 
 const formatNumber = (num) => new Intl.NumberFormat('fr-FR').format(num);
 
+const rarityShort = {
+    'Limited': `🟢L`,
+    'Rare': '🟡R',
+    'Epic': '💎E',
+    'Legendary': '👑LG',
+    'Not Revealed': '❔ NR'
+};
+
 function getPriceStringFormatted(price) {
     const dolzPrice = parseFloat(process.env.DOLZ_PRICE ?? '0');
     const priceInDollars = price * dolzPrice;
@@ -88,13 +96,6 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
     }, false);
     const topListSeller = nftSellerStats.topWalletsPerModel[data.card_number] || [];
     let assetsSellerForThisModelDetailStr = '—';
-    const rarityShort = {
-        'Limited': `🟢L`,
-        'Rare': '🟡R',
-        'Epic': '💎E',
-        'Legendary': '👑LG',
-        'Not Revealed': '❔ NR'
-    };
     if (topListSeller) {
         const totalStr = `${assetsSellerForThisModel.total}🃏 ${topListSeller[0]?.listed || 0}🛒`;
         const rarityStr = RARITY_ORDER
@@ -299,14 +300,6 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
         numberOfFullCollectors,
         walletsPerModel,
     } = analysisResult;
-
-    const rarityShort = {
-        'Limited': `🟢L`,
-        'Rare': '🟡R',
-        'Epic': '💎E',
-        'Legendary': '👑LG',
-        'Not Revealed': '❔ NR'
-    };
 
     const embed = new EmbedBuilder()
         .setTitle(`🐋 Top Whales Saison ${season}`)
@@ -522,7 +515,11 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
     }
 }
 
-export async function buildWalletDataEmbed(from) {
+export async function buildWalletDataEmbed(from, withFullDetails = false) {
+    const embed = new EmbedBuilder()
+        .setURL(`https://dolz.io/marketplace/profile/${from}`)
+        .setTimestamp();
+
     const [allAssetsWallet, totalAssetsOnSaleWallet, babyDolzBalanceWallet, dolzBalanceWallet, usernameData] = await Promise.all([
         searchCardsByCriterias({
             owner: from,
@@ -547,6 +544,8 @@ export async function buildWalletDataEmbed(from) {
         const animationUrl = asset.metadata?.animation_url;
         if (!animationUrl) continue;
         const match = animationUrl.match(/\/(g\d+)\/\d+\/(Limited|Rare|Epic|Legendary)\//);
+        if (!match) continue;
+
         const modelId = match[1];
         const rarity = match[2];
 
@@ -555,14 +554,11 @@ export async function buildWalletDataEmbed(from) {
             grouped[modelId][rarity] ??= 0;
             grouped[modelId][rarity] += 1;
         } else {
-            if (IS_TEST_MODE) {
-                console.log(`Ignoring asset with modelId ${modelId} and rarity ${rarity}`);
-            }
             others.push({ modelId, rarity });
         }
     }
-    const uniqueModelRarityPairs = [];
 
+    const uniqueModelRarityPairs = [];
     for (const modelId in grouped) {
         for (const rarity in grouped[modelId]) {
             uniqueModelRarityPairs.push({ modelId, rarity });
@@ -576,7 +572,6 @@ export async function buildWalletDataEmbed(from) {
     for (const modelId in grouped) {
         const rarityMap = grouped[modelId];
         for (const rarity of Object.keys(rarityMap)) {
-            uniqueModelRarityPairs.push({ modelId, rarity });
             const count = rarityMap[rarity];
             const floor = floorPrices[`${modelId}-${rarity}`] ?? 0;
             const value = count * floor;
@@ -588,65 +583,115 @@ export async function buildWalletDataEmbed(from) {
         }
     }
 
+    // --- Résumé global du wallet
+    embed.addFields([
+        {
+            name: `🙋‍♂️ Wallet: ${getWhaleEmoji(allAssetsWallet.total, dolzBalanceWallet)} ${username}`,
+            value:
+                `🔗 [${from}](https://dolz.io/marketplace/profile/${from})\n` +
+                `Total Assets: ${allAssetsWallet.total}🃏 ${totalAssetsOnSaleWallet}🛒\n` +
+                `Total DOLZ: ${formatNumber(dolzBalanceWallet)}\n` +
+                `Total BabyDOLZ: ${formatNumber(babyDolzBalanceWallet)}\n`,
+        },
+        {
+            name: '💰 Estimée en DOLZ (Rare/Limited évaluées)',
+            value: `${formatNumber(totalDolzEstimated)} DOLZ (au floor)\n` +
+                `📦 Epic/Legendary/Not Revealed ignorées : ${others.length} cartes`,
+        }
+    ]);
+
+    // --- Résumé par saison
     const displayOrder = [
         '1', '2', '3', '4', '5', '6', '7', '8', 'Off-Season', 'Special Edition'
     ];
-    const seasonSummaries = [];
 
     for (const season of displayOrder) {
         const models = groupedBySeason[season];
         if (!models?.length) continue;
 
-        if (IS_TEST_MODE) {
-            console.log(`📅 Saison ${season} :`);
-        }
-        const modelOrder = [...(NFT_LIST_BY_SEASON[season] ?? [])];
-
-        // Trier les modèles dans l’ordre du set (ou alphabetique pour Special Edition)
+        const modelOrder = NFT_LIST_BY_SEASON[season] ? [...NFT_LIST_BY_SEASON[season]] : [];
         models.sort((a, b) => {
             const iA = modelOrder.indexOf(a.modelId);
             const iB = modelOrder.indexOf(b.modelId);
             return iA !== -1 && iB !== -1 ? iA - iB : a.modelId.localeCompare(b.modelId);
         });
 
-        if (IS_TEST_MODE) {
-            for (const { modelId, count, rarity, floor, value } of models) {
-                console.log(`   🧾 ${modelId} (${rarity}) — ${count}×${floor} DOLZ = ${value} DOLZ`);
-            }
-        }
         let seasonTotal = 0;
         let seasonCount = 0;
-        for (const { count, value } of models) {
+        const detailsByModel = {};
+
+        for (const { modelId, count, rarity, floor, value } of models) {
             seasonTotal += value;
             seasonCount += count;
+
+            if (withFullDetails) {
+                if (!detailsByModel[modelId]) {
+                    detailsByModel[modelId] = [];
+                }
+                const rarityDisplay = rarityShort[rarity] || rarity;
+                detailsByModel[modelId].push({
+                    count,
+                    rarity: rarityDisplay,
+                    floor,
+                    value
+                });
+            }
         }
 
-        seasonSummaries.push(`🧾 S${season} — ${seasonCount} cartes, ${formatNumber(seasonTotal)} DOLZ`);
-    }
-
-    if (IS_TEST_MODE) {
-        console.log(`📊 Total estimé toutes saisons : ${totalDolzEstimated} DOLZ`);
-    }
-
-    const embed = new EmbedBuilder()
-        .setURL(`https://dolz.io/marketplace/profile/${from}`)
-        .setTimestamp()
-        .addFields([
-            {
-                name: `🙋‍♂️ Wallet: ${getWhaleEmoji(allAssetsWallet.total, dolzBalanceWallet)} ${username}`,
-                value:
-                    `🔗 [${from}](https://dolz.io/marketplace/profile/${from})\n` +
-                    `Total Assets: ${allAssetsWallet.total}🃏 ${totalAssetsOnSaleWallet}🛒\n` +
-                    `Total DOLZ: ${formatNumber(dolzBalanceWallet)}\n` +
-                    `Total BabyDOLZ: ${formatNumber(babyDolzBalanceWallet)}\n`,
-            },
-            {
-                name: '💰 Estimée en DOLZ (Rare/Limited évaluées)',
-                value: `${formatNumber(totalDolzEstimated)} DOLZ (au floor)\n` +
-                    `📦 Epic/Legendary/Not Revealed ignorées : ${others.length} cartes\n\n` +
-                    seasonSummaries.join('\n'),
+        const details = [];
+        if (withFullDetails) {
+            for (const modelId of Object.keys(detailsByModel).sort((a, b) => {
+                const iA = modelOrder.indexOf(a);
+                const iB = modelOrder.indexOf(b);
+                return iA !== -1 && iB !== -1 ? iA - iB : a.localeCompare(b);
+            })) {
+                const entries = detailsByModel[modelId];
+                if (entries.length === 1) {
+                    const { count, rarity, floor, value } = entries[0];
+                    details.push(
+                        `${modelId} ${count}x${rarity} @${formatNumber(floor)} = ${formatNumber(value)}`
+                    );
+                } else {
+                    const parts = entries.map(e => 
+                        `${e.count}x${e.rarity}@${formatNumber(e.floor)}`
+                    ).join(' + ');
+                    const totalValue = entries.reduce((sum, e) => sum + e.value, 0);
+                    details.push(
+                        `${modelId} ${parts} = ${formatNumber(totalValue)}`
+                    );
+                }
             }
-        ]);
+        }
+
+        // ✅ Complétude
+        let seasonCompleteness = "";
+        if (NFT_LIST_BY_SEASON[season]?.size) {
+            const expectedModels = NFT_LIST_BY_SEASON[season].size;
+            const ownedModels = new Set(models.map(m => m.modelId)).size;
+            const missing = expectedModels - ownedModels;
+
+            seasonCompleteness = missing === 0
+                ? "✅ Complète"
+                : `❌ ${missing} modèle${missing > 1 ? "s" : ""} manquant${missing > 1 ? "s" : ""}`;
+        }
+
+        // Ajout du champ résumé
+        embed.addFields({
+            name: `🧾 Saison ${season}`,
+            value: `${seasonCount} cartes, ${formatNumber(seasonTotal)} DOLZ\n${seasonCompleteness}`
+        });
+
+        // Ajout du champ détails si demandé
+        if (withFullDetails && details.length) {
+            const detailsText = details.join("\n");
+            for (let i = 0; i < detailsText.length; i += 1024) {
+                embed.addFields({
+                    name: `📋 Détails ${season.startsWith('S') ? season : 'S' + season}`,
+                    value: "```text\n" + detailsText.slice(i, i + 1024) + "\n```"
+                });
+            }
+        }
+    }
 
     return embed;
 }

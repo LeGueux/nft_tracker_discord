@@ -154,7 +154,7 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
                 // const nftHoldersEmbed = await handleNftHoldersForSeason(6);
-                const nftTrackingEmbed = await handleNftTrackingForModel('g0124', 15, false);
+                // const nftTrackingEmbed = await handleNftTrackingForModel('g0124', 15, false);
                 // const tokenId = '51623';  // Limited
                 // const tokenId = '51520';  // Rare
                 // const tokenId = '51495';  // Epic
@@ -168,7 +168,7 @@ export function eventBotReady(discordClient) {
                 //     tokenId,
                 //     'sale',
                 // );
-                // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1);
+                const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1, false);
                 // const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
@@ -187,8 +187,8 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
                     // await thread.send({ embeds: [nftHoldersEmbed] });
-                    await thread.send({ embeds: [nftTrackingEmbed] });
-                    // await thread.send({ embeds: [walletFranckEmbed] });
+                    // await thread.send({ embeds: [nftTrackingEmbed] });
+                    await thread.send({ embeds: [walletFranckEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
                     // await thread.send({
@@ -270,7 +270,7 @@ export function eventBotReady(discordClient) {
                 } else {
                     return interaction.reply({ content: '⚠️ Tu dois renseigner une adresse ou choisir une personne.', ephemeral: true });
                 }
-                const embed = await handleGetDataForWallet(walletAddress);
+                const embed = await handleGetDataForWallet(walletAddress, withFullDetails);
                 await interaction.editReply({ embeds: [embed] });
             } else if (interaction.commandName === 'get_chart_sales_volume') {
                 const embedWithChart = await handleGetChartSalesVolume(false);
