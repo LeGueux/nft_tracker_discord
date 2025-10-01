@@ -548,11 +548,15 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
 
         const modelId = match[1];
         const rarity = match[2];
+        const isListed = asset.orderbookStats?.lowestListingPrice != null;
 
         if (['Limited', 'Rare'].includes(rarity)) {
             grouped[modelId] ??= {};
-            grouped[modelId][rarity] ??= 0;
-            grouped[modelId][rarity] += 1;
+            grouped[modelId][rarity] ??= { count: 0, listed: 0 };
+            grouped[modelId][rarity].count += 1;
+            if (isListed) {
+                grouped[modelId][rarity].listed += 1;
+            }
         } else {
             others.push({ modelId, rarity });
         }
@@ -567,19 +571,19 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
 
     const floorPrices = await getFloorPricesByModelAndRarity(uniqueModelRarityPairs);
     let totalDolzEstimated = dolzBalanceWallet;
-    const groupedBySeason = {}; // { [season]: [ { modelId, count, rarity, floor, value } ] }
+    const groupedBySeason = {}; // { [season]: [ { modelId, count, listed, rarity, floor, value } ] }
 
     for (const modelId in grouped) {
         const rarityMap = grouped[modelId];
         for (const rarity of Object.keys(rarityMap)) {
-            const count = rarityMap[rarity];
+            const { count, listed } = rarityMap[rarity];
             const floor = floorPrices[`${modelId}-${rarity}`] ?? 0;
             const value = count * floor;
             totalDolzEstimated += value;
 
             const season = getNFTSeasonByCardNumber(modelId);
             groupedBySeason[season] ??= [];
-            groupedBySeason[season].push({ modelId, count, rarity, floor, value });
+            groupedBySeason[season].push({ modelId, count, listed, rarity, floor, value });
         }
     }
 
@@ -620,7 +624,7 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
         let seasonCount = 0;
         const detailsByModel = {};
 
-        for (const { modelId, count, rarity, floor, value } of models) {
+        for (const { modelId, count, listed, rarity, floor, value } of models) {
             seasonTotal += value;
             seasonCount += count;
 
@@ -631,12 +635,16 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
                 const rarityDisplay = rarityShort[rarity] || rarity;
                 detailsByModel[modelId].push({
                     count,
+                    listed,
                     rarity: rarityDisplay,
                     floor,
                     value
                 });
             }
         }
+
+        let totalListed = models.reduce((sum, m) => sum + m.listed, 0);
+        const listedInfo = totalListed > 0 ? ` • ${totalListed}🛒` : '';
 
         const details = [];
         if (withFullDetails) {
@@ -647,14 +655,16 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
             })) {
                 const entries = detailsByModel[modelId];
                 if (entries.length === 1) {
-                    const { count, rarity, floor, value } = entries[0];
+                    const { count, listed, rarity, floor, value } = entries[0];
+                    const listedInfo = listed > 0 ? ` ${listed}🛒` : '';
                     details.push(
-                        `${modelId} ${count}x${rarity} @${formatNumber(floor)} = ${formatNumber(value)}`
+                        `${modelId} ${count}${rarity}${listedInfo} @${formatNumber(floor)} = ${formatNumber(value)}`
                     );
                 } else {
-                    const parts = entries.map(e => 
-                        `${e.count}x${e.rarity}@${formatNumber(e.floor)}`
-                    ).join(' + ');
+                    const parts = entries.map(e => {
+                        const listedInfo = e.listed > 0 ? ` ${e.listed}🛒` : '';
+                        return `${e.count}${e.rarity}${listedInfo} @${formatNumber(e.floor)}`;
+                    }).join(' + ');
                     const totalValue = entries.reduce((sum, e) => sum + e.value, 0);
                     details.push(
                         `${modelId} ${parts} = ${formatNumber(totalValue)}`
@@ -678,7 +688,7 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
         // Ajout du champ résumé
         embed.addFields({
             name: `🧾 Saison ${season}`,
-            value: `${seasonCount} cartes, ${formatNumber(seasonTotal)} DOLZ\n${seasonCompleteness}`
+            value: `${seasonCount} cartes${listedInfo}, ${formatNumber(seasonTotal)} DOLZ\n${seasonCompleteness}`
         });
 
         // Ajout du champ détails si demandé

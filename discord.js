@@ -168,7 +168,7 @@ export function eventBotReady(discordClient) {
                 //     tokenId,
                 //     'sale',
                 // );
-                const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1, false);
+                const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1, true);
                 // const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
