@@ -154,7 +154,7 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
                 // const nftHoldersEmbed = await handleNftHoldersForSeason(6);
-                const nftTrackingEmbed = await handleNftTrackingForModel('g0143', 30, true);
+                const nftTrackingEmbed = await handleNftTrackingForModel('g0124', 15, false);
                 // const tokenId = '51623';  // Limited
                 // const tokenId = '51520';  // Rare
                 // const tokenId = '51495';  // Epic
@@ -259,7 +259,18 @@ export function eventBotReady(discordClient) {
                 await interaction.editReply({ embeds: [embed] });
             } else if (interaction.commandName === 'get_wallet_data') {
                 const address = interaction.options.getString('address');
-                const embed = await handleGetDataForWallet(address);
+                const person = interaction.options.getString('person');
+                const withFullDetails = interaction.options.getBoolean('with_full_details') ?? false;
+                let walletAddress;
+
+                if (address) {
+                    walletAddress = address;
+                } else if (person) {
+                    walletAddress = person;
+                } else {
+                    return interaction.reply({ content: '⚠️ Tu dois renseigner une adresse ou choisir une personne.', ephemeral: true });
+                }
+                const embed = await handleGetDataForWallet(walletAddress);
                 await interaction.editReply({ embeds: [embed] });
             } else if (interaction.commandName === 'get_chart_sales_volume') {
                 const embedWithChart = await handleGetChartSalesVolume(false);

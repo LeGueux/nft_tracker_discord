@@ -66,7 +66,21 @@ const commands = [
         .addStringOption(option =>
             option.setName('address')
                 .setDescription('L\'adresse du wallet (ex: 0x1234567890abcdef1234567890abcdef12345678)')
-                .setRequired(true)
+        )
+        .addStringOption(option =>
+            option
+                .setName('person')
+                .setDescription('Sélectionne une personne')
+                .addChoices(
+                    { name: 'Franck', value: process.env.FRANCK_ADDRESS_1 },
+                    { name: 'Nico', value: process.env.NICO_ADDRESS_1 },
+                    { name: 'Bob', value: process.env.BOB_ADDRESS_1 },
+                    { name: 'Coch', value: process.env.COCH_ADDRESS_1 },
+                )
+        )
+        .addBooleanOption(option =>
+            option.setName('with_full_details')
+                .setDescription('Affiche le détail complet du wallet (défaut: false)')
         )
         .toJSON(),
     new SlashCommandBuilder()
