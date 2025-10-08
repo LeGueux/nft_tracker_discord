@@ -259,6 +259,38 @@ export async function getBabyDolzBalance(address) {
     }
 }
 
+export async function getDolzPrice() {
+    try {
+        // Envoi de la requête POST à l'API avec le corps contenant le type de commande
+        const response = await fetch('https://back.dolz.io/api.php', {
+            method: 'POST',
+            headers: {
+                accept: 'application/json',
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+                command: 'getDolzPrice',
+            }),
+        });
+
+        // Parsing de la réponse JSON
+        const data = await response.json();
+        console.log(response);
+        console.log('-----------------');
+        console.log('DOLZ' in data ? parseFloat(data['DOLZ']) : 0);
+        
+        return 'DOLZ' in data ? parseFloat(data['DOLZ']) : 0;
+    } catch (error) {
+        // Affichage de l'erreur en cas d'échec de la requête ou de parsing
+        console.error(
+            `Erreur lors de la récupération du prix du Dolz:`,
+            error,
+        );
+        // Retourne 0 par défaut en cas d'erreur
+        return 0;
+    }
+}
+
 export async function searchFilledEventsByCriterias({
     maker = null,
     taker = null,

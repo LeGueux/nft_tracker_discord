@@ -3,6 +3,7 @@ import {
     searchCardsByCriterias,
     getDolzUsername,
     getBabyDolzBalance,
+    getDolzPrice,
     getFloorPricesByModelAndRarity,
     getFloorPriceByModelAndRarity,
     getListingPriceByTokenId,
@@ -27,8 +28,7 @@ const rarityShort = {
     'Not Revealed': '❔ NR'
 };
 
-function getPriceStringFormatted(price) {
-    const dolzPrice = parseFloat(process.env.DOLZ_PRICE ?? '0');
+function getPriceStringFormatted(price, dolzPrice) {
     const priceInDollars = price * dolzPrice;
     return `${formatNumber(parseInt(price))} DOLZ ($ ${priceInDollars.toFixed(2)})`;
 }
@@ -67,7 +67,7 @@ function getPrefixNameEmojiBySeason(season) {
 }
 
 export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, type) {
-    const [totalAssetsSeller, totalAssetsOnSaleSeller, babyDolzBalanceSeller, dolzBalanceSeller, sellerUsernameData, floorPriceModel, assetsSellerForThisModel] = await Promise.all([
+    const [totalAssetsSeller, totalAssetsOnSaleSeller, babyDolzBalanceSeller, dolzBalanceSeller, dolzPrice, sellerUsernameData, floorPriceModel, assetsSellerForThisModel] = await Promise.all([
         searchCardsByCriterias({
             owner: from,
             returnOnlyTotal: true,
@@ -79,6 +79,7 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
         }),
         getBabyDolzBalance(from),
         getDolzBalance(from),
+        getDolzPrice(),
         getDolzUsername(from),
         getFloorPriceByModelAndRarity(data.card_number, data.rarity),
         searchCardsByCriterias({
@@ -107,29 +108,29 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
 
     const sellerUsername = (sellerUsernameData[0]?.duUsername ?? '').split('#')[0];
     // Cas où from correspond à un utilisateur spécifique
-    let priceString = getPriceStringFormatted(price);
+    let priceString = getPriceStringFormatted(price, dolzPrice);
     if ([
         process.env.FRANCK_ADDRESS_1.toLowerCase(),
         process.env.FRANCK_ADDRESS_2.toLowerCase(),
     ].includes(from.toLowerCase())) {
         const tpInDolz = price * parseFloat(process.env.FRANCK_TP_RATIO) / 100;
-        priceString += `\nTP ${process.env.FRANCK_TP_RATIO}%: ${getPriceStringFormatted(tpInDolz)}\n`;
+        priceString += `\nTP ${process.env.FRANCK_TP_RATIO}%: ${getPriceStringFormatted(tpInDolz, dolzPrice)}\n`;
     } else if ([
         process.env.NICO_ADDRESS_1.toLowerCase(),
         process.env.NICO_ADDRESS_2.toLowerCase(),
     ].includes(from.toLowerCase())) {
         const tpInDolz = price * parseFloat(process.env.NICO_TP_RATIO) / 100;
-        priceString += `\nTP ${process.env.NICO_TP_RATIO}%: ${getPriceStringFormatted(tpInDolz)}\n`;
+        priceString += `\nTP ${process.env.NICO_TP_RATIO}%: ${getPriceStringFormatted(tpInDolz, dolzPrice)}\n`;
     } else if ([
         process.env.BOB_ADDRESS_1.toLowerCase(),
     ].includes(from.toLowerCase())) {
         const tpInDolz = price * parseFloat(process.env.BOB_TP_RATIO) / 100;
-        priceString += `\nTP ${process.env.BOB_TP_RATIO}%: ${getPriceStringFormatted(tpInDolz)}\n`;
+        priceString += `\nTP ${process.env.BOB_TP_RATIO}%: ${getPriceStringFormatted(tpInDolz, dolzPrice)}\n`;
     } else if ([
         process.env.COCH_ADDRESS_1.toLowerCase(),
     ].includes(from.toLowerCase())) {
         const tpInDolz = price * parseFloat(process.env.COCH_TP_RATIO) / 100;
-        priceString += `\nTP ${process.env.COCH_TP_RATIO}%: ${getPriceStringFormatted(tpInDolz)}\n`;
+        priceString += `\nTP ${process.env.COCH_TP_RATIO}%: ${getPriceStringFormatted(tpInDolz, dolzPrice)}\n`;
     }
 
     const embed = new EmbedBuilder()
@@ -140,7 +141,7 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
         .setTimestamp()
         .addFields(
             { name: '💰 Price:', value: priceString },
-            { name: '⬇️ FP de la rareté:', value: getPriceStringFormatted(floorPriceModel) },
+            { name: '⬇️ FP de la rareté:', value: getPriceStringFormatted(floorPriceModel, dolzPrice) },
             {
                 name: `🙋‍♂️ Seller: ${getWhaleEmoji(totalAssetsSeller, dolzBalanceSeller)} ${sellerUsername}`,
                 value:
@@ -178,7 +179,7 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
 
         if (assetDataForListingPrice?.orderbookStats?.lowestListingPrice) {
             const listingPrice = parseInt(weiToDolz(assetDataForListingPrice.orderbookStats.lowestListingPrice));
-            embed.addFields({ name: '💰 Listing Price:', value: `${getPriceStringFormatted(listingPrice)} DOLZ` });
+            embed.addFields({ name: '💰 Listing Price:', value: `${getPriceStringFormatted(listingPrice, dolzPrice)} DOLZ` });
         }
 
         const nftBuyerStats = computeNftHoldersStats(assetsBuyerForThisModel, {
