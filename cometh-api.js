@@ -275,9 +275,6 @@ export async function getDolzPrice() {
 
         // Parsing de la réponse JSON
         const data = await response.json();
-        console.log(response);
-        console.log('-----------------');
-        console.log('DOLZ' in data ? parseFloat(data['DOLZ']) : 0);
 
         return 'DOLZ' in data ? parseFloat(data['DOLZ']) : 0;
     } catch (error) {
