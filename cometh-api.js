@@ -1,7 +1,7 @@
 import { buildSaleListingNFTEmbed } from './embeds.js';
 import { getThreadIdForToken } from './discord.js';
 import {
-    getNFTData,
+    getRarityColor,
     weiToDolz,
     checkDateIsValidSinceLastOneInterval,
     getContentTagsDependsOnNFT,
@@ -278,7 +278,7 @@ export async function getDolzPrice() {
         console.log(response);
         console.log('-----------------');
         console.log('DOLZ' in data ? parseFloat(data['DOLZ']) : 0);
-        
+
         return 'DOLZ' in data ? parseFloat(data['DOLZ']) : 0;
     } catch (error) {
         // Affichage de l'erreur en cas d'échec de la requête ou de parsing
@@ -288,6 +288,116 @@ export async function getDolzPrice() {
         );
         // Retourne 0 par défaut en cas d'erreur
         return 0;
+    }
+}
+
+export async function getUserNFTs(address) {
+    try {
+        // Envoi de la requête POST à l'API avec le corps contenant le type de commande et le wallet address
+        const response = await fetch('https://back.dolz.io/api.php', {
+            method: 'POST',
+            headers: {
+                accept: 'application/json',
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+                command: 'getUserNFTs',
+                contractAddress: process.env.NFT_CONTRACT_ADDRESS,
+                walletAddress: address,
+            }),
+        });
+        // Parsing de la réponse JSON
+        const data = await response.json();
+
+        return data;
+    } catch (error) {
+        // Affichage de l'erreur en cas d'échec de la requête ou de parsing
+        console.error(
+            `Erreur lors de la récupération du prix du Dolz:`,
+            error,
+        );
+        // Retourne 0 par défaut en cas d'erreur
+        return 0;
+    }
+}
+
+export async function getNFTData(tokenId) {
+    try {
+        // V1
+        // const response = await fetch(`https://cardsdata.dolz.io/jsons/${tokenId}.json`);
+        // if (!response.ok) return;
+
+        // const data = await response.json();
+        // return {
+        //     name: data.name,
+        //     image: data.image,
+        //     rarity: data.attributes.find((attr) => attr.trait_type === 'Rarity')?.value,
+        //     rarity_color: getRarityColor(data.attributes.find((attr) => attr.trait_type === 'Rarity')?.value),
+        //     season: data.attributes.find((attr) => attr.trait_type === 'Season')?.value,
+        //     card_number: data.attributes.find((attr) => attr.trait_type === 'Card Number')?.value,
+        //     serial_number: data.attributes.find((attr) => attr.trait_type === 'Serial Number')?.value,
+        // };
+
+        // V2
+        const response = await fetch('https://back.dolz.io/apiMarket.php', {
+            method: 'POST',
+            headers: {
+                accept: 'application/json',
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+                command: 'getNFTInfos',
+                contractAddress: process.env.NFT_CONTRACT_ADDRESS,
+                nftId: tokenId,
+            }),
+        });
+        // Parsing de la réponse JSON
+        const data = await response.json();
+
+        // Sécurité : vérifier que la structure est bien conforme
+        if (!data?.traits || !data?.extendedInfos) {
+            console.warn(`Structure inattendue pour le token ${tokenId}`, data);
+            return {};
+        }
+
+        // Extraction et mappage vers l'ancien format
+        const traits = data.traits;
+        const rarity = traits.Rarity?.[0];
+        const season = traits.Season?.[0];
+        const cardNumber = traits['Card Number']?.[0];
+        const serialBase = traits['Serial Number']?.[0];
+
+        // Récupération du total selon la rareté
+        const totalForRarity = data.extendedInfos?.nftInfos?.[rarity] || '?';
+        const serialNumber = serialBase ? `${serialBase}/${totalForRarity}` : null;
+
+        // Pour le nom, on privilégie extendedInfos.name si dispo
+        const name = data.extendedInfos?.name
+            ? `${data.extendedInfos.name} - ${data.extendedInfos.title}`
+            : traits.Name?.[0] || 'Unknown';
+
+        // L’image doit être reconstruite car elle n’est plus directement fournie
+        // Exemple d’URL basée sur ton ancien format d’image :
+        const rarityType = rarity || 'Limited';
+        const edition = traits.Edition?.[0] || '1';
+        const image = `https://cardsdata.dolz.io/iStripper/${cardNumber}/${edition}/${rarityType}/${serialBase}_lgx.png`;
+
+        const dataResponse =  {
+            name,
+            image,
+            rarity,
+            rarity_color: getRarityColor(rarity),
+            season,
+            card_number: cardNumber,
+            serial_number: serialNumber,
+        };
+        // console.log(data);
+        // console.log(dataResponse);
+
+        return data;
+    } catch (error) {
+        console.error(`Erreur lors de la récupération du token ${tokenId}:`, error);
+        return {};
     }
 }
 

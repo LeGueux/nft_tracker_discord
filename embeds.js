@@ -4,6 +4,8 @@ import {
     getDolzUsername,
     getBabyDolzBalance,
     getDolzPrice,
+    getUserNFTs,
+    getNFTData,
     getFloorPricesByModelAndRarity,
     getFloorPriceByModelAndRarity,
     getListingPriceByTokenId,
@@ -12,7 +14,6 @@ import { getDolzBalance } from './alchemy-api.js';
 import { computeNftHoldersStats } from './command-nft-holders.js';
 import {
     getNFTSeasonByCardNumber,
-    getNFTData,
     weiToDolz,
     calculateBBDRewardNftByNFTData,
 } from './utils.js';
@@ -145,7 +146,7 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
             {
                 name: `🙋‍♂️ Seller: ${getWhaleEmoji(totalAssetsSeller, dolzBalanceSeller)} ${sellerUsername}`,
                 value:
-                    `🔗 [${from}](https://dolz.io/marketplace/profile/${from})\n` +
+                    `🔗 [${from}](https://dolz.io/market/profile/${from})\n` +
                     `Total Assets: ${totalAssetsSeller}🃏 ${totalAssetsOnSaleSeller}🛒\n` +
                     `Assets ${data.card_number}: ${assetsSellerForThisModelDetailStr}\n` +
                     `Total DOLZ: ${formatNumber(dolzBalanceSeller)}\n` +
@@ -200,7 +201,7 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
         embed.addFields({
             name: `🙋‍♂️ Buyer: ${getWhaleEmoji(totalAssetsBuyer, dolzBalanceBuyer)} ${buyerUsername}`,
             value:
-                `🔗 [${to}](https://dolz.io/marketplace/profile/${to})\n` +
+                `🔗 [${to}](https://dolz.io/market/profile/${to})\n` +
                 `Total Assets: ${totalAssetsBuyer}🃏 ${totalAssetsOnSaleBuyer}🛒\n` +
                 `Assets ${data.card_number}: ${assetsBuyerForThisModelDetailStr}\n` +
                 `Total DOLZ: ${formatNumber(dolzBalanceBuyer)}\n` +
@@ -334,7 +335,7 @@ export async function buildNftHoldersEmbed(analysisResult, season) {
                 // Ajouter le lien cliquable si dans le top 3
                 if (i < 3) {
                     const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
-                    top3Links.push(`${medal} [${holderUsername}](https://dolz.io/marketplace/profile/${holder.wallet})`);
+                    top3Links.push(`${medal} [${holderUsername}](https://dolz.io/market/profile/${holder.wallet})`);
                 }
 
                 lines.push(`${holderUsername.padEnd(10)} ${totalStr.padStart(8)}${percent.toString().padStart(4)}% ${rarityStr}`);
@@ -518,14 +519,15 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
 
 export async function buildWalletDataEmbed(from, withFullDetails = false) {
     const embed = new EmbedBuilder()
-        .setURL(`https://dolz.io/marketplace/profile/${from}`)
+        .setURL(`https://dolz.io/market/profile/${from}`)
         .setTimestamp();
 
-    const [allAssetsWallet, totalAssetsOnSaleWallet, babyDolzBalanceWallet, dolzBalanceWallet, usernameData] = await Promise.all([
+    const [allAssetsWallet, allAssetsWalletV2, totalAssetsOnSaleWallet, babyDolzBalanceWallet, dolzBalanceWallet, usernameData] = await Promise.all([
         searchCardsByCriterias({
             owner: from,
             limit: 10000,
         }),
+        getUserNFTs(from),
         searchCardsByCriterias({
             owner: from,
             onSaleOnly: true,
@@ -593,7 +595,7 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
         {
             name: `🙋‍♂️ Wallet: ${getWhaleEmoji(allAssetsWallet.total, dolzBalanceWallet)} ${username}`,
             value:
-                `🔗 [${from}](https://dolz.io/marketplace/profile/${from})\n` +
+                `🔗 [${from}](https://dolz.io/market/profile/${from})\n` +
                 `Total Assets: ${allAssetsWallet.total}🃏 ${totalAssetsOnSaleWallet}🛒\n` +
                 `Total DOLZ: ${formatNumber(dolzBalanceWallet)}\n` +
                 `Total BabyDOLZ: ${formatNumber(babyDolzBalanceWallet)}\n`,

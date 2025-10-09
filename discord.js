@@ -6,10 +6,9 @@ import {
     ButtonStyle,
 } from 'discord.js';
 import { buildSaleListingNFTEmbed } from './embeds.js';
-import { getNFTData } from './utils.js';
 import { IS_TEST_MODE, ALIVE_PING_INTERVAL, COMETH_API_INTERVAL } from './config.js';
 import { sendStatusMessage } from './error-handler.js';
-import { callComethApiForLastListings, callComethApiForLastSales } from './cometh-api.js';
+import { callComethApiForLastListings, callComethApiForLastSales, getNFTData } from './cometh-api.js';
 import { handleSnipeForSeason } from './command-snipe.js';
 import { handleNftHoldersForSeason } from './command-nft-holders.js';
 import { handleNftTrackingForModel } from './command-nft-tracking.js';
@@ -155,20 +154,20 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
                 // const nftHoldersEmbed = await handleNftHoldersForSeason(6);
                 // const nftTrackingEmbed = await handleNftTrackingForModel('g0124', 15, false);
-                // const tokenId = '51623';  // Limited
+                const tokenId = '51623';  // Limited
                 // const tokenId = '51520';  // Rare
                 // const tokenId = '51495';  // Epic
                 // const tokenId = '51490';  // Legendary
-                // const data = await getNFTData(tokenId);
-                // const embedSale = await buildSaleListingNFTEmbed(
-                //     data,
-                //     process.env.BOB_ADDRESS_1,
-                //     process.env.COCH_ADDRESS_1,
-                //     1000,
-                //     tokenId,
-                //     'sale',
-                // );
-                const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1, true);
+                const data = await getNFTData(tokenId);
+                const embedSale = await buildSaleListingNFTEmbed(
+                    data,
+                    process.env.BOB_ADDRESS_1,
+                    process.env.COCH_ADDRESS_1,
+                    1000,
+                    tokenId,
+                    'sale',
+                );
+                // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1, true);
                 // const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
@@ -188,21 +187,18 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedOS] });
                     // await thread.send({ embeds: [nftHoldersEmbed] });
                     // await thread.send({ embeds: [nftTrackingEmbed] });
-                    await thread.send({ embeds: [walletFranckEmbed] });
+                    // await thread.send({ embeds: [walletFranckEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
-                    // await thread.send({
-                    //     content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
-                    //     embeds: [embedSale],
-                    //     allowedMentions: {
-                    //         users: [
-                    //             process.env.FRANCK_DISCORD_USER_ID,
-                    //             process.env.NICO_DISCORD_USER_ID,
-                    //             process.env.BOB_DISCORD_USER_ID,
-                    //             process.env.COCH_DISCORD_USER_ID,
-                    //         ],
-                    //     },
-                    // });
+                    await thread.send({
+                        content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
+                        embeds: [embedSale],
+                        allowedMentions: {
+                            users: [
+                                process.env.FRANCK_DISCORD_USER_ID,
+                            ],
+                        },
+                    });
                     process.exit(0);
                 }
             } catch (e) {
