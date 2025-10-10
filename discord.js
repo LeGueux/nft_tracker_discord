@@ -154,8 +154,8 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
                 // const nftHoldersEmbed = await handleNftHoldersForSeason(6);
                 // const nftTrackingEmbed = await handleNftTrackingForModel('g0124', 15, false);
-                const tokenId = '51623';  // Limited
-                // const tokenId = '51520';  // Rare
+                const tokenId = '51729';  // Limited
+                // const tokenId = '51565';  // Rare
                 // const tokenId = '51495';  // Epic
                 // const tokenId = '51490';  // Legendary
                 const data = await getNFTData(tokenId);

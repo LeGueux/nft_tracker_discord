@@ -5,6 +5,7 @@ import {
     weiToDolz,
     checkDateIsValidSinceLastOneInterval,
     getContentTagsDependsOnNFT,
+    getFloorPriceByModelAndRarity,
 } from './utils.js';
 import { sendStatusMessage } from './error-handler.js';
 import { IS_TEST_MODE } from './config.js';
@@ -379,7 +380,15 @@ export async function getNFTData(tokenId) {
         const edition = traits.Edition?.[0] || '1';
         const image = `https://cardsdata.dolz.io/iStripper/${cardNumber}/${edition}/${rarityType}/${serialBase}_lgx.png`;
 
-        const dataResponse =  {
+        const listingPrice = data.marketInfos?.listing?.price || null;
+        const owner = data.marketInfos?.owner || null;
+        let floorPrice = null;
+        if (cardNumber && rarity) {
+            floorPrice = await getFloorPriceByModelAndRarity(cardNumber, rarity);
+        }
+
+        return {
+            tokenId,
             name,
             image,
             rarity,
@@ -387,11 +396,10 @@ export async function getNFTData(tokenId) {
             season,
             card_number: cardNumber,
             serial_number: serialNumber,
+            listing_price: listingPrice,
+            floor_price: floorPrice,
+            owner: owner,
         };
-        // console.log(data);
-        // console.log(dataResponse);
-
-        return data;
     } catch (error) {
         console.error(`Erreur lors de la récupération du token ${tokenId}:`, error);
         return {};
@@ -546,6 +554,57 @@ export async function searchCardsByCriterias({
     }
 }
 
+export async function searchCardsByCriteriasV2({
+    attributes = [],
+    limit = 1,
+    sort = 'priceLowToHigh',
+    status = 'All',
+    walletAddress = null,
+    returnOnlyTotal = false,
+} = {}) {
+    try {
+        console.log(`🔍 searchCardsByCriteriasV2 lancé à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
+        console.log(`🧪 Paramètres : ${JSON.stringify({ attributes, limit, sort, status, walletAddress, returnOnlyTotal })}`);
+
+        const body = {
+            contractAddress: process.env.NFT_CONTRACT_ADDRESS,
+            command: 'getNFTsForAttributes',
+            limit,
+            page: 1,
+            sort,
+            status
+        };
+
+        if (attributes) {
+            body.attributes = btoa(JSON.stringify(attributes));
+        }
+        if (walletAddress) {
+            body.walletAddress = walletAddress.toLowerCase();
+        }
+
+        const response = await fetch('https://back.dolz.io/apiMarket.php',
+            {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body),
+            },
+        );
+
+        const data = await response.json();
+        return returnOnlyTotal ? data.total : data;
+    } catch (error) {
+        console.error('❌ Erreur dans searchCardsByCriteriasV2:', error);
+        await sendStatusMessage(
+            discordClient,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans searchCardsByCriteriasV2 - Rejection : \`${error}\``,
+        );
+        return { results: [], total: 0 };
+    }
+}
+
 export async function getListingPriceByTokenId(tokenId) {
     try {
         console.log(`🔍 getListingPriceByTokenId lancé à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
@@ -571,56 +630,5 @@ export async function getListingPriceByTokenId(tokenId) {
             `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans getListingPriceByTokenId - Rejection : \`${error}\``,
         );
         return {};
-    }
-}
-
-export async function getFloorPricesByModelAndRarity(pairs = []) {
-    const floorPrices = {};
-
-    for (const { modelId, rarity } of pairs) {
-        const key = `${modelId}-${rarity}`;
-        try {
-            console.log(`Recherche pour modèle ${modelId} et rareté ${rarity} et key ${key}`);
-            const result = await searchCardsByCriterias({
-                attributes: [{ 'Card Number': [modelId], 'Rarity': [rarity] }],
-                onSaleOnly: true,
-                limit: 1,
-                orderBy: 'PRICE',
-                direction: 'ASC',
-            });
-
-            const asset = result.assets?.[0];
-            if (IS_TEST_MODE) {
-                console.log(`Recherche pour modèle ${modelId} et rareté ${rarity}:`, asset?.metadata, asset?.orderbookStats);
-            }
-            if (asset?.orderbookStats?.lowestListingPrice) {
-                floorPrices[key] = parseInt(weiToDolz(asset.orderbookStats.lowestListingPrice));
-            } else {
-                floorPrices[key] = 0;
-            }
-        } catch (e) {
-            console.error(`Erreur pour key ${key} :`, e);
-            floorPrices[key] = 0;
-        }
-    }
-
-    return floorPrices;
-}
-
-export async function getFloorPriceByModelAndRarity(modelId, rarity) {
-    console.log(`Recherche FP pour modèle ${modelId} et rareté ${rarity}`);
-    const result = await searchCardsByCriterias({
-        attributes: [{ 'Card Number': [modelId], 'Rarity': [rarity] }],
-        onSaleOnly: true,
-        limit: 1,
-        orderBy: 'PRICE',
-        direction: 'ASC',
-    });
-
-    const asset = result.assets?.[0];
-    if (asset?.orderbookStats?.lowestListingPrice) {
-        return parseInt(weiToDolz(asset.orderbookStats.lowestListingPrice));
-    } else {
-        return 0;
     }
 }

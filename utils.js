@@ -1,4 +1,5 @@
 import { COMETH_API_INTERVAL, NFT_LIST_BY_SEASON } from './config.js';
+import { searchCardsByCriterias, searchCardsByCriteriasV2 } from './cometh-api.js';
 
 export function getRarityColor(rarity) {
     switch (rarity) {
@@ -101,4 +102,55 @@ export function calculateBBDRewardNftByNFTData(nftData) {
     const bbd = rarity * (1 - (numerator / denominator)) + minRarity;
 
     return Math.round(bbd * 100) / 100;
+}
+
+export async function getFloorPricesByModelAndRarity(pairs = []) {
+    const floorPrices = {};
+
+    for (const { modelId, rarity } of pairs) {
+        const key = `${modelId}-${rarity}`;
+        try {
+            console.log(`Recherche pour modèle ${modelId} et rareté ${rarity} et key ${key}`);
+            const result = await searchCardsByCriterias({
+                attributes: [{ 'Card Number': [modelId], 'Rarity': [rarity] }],
+                onSaleOnly: true,
+                limit: 1,
+                orderBy: 'PRICE',
+                direction: 'ASC',
+            });
+
+            const asset = result.assets?.[0];
+            if (IS_TEST_MODE) {
+                console.log(`Recherche pour modèle ${modelId} et rareté ${rarity}:`, asset?.metadata, asset?.orderbookStats);
+            }
+            if (asset?.orderbookStats?.lowestListingPrice) {
+                floorPrices[key] = parseInt(weiToDolz(asset.orderbookStats.lowestListingPrice));
+            } else {
+                floorPrices[key] = 0;
+            }
+        } catch (e) {
+            console.error(`Erreur pour key ${key} :`, e);
+            floorPrices[key] = 0;
+        }
+    }
+
+    return floorPrices;
+}
+
+export async function getFloorPriceByModelAndRarity(modelId, rarity) {
+    console.log(`Recherche FP pour modèle ${modelId} et rareté ${rarity}`);
+    const result = await searchCardsByCriteriasV2({
+        attributes: [{ 'name': 'Card Number', 'value': [modelId] }, { 'name': 'Rarity', 'value': rarity }],
+        status: 'Listed',
+        limit: 1,
+        sort: 'priceLowToHigh',
+    });
+
+    const asset = result.results?.[0];
+    
+    if (asset?.listing?.price) {
+        return asset.listing.price;
+    } else {
+        return null;
+    }
 }
