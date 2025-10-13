@@ -161,10 +161,9 @@ export function eventBotReady(discordClient) {
                 const data = await getNFTData(tokenId);
                 const embedSale = await buildSaleListingNFTEmbed(
                     data,
-                    process.env.BOB_ADDRESS_1,
-                    process.env.COCH_ADDRESS_1,
+                    process.env.FRANCK_ADDRESS_1,
+                    process.env.NICO_ADDRESS_1,
                     1000,
-                    tokenId,
                     'sale',
                 );
                 // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1, true);

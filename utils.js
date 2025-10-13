@@ -111,23 +111,7 @@ export async function getFloorPricesByModelAndRarity(pairs = []) {
         const key = `${modelId}-${rarity}`;
         try {
             console.log(`Recherche pour modèle ${modelId} et rareté ${rarity} et key ${key}`);
-            const result = await searchCardsByCriterias({
-                attributes: [{ 'Card Number': [modelId], 'Rarity': [rarity] }],
-                onSaleOnly: true,
-                limit: 1,
-                orderBy: 'PRICE',
-                direction: 'ASC',
-            });
-
-            const asset = result.assets?.[0];
-            if (IS_TEST_MODE) {
-                console.log(`Recherche pour modèle ${modelId} et rareté ${rarity}:`, asset?.metadata, asset?.orderbookStats);
-            }
-            if (asset?.orderbookStats?.lowestListingPrice) {
-                floorPrices[key] = parseInt(weiToDolz(asset.orderbookStats.lowestListingPrice));
-            } else {
-                floorPrices[key] = 0;
-            }
+            floorPrices[key] = await getFloorPriceByModelAndRarity(modelId, rarity);
         } catch (e) {
             console.error(`Erreur pour key ${key} :`, e);
             floorPrices[key] = 0;

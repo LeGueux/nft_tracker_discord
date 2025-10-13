@@ -44,7 +44,6 @@ export async function callComethApiForLastSales(discordClient) {
                     seller,
                     buyer,
                     price,
-                    tokenId,
                     'sale',
                 );
                 const threadId = getThreadIdForToken('sale', seller);
@@ -110,7 +109,6 @@ export async function callComethApiForLastListings(discordClient) {
                     item.maker,
                     null,
                     price,
-                    tokenId,
                     'listing',
                 );
                 const threadNameDependsOnPrice = price < 500 ? 'main' : 'listing';
@@ -163,7 +161,6 @@ export async function callComethApiForLastListings(discordClient) {
                     item.asset.owner,
                     item.maker,
                     price,
-                    tokenId,
                     'offer',
                 );
                 const threadId = getThreadIdForToken('offer');
@@ -560,41 +557,80 @@ export async function searchCardsByCriteriasV2({
     sort = 'priceLowToHigh',
     status = 'All',
     walletAddress = null,
+    listingOnly = false,
     returnOnlyTotal = false,
 } = {}) {
     try {
         console.log(`🔍 searchCardsByCriteriasV2 lancé à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
-        console.log(`🧪 Paramètres : ${JSON.stringify({ attributes, limit, sort, status, walletAddress, returnOnlyTotal })}`);
+        console.log(`🧪 Paramètres : ${JSON.stringify({ attributes, limit, sort, status, walletAddress, listingOnly, returnOnlyTotal })}`);
 
-        const body = {
+        const baseBody = {
             contractAddress: process.env.NFT_CONTRACT_ADDRESS,
             command: 'getNFTsForAttributes',
             limit,
-            page: 1,
             sort,
-            status
+            status,
         };
 
-        if (attributes) {
-            body.attributes = btoa(JSON.stringify(attributes));
+        if (attributes && attributes.length > 0) {
+            baseBody.attributes = btoa(JSON.stringify(attributes));
         }
         if (walletAddress) {
-            body.walletAddress = walletAddress.toLowerCase();
+            baseBody.walletAddress = walletAddress.toLowerCase();
         }
 
-        const response = await fetch('https://back.dolz.io/apiMarket.php',
-            {
+        // 🔹 Cas simple : on veut juste le total
+        if (returnOnlyTotal || limit === 1) {
+            const response = await fetch('https://back.dolz.io/apiMarket.php', {
                 method: 'POST',
                 headers: {
-                    'Accept': 'application/json, text/plain, */*',
+                    Accept: 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ...baseBody, page: 1 }),
+            });
+
+            const data = await response.json();
+            return returnOnlyTotal ? (data.total ?? 0) : data;
+        }
+
+        // 🔹 Sinon, on boucle sur toutes les pages
+        let allResults = [];
+        let currentPage = 1;
+        let total = 0;
+
+        while (true) {
+            const body = { ...baseBody, page: currentPage };
+
+            const response = await fetch('https://back.dolz.io/apiMarket.php', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json, text/plain, */*',
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(body),
-            },
-        );
+            });
 
-        const data = await response.json();
-        return returnOnlyTotal ? data.total : data;
+            const data = await response.json();
+
+            if (!data.results || data.results.length === 0) break;
+
+            allResults = allResults.concat(data.results);
+            total = data.total ?? allResults.length;
+
+            console.log(`📄 Page ${currentPage} récupérée (${data.results.length} résultats)`);
+
+            if (allResults.length == data.total) break;
+
+            currentPage++;
+        }
+
+        if (listingOnly) {
+            allResults = allResults.filter(item => item.listing !== null);
+            total = allResults.length;
+        }
+
+        return { results: allResults, total };
     } catch (error) {
         console.error('❌ Erreur dans searchCardsByCriteriasV2:', error);
         await sendStatusMessage(
@@ -602,33 +638,5 @@ export async function searchCardsByCriteriasV2({
             `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans searchCardsByCriteriasV2 - Rejection : \`${error}\``,
         );
         return { results: [], total: 0 };
-    }
-}
-
-export async function getListingPriceByTokenId(tokenId) {
-    try {
-        console.log(`🔍 getListingPriceByTokenId lancé à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
-
-        const response = await fetch(`https://api.marketplace.cometh.io/v1/assets/${process.env.NFT_CONTRACT_ADDRESS}/${tokenId}`,
-            {
-                method: 'GET',
-                headers: {
-                    accept: 'application/json',
-                    'content-type': 'application/json',
-                    apikey: process.env.COMETH_API_KEY,
-                },
-            },
-        );
-
-        const data = await response.json();
-        console.log(`getListingPriceByTokenId - Token ID: ${tokenId}, Data:`, data);
-        return data;
-    } catch (error) {
-        console.error('❌ Erreur dans getListingPriceByTokenId:', error);
-        await sendStatusMessage(
-            discordClient,
-            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans getListingPriceByTokenId - Rejection : \`${error}\``,
-        );
-        return {};
     }
 }

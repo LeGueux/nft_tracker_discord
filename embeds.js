@@ -1,21 +1,19 @@
 import { AttachmentBuilder, EmbedBuilder } from 'discord.js';
 import {
     searchCardsByCriterias,
+    searchCardsByCriteriasV2,
     getDolzUsername,
     getBabyDolzBalance,
     getDolzPrice,
     getUserNFTs,
     getNFTData,
-    getFloorPricesByModelAndRarity,
-    getFloorPriceByModelAndRarity,
-    getListingPriceByTokenId,
 } from './cometh-api.js';
 import { getDolzBalance } from './alchemy-api.js';
-import { computeNftHoldersStats } from './command-nft-holders.js';
 import {
     getNFTSeasonByCardNumber,
     weiToDolz,
     calculateBBDRewardNftByNFTData,
+    getFloorPricesByModelAndRarity,
 } from './utils.js';
 import { IS_TEST_MODE, RARITY_ORDER, NFT_LIST_BY_SEASON } from './config.js';
 
@@ -67,45 +65,22 @@ function getPrefixNameEmojiBySeason(season) {
     return emojiMap[season] || '🃏';
 }
 
-export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, type) {
-    const [totalAssetsSeller, totalAssetsOnSaleSeller, babyDolzBalanceSeller, dolzBalanceSeller, dolzPrice, sellerUsernameData, floorPriceModel, assetsSellerForThisModel] = await Promise.all([
-        searchCardsByCriterias({
-            owner: from,
-            returnOnlyTotal: true,
-        }),
-        searchCardsByCriterias({
-            owner: from,
-            onSaleOnly: true,
-            returnOnlyTotal: true,
+export async function buildSaleListingNFTEmbed(data, from, to, price, type) {
+    console.log('DATA: ', data);
+    const [allAssetsSeller, babyDolzBalanceSeller, dolzBalanceSeller, dolzPrice, sellerUsernameData] = await Promise.all([
+        searchCardsByCriteriasV2({
+            limit: 10000,
+            status: 'Owned',
+            walletAddress: from,
         }),
         getBabyDolzBalance(from),
         getDolzBalance(from),
         getDolzPrice(),
         getDolzUsername(from),
-        getFloorPriceByModelAndRarity(data.card_number, data.rarity),
-        searchCardsByCriterias({
-            owner: from,
-            attributes: [{ 'Card Number': [data.card_number] }],
-            limit: 10000,
-            orderBy: 'PRICE',
-            direction: 'ASC',
-        }),
     ]);
-
-    const nftSellerStats = computeNftHoldersStats(assetsSellerForThisModel, {
-        topX: 1,
-        minCardsPerModel: 0,
-    }, false);
-    const topListSeller = nftSellerStats.topWalletsPerModel[data.card_number] || [];
-    let assetsSellerForThisModelDetailStr = '—';
-    if (topListSeller) {
-        const totalStr = `${assetsSellerForThisModel.total}🃏 ${topListSeller[0]?.listed || 0}🛒`;
-        const rarityStr = RARITY_ORDER
-            .filter(r => (topListSeller[0]?.[r] ?? 0) > 0)
-            .map(r => `${rarityShort[r]}${topListSeller[0]?.[r]}`)
-            .join(' ');
-        assetsSellerForThisModelDetailStr = `${totalStr} ${assetsSellerForThisModel.total ? rarityStr : ''}`;
-    }
+    console.log('Exemple:', allAssetsSeller.results[0]);
+    const totalListedAssetsSeller = structuredClone(allAssetsSeller).results.filter(item => item.listing !== null).length;
+    const assetsSellerForThisModel = structuredClone(allAssetsSeller).results.filter(item => item.cardNumber === data.card_number);
 
     const sellerUsername = (sellerUsernameData[0]?.duUsername ?? '').split('#')[0];
     // Cas où from correspond à un utilisateur spécifique
@@ -134,76 +109,85 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, tokenId, t
         priceString += `\nTP ${process.env.COCH_TP_RATIO}%: ${getPriceStringFormatted(tpInDolz, dolzPrice)}\n`;
     }
 
+    const totalListedAssetsSellerForThisModel = structuredClone(assetsSellerForThisModel).filter(item => item.listing !== null).length;
+    // Comptage des raretés dans ton tableau
+    const rarityCount = {};
+    for (const asset of assetsSellerForThisModel) {
+        const rarity = asset.rarity || 'Not Revealed';
+        rarityCount[rarity] = (rarityCount[rarity] || 0) + 1;
+    }
+    // Création des chaînes finales
+    const totalStr = `${assetsSellerForThisModel.length}🃏 ${totalListedAssetsSellerForThisModel}🛒`;
+    const rarityStr = RARITY_ORDER
+        .filter(r => rarityCount[r] > 0)
+        .map(r => `${rarityShort[r]}${rarityCount[r]}`)
+        .join(' ');
+
+    // Chaîne finale avec détails
+    const assetsSellerForThisModelDetailStr = `${totalStr} ${rarityStr}`;
+
     const embed = new EmbedBuilder()
         .setTitle(getTitle(type, data.name))
-        .setURL(`https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}/${tokenId}`)
+        .setURL(`https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}/${data.tokenId}`)
         .setImage(data.image)
         .setColor(data.rarity_color)
         .setTimestamp()
         .addFields(
             { name: '💰 Price:', value: priceString },
-            { name: '⬇️ FP de la rareté:', value: getPriceStringFormatted(floorPriceModel, dolzPrice) },
+            { name: '⬇️ FP de la rareté:', value: getPriceStringFormatted(data.floor_price, dolzPrice) },
             {
-                name: `🙋‍♂️ Seller: ${getWhaleEmoji(totalAssetsSeller, dolzBalanceSeller)} ${sellerUsername}`,
+                name: `🙋‍♂️ Seller: ${getWhaleEmoji(allAssetsSeller.total, dolzBalanceSeller)} ${sellerUsername}`,
                 value:
                     `🔗 [${from}](https://dolz.io/market/profile/${from})\n` +
-                    `Total Assets: ${totalAssetsSeller}🃏 ${totalAssetsOnSaleSeller}🛒\n` +
-                    `Assets ${data.card_number}: ${assetsSellerForThisModelDetailStr}\n` +
+                    `Total Assets: ${allAssetsSeller.total}🃏 ${totalListedAssetsSeller}🛒\n` +
+                    `Asset ${data.card_number}: ${assetsSellerForThisModelDetailStr}\n` +
                     `Total DOLZ: ${formatNumber(dolzBalanceSeller)}\n` +
                     `Total BabyDOLZ: ${formatNumber(babyDolzBalanceSeller)}\n`,
             }
         );
     if (['sale', 'offer'].includes(type)) {
-        const [totalAssetsBuyer, totalAssetsOnSaleBuyer, babyDolzBalanceBuyer, dolzBalanceBuyer, buyerUsernameData, assetsBuyerForThisModel, assetDataForListingPrice] = await Promise.all([
-            searchCardsByCriterias({
-                owner: to,
-                returnOnlyTotal: true,
-            }),
-            searchCardsByCriterias({
-                owner: to,
-                onSaleOnly: true,
-                returnOnlyTotal: true,
+        const [allAssetsBuyer, babyDolzBalanceBuyer, dolzBalanceBuyer, dolzPrice, buyerUsernameData] = await Promise.all([
+            searchCardsByCriteriasV2({
+                limit: 10000,
+                status: 'Owned',
+                walletAddress: to,
             }),
             getBabyDolzBalance(to),
             getDolzBalance(to),
+            getDolzPrice(),
             getDolzUsername(to),
-            searchCardsByCriterias({
-                owner: to,
-                attributes: [{ 'Card Number': [data.card_number] }],
-                limit: 10000,
-                orderBy: 'PRICE',
-                direction: 'ASC',
-            }),
-            getListingPriceByTokenId(tokenId),
         ]);
+        const totalListedAssetsBuyer = structuredClone(allAssetsBuyer).results.filter(item => item.listing !== null).length;
+        const assetsBuyerForThisModel = structuredClone(allAssetsBuyer).results.filter(item => item.cardNumber === data.card_number);
         const buyerUsername = (buyerUsernameData[0]?.duUsername ?? '').split('#')[0];
 
-        if (assetDataForListingPrice?.orderbookStats?.lowestListingPrice) {
-            const listingPrice = parseInt(weiToDolz(assetDataForListingPrice.orderbookStats.lowestListingPrice));
-            embed.addFields({ name: '💰 Listing Price:', value: `${getPriceStringFormatted(listingPrice, dolzPrice)} DOLZ` });
+        if (data.listing_price) {
+            embed.addFields({ name: '💰 Listing Price TODO:', value: `${getPriceStringFormatted(data.listing_price, dolzPrice)} DOLZ` });
         }
 
-        const nftBuyerStats = computeNftHoldersStats(assetsBuyerForThisModel, {
-            topX: 1,
-            minCardsPerModel: 0,
-        }, false);
-        const topListBuyer = nftBuyerStats.topWalletsPerModel[data.card_number] || [];
-        let assetsBuyerForThisModelDetailStr = '—';
-        if (topListBuyer) {
-            const totalStr = `${assetsBuyerForThisModel.total}🃏 ${topListBuyer[0]?.listed || 0}🛒`;
-            const rarityStr = RARITY_ORDER
-                .filter(r => (topListBuyer[0]?.[r] ?? 0) > 0)
-                .map(r => `${rarityShort[r]}${topListBuyer[0]?.[r]}`)
-                .join(' ');
-            assetsBuyerForThisModelDetailStr = `${totalStr} ${assetsSellerForThisModel.total ? rarityStr : ''}`;
+        const totalListedAssetsBuyerForThisModel = structuredClone(assetsBuyerForThisModel).filter(item => item.listing !== null).length;
+        // Comptage des raretés dans ton tableau
+        const rarityCount = {};
+        for (const asset of assetsBuyerForThisModel) {
+            const rarity = asset.rarity || 'Not Revealed';
+            rarityCount[rarity] = (rarityCount[rarity] || 0) + 1;
         }
+        // Création des chaînes finales
+        const totalStr = `${assetsBuyerForThisModel.length}🃏 ${totalListedAssetsBuyerForThisModel}🛒`;
+        const rarityStr = RARITY_ORDER
+            .filter(r => rarityCount[r] > 0)
+            .map(r => `${rarityShort[r]}${rarityCount[r]}`)
+            .join(' ');
+
+        // Chaîne finale avec détails
+        const assetsBuyerForThisModelDetailStr = `${totalStr} ${rarityStr}`;
 
         embed.addFields({
-            name: `🙋‍♂️ Buyer: ${getWhaleEmoji(totalAssetsBuyer, dolzBalanceBuyer)} ${buyerUsername}`,
+            name: `🙋‍♂️ Buyer: ${getWhaleEmoji(allAssetsBuyer.total, dolzBalanceBuyer)} ${buyerUsername}`,
             value:
                 `🔗 [${to}](https://dolz.io/market/profile/${to})\n` +
-                `Total Assets: ${totalAssetsBuyer}🃏 ${totalAssetsOnSaleBuyer}🛒\n` +
-                `Assets ${data.card_number}: ${assetsBuyerForThisModelDetailStr}\n` +
+                `Total Assets: ${allAssetsBuyer.total}🃏 ${totalListedAssetsBuyer}🛒\n` +
+                `Asset ${data.card_number}: ${assetsBuyerForThisModelDetailStr}\n` +
                 `Total DOLZ: ${formatNumber(dolzBalanceBuyer)}\n` +
                 `Total BabyDOLZ: ${formatNumber(babyDolzBalanceBuyer)}\n`,
         });
