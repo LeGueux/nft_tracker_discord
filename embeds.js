@@ -239,11 +239,7 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
             }
 
             let blocTitle = `${getPrefixNameEmojiBySeason(getNFTSeasonByCardNumber(item.modelId))} ${item.isFragileLevel1 ? '🔥' : '🧊'}${item.isFragileLevel2 ? '🔥' : '🧊'} `;
-            if (season < 100) {
-                blocTitle += `[${item.name}](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`;
-            } else {
-                blocTitle += `${item.name}`;
-            }
+            blocTitle += `${item.name}`;
 
             embed.addFields({
                 name: '',

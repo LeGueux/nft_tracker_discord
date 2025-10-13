@@ -1,46 +1,76 @@
-import { searchCardsByCriterias } from './cometh-api.js';
+import { searchCardsByCriteriasV2, getNFTData } from './cometh-api.js';
 import { buildSnipeEmbed } from './embeds.js';
 import { IS_TEST_MODE } from './config.js';
-import { weiToDolz } from './utils.js';
 
 export async function handleSnipeForSeason(season) {
     console.log(`handleSnipeForSeason for season code ${season}`);
 
-    let seasonList = [];
+    let attributes = [];
     let isSnipeOnly = false;
 
     switch (season) {
         case 100:
-            seasonList = ['Off-Season', 'Special Edition', '1', '2', '3', '4', '5', '6', '7', '8'];
+            attributes = [
+                { 'name': 'Rarity', 'value': 'Limited' },
+                { 'name': 'Rarity', 'value': 'Rare' },
+                { 'name': 'Season', 'value': '1' },
+                { 'name': 'Season', 'value': '2' },
+                { 'name': 'Season', 'value': '3' },
+                { 'name': 'Season', 'value': '4' },
+                { 'name': 'Season', 'value': '5' },
+                { 'name': 'Season', 'value': '6' },
+                { 'name': 'Season', 'value': '7' },
+                { 'name': 'Season', 'value': '8' },
+                { 'name': 'Season', 'value': 'Special Edition' },
+                { 'name': 'Season', 'value': 'Off-Season' },
+            ];
             isSnipeOnly = true;
             break;
         case 110:
-            seasonList = ['1', '2', '3', '4', '5', '6', '7', '8'];
+            attributes = [
+                { 'name': 'Rarity', 'value': 'Limited' },
+                { 'name': 'Rarity', 'value': 'Rare' },
+                { 'name': 'Season', 'value': '1' },
+                { 'name': 'Season', 'value': '2' },
+                { 'name': 'Season', 'value': '3' },
+                { 'name': 'Season', 'value': '4' },
+                { 'name': 'Season', 'value': '5' },
+                { 'name': 'Season', 'value': '6' },
+                { 'name': 'Season', 'value': '7' },
+                { 'name': 'Season', 'value': '8' },
+            ];
             isSnipeOnly = true;
             break;
         case 120:
-            seasonList = ['Special Edition'];
+            attributes = [
+                { 'name': 'Rarity', 'value': 'Limited' },
+                { 'name': 'Rarity', 'value': 'Rare' },
+                { 'name': 'Season', 'value': 'Special Edition' },
+            ];
             isSnipeOnly = true;
             break;
         case 130:
-            seasonList = ['Off-Season'];
+            attributes = [
+                { 'name': 'Rarity', 'value': 'Limited' },
+                { 'name': 'Rarity', 'value': 'Rare' },
+                { 'name': 'Season', 'value': 'Off-Season' },
+            ];
             break;
         default:
-            seasonList = [season];
+            attributes = [
+                { 'name': 'Rarity', 'value': 'Limited' },
+                { 'name': 'Rarity', 'value': 'Rare' },
+                { 'name': 'Season', 'value': season.toString() },
+            ];
     }
 
-    const dataListings = await searchCardsByCriterias({
-        attributes: [{
-            Season: seasonList,
-            Rarity: ['Limited', 'Rare'],
-        }],
-        onSaleOnly: true,
+    const dataListings = await searchCardsByCriteriasV2({
+        attributes,
         limit: 10000,
-        orderBy: 'PRICE',
-        direction: 'ASC',
+        status: 'Listed',
+        listingOnly: true,
     });
-
-    const dataFormatted = analyzeListingsFragility(dataListings, isSnipeOnly);
+    const dataFormatted = await analyzeListingsFragility(dataListings, isSnipeOnly);
     if (IS_TEST_MODE) {
         // console.dir(dataFormatted, { depth: null, colors: true });
         console.table(dataFormatted.map(item => {
@@ -49,8 +79,8 @@ export async function handleSnipeForSeason(season) {
                 const gapObj = item.simulatedGaps[i];
                 const gapValue = gapObj?.priceGapPercent;
                 gaps[`Gap ↑ After ${i + 1} Buy`] = gapValue !== null && gapValue !== undefined
-                    ? `${gapValue.toFixed(2)}%`
-                    : '-';
+                ? `${gapValue.toFixed(2)}%`
+                : '-';
             }
 
             return {
@@ -71,29 +101,52 @@ export async function handleSnipeForSeason(season) {
     return await buildSnipeEmbed(dataFormatted, season);
 }
 
-export function analyzeListingsFragility(data, snipeOnly = false) {
+export async function analyzeListingsFragility(data, snipeOnly = false) {
+    // searchCardsByCriteriasV2
+    // {
+    //     nftId: 60612,
+    //     rarity: 'Limited',
+    //     cardNumber: 'g0047',
+    //     serialNumber: '404',
+    //     name: 'Lexi MONTANA',
+    //     outfit: "Fallin' For You",
+    //     bestOffer: null,
+    //     listing: { price: 1599, currency: 'DOLZ', expireTime: 1762841667 },
+    //     lastSale: null
+    // }
+
+    // getNFTData
+    // {
+    //     tokenId: 62240,
+    //     name: 'YANGS - I Will Punish You',
+    //     image: 'https://cardsdata.dolz.io/iStripper/g0126/1/Limited/61_lgx.png',
+    //     rarity: 'Limited',
+    //     rarity_color: '#000000',
+    //     season: '7',
+    //     card_number: 'g0126',
+    //     serial_number: '61/370',
+    //     listing_price: 4570,
+    //     floor_price: 4570,
+    //     owner: '0xCcd2028dE154f6369269F8d91FAe7426EC059C30'
+    // }
     const grouped = {};
     const rareFloorsByModel = {}; // floorRare par modèleId
 
-    for (const asset of data.assets) {
-        const name = asset.metadata?.name?.split('-')[0]?.trim();
-        const animationUrl = asset.metadata?.animation_url;
-        const priceWei = asset.orderbookStats?.lowestListingPrice;
+    for (const asset of data.results) {
+        // TODO find a way to batch these calls, if 200 cards means 200 calls...
+        // const nftData = await getNFTData(asset.nftId);
+        const name = asset.name.trim();
+        let priceDolz = asset.listing?.price ?? null;
 
-        if (!name || !priceWei || !animationUrl) continue;
+        if (!name || !priceDolz) continue;
 
         // Extraire rarity et modelId depuis animation_url
-        let rarity = 'Limited';
-        let modelId = null;
+        let rarity = asset.rarity;
+        let modelId = asset.cardNumber;
 
-        const match = animationUrl.match(/\/(g\d+)\/\d+\/(Limited|Rare)\//);
-        if (!match) continue;
-        modelId = match[1];
-        rarity = match[2];
+        if (!['Limited', 'Rare'].includes(rarity)) continue;
 
-        let priceDolz = parseInt(weiToDolz(priceWei));
-
-        if (rarity === 'Rare' && modelId) {
+        if (rarity === 'Rare') {
             if (!rareFloorsByModel[modelId]) {
                 rareFloorsByModel[modelId] = [];
             }
@@ -106,19 +159,20 @@ export function analyzeListingsFragility(data, snipeOnly = false) {
             grouped[keyName] = { prices: [], rarity, modelId };
         }
 
-        const ownerMap = {
-            [process.env.FRANCK_ADDRESS_1.toLowerCase()]: '-F1',
-            [process.env.FRANCK_ADDRESS_2.toLowerCase()]: '-F2',
-            [process.env.NICO_ADDRESS_1.toLowerCase()]: '-N1',
-            [process.env.NICO_ADDRESS_2.toLowerCase()]: '-N2',
-            [process.env.BOB_ADDRESS_1.toLowerCase()]: '-B1',
-            [process.env.COCH_ADDRESS_1.toLowerCase()]: '-C1',
-        };
+        // TODO remettre plus tard si on veut différencier les listings par propriétaire
+        // const ownerMap = {
+        //     [process.env.FRANCK_ADDRESS_1.toLowerCase()]: '-F1',
+        //     [process.env.FRANCK_ADDRESS_2.toLowerCase()]: '-F2',
+        //     [process.env.NICO_ADDRESS_1.toLowerCase()]: '-N1',
+        //     [process.env.NICO_ADDRESS_2.toLowerCase()]: '-N2',
+        //     [process.env.BOB_ADDRESS_1.toLowerCase()]: '-B1',
+        //     [process.env.COCH_ADDRESS_1.toLowerCase()]: '-C1',
+        // };
 
-        const suffix = ownerMap[asset?.owner?.toLowerCase()];
-        if (suffix) {
-            priceDolz += suffix;
-        }
+        // const suffix = ownerMap[nftData?.owner?.toLowerCase()];
+        // if (suffix) {
+        //     priceDolz += suffix;
+        // }
 
         grouped[keyName].prices.push(priceDolz);
     }
@@ -128,9 +182,7 @@ export function analyzeListingsFragility(data, snipeOnly = false) {
     for (const [name, { prices, rarity, modelId }] of Object.entries(grouped)) {
         const cleanPrices = prices.map(price => {
             if (typeof price === 'string') {
-                // Si c'est une chaîne de caractères, on gère les suffixes -F ou -N
-                // On utilise une expression régulière pour cibler '-F' ou '-N' à la fin de la chaîne
-                const cleanedString = price.replace(/-(F|N)$/, '');
+                const cleanedString = price.split('-')[0];
                 return parseInt(cleanedString, 10);
             }
             // Si c'est déjà un nombre, on le retourne tel quel

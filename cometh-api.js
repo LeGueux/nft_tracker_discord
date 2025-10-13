@@ -316,24 +316,8 @@ export async function getUserNFTs(address) {
     }
 }
 
-export async function getNFTData(tokenId) {
+export async function getNFTData(tokenId, withFloorPrice = true) {
     try {
-        // V1
-        // const response = await fetch(`https://cardsdata.dolz.io/jsons/${tokenId}.json`);
-        // if (!response.ok) return;
-
-        // const data = await response.json();
-        // return {
-        //     name: data.name,
-        //     image: data.image,
-        //     rarity: data.attributes.find((attr) => attr.trait_type === 'Rarity')?.value,
-        //     rarity_color: getRarityColor(data.attributes.find((attr) => attr.trait_type === 'Rarity')?.value),
-        //     season: data.attributes.find((attr) => attr.trait_type === 'Season')?.value,
-        //     card_number: data.attributes.find((attr) => attr.trait_type === 'Card Number')?.value,
-        //     serial_number: data.attributes.find((attr) => attr.trait_type === 'Serial Number')?.value,
-        // };
-
-        // V2
         const response = await fetch('https://back.dolz.io/apiMarket.php', {
             method: 'POST',
             headers: {
@@ -380,7 +364,7 @@ export async function getNFTData(tokenId) {
         const listingPrice = data.marketInfos?.listing?.price || null;
         const owner = data.marketInfos?.owner || null;
         let floorPrice = null;
-        if (cardNumber && rarity) {
+        if (cardNumber && rarity && withFloorPrice) {
             floorPrice = await getFloorPriceByModelAndRarity(cardNumber, rarity);
         }
 

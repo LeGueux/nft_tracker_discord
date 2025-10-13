@@ -40,7 +40,7 @@ export async function handleNftTrackingForModel(modelId, nbHolders = 15, withAdd
         }
     }
 
-    const snipeStats = analyzeListingsFragility(dataCard, false);
+    const snipeStats = await analyzeListingsFragility(dataCard, false);
     if (IS_TEST_MODE) {
         console.table(snipeStats.map(item => {
             const gaps = {};
