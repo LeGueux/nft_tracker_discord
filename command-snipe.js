@@ -134,7 +134,7 @@ export async function analyzeListingsFragility(data, snipeOnly = false) {
 
     for (const asset of data.results) {
         // TODO find a way to batch these calls, if 200 cards means 200 calls...
-        // const nftData = await getNFTData(asset.nftId);
+        // const nftData = await getNFTData(asset.nftId, false);
         const name = asset.name.trim();
         let priceDolz = asset.listing?.price ?? null;
 

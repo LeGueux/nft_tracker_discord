@@ -138,3 +138,27 @@ export async function getFloorPriceByModelAndRarity(modelId, rarity) {
         return null;
     }
 }
+
+export async function processWithConcurrencyLimit(items, concurrency, asyncCallback) {
+    const results = [];
+    const executing = new Set();
+
+    for (const item of items) {
+        const p = (async () => await asyncCallback(item))()
+            .then(result => {
+                results.push(result);
+                executing.delete(p);
+            });
+
+        executing.add(p);
+
+        if (executing.size >= concurrency) {
+            // Attend qu'au moins une promesse se termine
+            await Promise.race(executing);
+        }
+    }
+
+    // Attend la fin de toutes les promesses restantes
+    await Promise.all(executing);
+    return results;
+}

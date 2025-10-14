@@ -1,28 +1,33 @@
-import { searchCardsByCriterias, getDolzUsername, getNFTData } from './cometh-api.js';
-import { computeNftHoldersStats } from './command-nft-holders.js';
-import { analyzeListingsFragility } from './command-snipe.js';
+import { getDolzUsername, getNFTData, searchCardsByCriteriasV2 } from './cometh-api.js';
 import { buildNftTrackingEmbed } from './embeds.js';
 import { IS_TEST_MODE, RARITY_ORDER } from './config.js';
-import fs from 'fs/promises';
-import path from 'path';
+import { processWithConcurrencyLimit } from './utils.js';
 
 export async function handleNftTrackingForModel(modelId, nbHolders = 15, withAddress = false) {
-    let dataCard = null;
-
     console.log(`handleNftTrackingForModel for modelId ${modelId} nbHolders: ${nbHolders} withAddress: ${withAddress}`);
-    // In case API is too slow or down, we can use a local mock file
-    // const dataRaw = await fs.readFile(path.resolve('./mocks/card_' + modelId + '.json'), 'utf-8');
-    // dataCard = JSON.parse(dataRaw);
-    dataCard = await searchCardsByCriterias({
-        attributes: [{ 'Card Number': [modelId] }],
+
+    let dataSearchResults = await searchCardsByCriteriasV2({
+        attributes: [{ 'name': 'Card Number', 'value': [modelId] }],
         limit: 2000,
     });
-    console.log(`handleNftTrackingForModel for modelId ${modelId} - Cards found: ${dataCard.total}`);
+    console.log(`handleNftTrackingForModel for modelId ${modelId} - Cards found: ${dataSearchResults.total}`);
 
-    const nftHoldersStats = computeNftHoldersStats(dataCard, {
+    // Limite la concurrence à `concurrency` appels API
+    const nftResults = await processWithConcurrencyLimit(
+        dataSearchResults.results.map((asset, index) => ({ asset, index })),
+        50,
+        async ({ asset, index }) => {
+            const nftData = await getNFTData(asset.nftId, false);
+            return { index, asset, nftData };
+        }
+    );
+    // 🔹 Recréer le tableau dans l'ordre initial
+    nftResults.sort((a, b) => a.index - b.index);
+
+    const nftHoldersStats = await computeNftHoldersStats(nftResults, {
         topX: 10000,
         minCardsPerModel: 1,
-    }, false);
+    });
 
     if (IS_TEST_MODE) {
         console.log(`📊 Nombre de wallets par modèle :`);
@@ -40,34 +45,95 @@ export async function handleNftTrackingForModel(modelId, nbHolders = 15, withAdd
         }
     }
 
-    const snipeStats = await analyzeListingsFragility(dataCard, false);
-    if (IS_TEST_MODE) {
-        console.table(snipeStats.map(item => {
-            const gaps = {};
-            for (let i = 0; i < 5; i++) {
-                const gapObj = item.simulatedGaps[i];
-                const gapValue = gapObj?.priceGapPercent;
-                gaps[`Gap ↑ After ${i + 1} Buy`] = gapValue !== null && gapValue !== undefined
-                    ? `${gapValue.toFixed(2)}%`
-                    : '-';
+    const assetRarityFirst = dataSearchResults.results[0]?.rarity;
+    const isUnrevealed = assetRarityFirst === 'Not revealed';
+
+    return await buildNftTrackingEmbed(nftHoldersStats, nftResults, modelId, isUnrevealed, nbHolders, withAddress);
+}
+
+async function computeNftHoldersStats(nftResults, options = {}) {
+    const { topX = 5, minCardsPerModel = 0 } = options;
+
+    const walletModels = new Map();               // wallet → Set(models)
+    const allModels = new Set();                  // Set(modelId)
+    const modelWallets = new Map();               // modelId → Set(wallet)
+    const modelWalletCounts = new Map();          // modelId → Map(wallet → { total, [rarity]: count })
+    const cardsPerModel = new Map();              // modelId → total number of cards
+    const modelNames = new Map();                 // modelId => nom
+
+    for (const { asset, nftData } of nftResults) {
+        const name = asset.name.trim();
+        const owner = nftData.owner.toLowerCase();
+        const isListed = asset.listing != null;
+        // Extraire rarity et modelId depuis animation_url
+        let rarity = asset.rarity;
+        let modelId = asset.cardNumber;
+
+        modelNames.set(modelId, name);
+
+        allModels.add(modelId);
+
+        // wallet → models
+        if (!walletModels.has(owner)) walletModels.set(owner, new Set());
+        walletModels.get(owner).add(modelId);
+
+        // modelId → wallets
+        if (!modelWallets.has(modelId)) modelWallets.set(modelId, new Set());
+        modelWallets.get(modelId).add(owner);
+
+        // modelId → wallet → rareté dynamique
+        if (!modelWalletCounts.has(modelId)) modelWalletCounts.set(modelId, new Map());
+        const walletMap = modelWalletCounts.get(modelId);
+
+        if (!walletMap.has(owner)) walletMap.set(owner, { total: 0, listed: 0 });
+        const countObj = walletMap.get(owner);
+
+        countObj.total += 1;
+        if (isListed) countObj.listed += 1;
+        countObj[rarity] = (countObj[rarity] || 0) + 1;
+
+        cardsPerModel.set(modelId, (cardsPerModel.get(modelId) || 0) + 1);
+    }
+
+    const totalModels = allModels.size;
+    const fullSeasonWallets = [...walletModels.entries()]
+        .filter(([_, models]) => models.size === totalModels)
+        .map(([wallet]) => wallet);
+
+    const walletsPerModel = {};
+    for (const [modelId, walletSet] of modelWallets.entries()) {
+        walletsPerModel[modelId] = walletSet.size;
+    }
+
+    const topWalletsPerModel = {};
+    for (const [modelId, walletMap] of modelWalletCounts.entries()) {
+        const sorted = [...walletMap.entries()]
+            .filter(([_, counts]) => counts.total >= minCardsPerModel)
+            .sort((a, b) => b[1].total - a[1].total)
+            .slice(0, topX);
+
+        topWalletsPerModel[modelId] = sorted.map(([wallet, counts]) => {
+            const result = {
+                wallet,
+                total: counts.total,
+                listed: counts.listed || 0,
+                percentOwned: parseFloat(((counts.total / cardsPerModel.get(modelId)) * 100).toFixed(2)),
+            };
+
+            // Injecte chaque rareté dans l'ordre défini
+            for (const rarity of RARITY_ORDER) {
+                result[rarity] = counts[rarity] || 0;
             }
 
-            return {
-                Name: item.name,
-                'S/N': item.modelId,
-                FloorLimited: item.floor,
-                Next: item.next ?? '-',
-                FloorRare: item.floorRare ?? '-',
-                Prices: item.prices.join(', '),
-                'Gap %': item.priceGapPercent !== null ? item.priceGapPercent.toFixed(2) : '-',
-                'Fragile L1 (+25%)': item.isFragileLevel1,
-                'Fragile L2 (+25%)': item.isFragileLevel2,
-                ...gaps
-            };
-        }));
+            return result;
+        });
     }
-    const dataFirstAssetOfCards = await getNFTData(dataCard.assets[0]?.tokenId);
-    const isUnrevealed = dataFirstAssetOfCards?.rarity === 'Not revealed';
 
-    return await buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId, isUnrevealed, nbHolders, withAddress);
+    return {
+        modelNames: Object.fromEntries(modelNames),
+        cardsPerModel: Object.fromEntries(cardsPerModel),
+        topWalletsPerModel,
+        numberOfFullCollectors: fullSeasonWallets.length,
+        walletsPerModel,
+    };
 }

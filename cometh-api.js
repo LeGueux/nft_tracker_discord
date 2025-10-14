@@ -317,6 +317,7 @@ export async function getUserNFTs(address) {
 }
 
 export async function getNFTData(tokenId, withFloorPrice = true) {
+    console.log(`Récupération des données pour le token ID: ${tokenId} (withFloorPrice: ${withFloorPrice})`);
     try {
         const response = await fetch('https://back.dolz.io/apiMarket.php', {
             method: 'POST',

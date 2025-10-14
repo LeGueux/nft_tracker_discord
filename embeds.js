@@ -366,7 +366,7 @@ function chunkText(text, maxLength = 1000) {
     return chunks;
 }
 
-export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId, isUnrevealed = false, nbHolders = 15, withAddress = false) {
+export async function buildNftTrackingEmbed(nftHoldersStats, nftResults, modelId, isUnrevealed = false, nbHolders = 15, withAddress = false) {
     const {
         modelNames,
         cardsPerModel,
@@ -388,32 +388,6 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
         .setTimestamp();
 
     try {
-        // Ajout des champs snipeStats (probablement pas très longs, mais chunk si besoin)
-        for (const item of snipeStats) {
-            const simulatedGaps = item.simulatedGaps
-                .map(g => (g?.priceGapPercent != null ? `${g.priceGapPercent.toFixed(1)}%` : null))
-                .filter(Boolean);
-
-            const snipeLines = [];
-            snipeLines.push(`[🔗LINK](https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}?isOnSale=true&orderBy=PRICE&direction=ASC&Card+Number=${item.modelId})`);
-            snipeLines.push(
-                `FP Limited ${item.floor}`,
-                `FP Rare ${item.floorRare ?? '-'}`,
-                `**Prices (${item.countLimitedBeforeRare})** ${item.prices.join(', ')}`,
-                '**Gaps:**',
-                `${item.priceGapPercent?.toFixed(1) ?? '-'}%${simulatedGaps.length > 0 ? ` | ${simulatedGaps.join(' | ')}` : ''}`
-            );
-
-            const chunks = chunkText(snipeLines.join('\n'));
-            for (const chunk of chunks) {
-                embed.addFields({
-                    name: `Snipe ${item.isFragileLevel1 ? '🔥' : '🧊'}${item.isFragileLevel2 ? '🔥' : '🧊'} ${item.name}`,
-                    value: chunk + '\u200B',
-                    inline: false,
-                });
-            }
-        }
-
         // Ajout des champs topWalletsPerModel (chunk obligatoire car potentiellement très long)
         for (const [modelId, topList] of Object.entries(topWalletsPerModel)) {
             const holdersLines = [];
@@ -473,11 +447,11 @@ export async function buildNftTrackingEmbed(nftHoldersStats, snipeStats, modelId
 
         // Ajout du calculateur de BBD Reward si revealed card
         if (!isUnrevealed) {
-            embed = buildNftBBDRewardCalculatorEmbedField(modelId, embed);
+            embed = buildNftBBDRewardCalculatorEmbedField(nftResults, modelId, embed);
         }
 
         // Sécurité : éviter débordement Discord
-        console.log(`Embed length: ${embed.length} characters`);
+        console.log(`Embed total length: ${embed.length} characters`);
         if (embed.length > 6000) {
             console.warn('Embed too large, truncating...');
             embed.setFields({
@@ -689,23 +663,16 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
     return embed;
 }
 
-export async function buildNftBBDRewardCalculatorEmbedField(modelId, embed) {
+function buildNftBBDRewardCalculatorEmbedField(nftResults, modelId, embed) {
     console.log(`buildNftBBDRewardCalculatorEmbedField for modelId ${modelId}`);
-    const dataCard = await searchCardsByCriterias({
-        attributes: [{ 'Card Number': [modelId] }],
-        onSaleOnly: true,
-        limit: 2000,
-    });
-    console.log(`buildNftBBDRewardCalculatorEmbedField for modelId ${modelId} - Cards found: ${dataCard.total}`);
-
     try {
         // Étape 1 : préparer toutes les lignes dans un tableau temporaire
         const assetStats = [];
 
-        for (const asset of dataCard.assets) {
-            const priceWei = asset.orderbookStats?.lowestListingPrice;
-            const priceDolz = parseInt(weiToDolz(priceWei));
-            const nftData = await getNFTData(asset.tokenId);
+        for (const { asset, nftData } of nftResults) {
+            if (!nftData.listing_price) continue;
+
+            const priceDolz = nftData.listing_price;
             const bbdRewardNft = calculateBBDRewardNftByNFTData(nftData);
             const ratio = bbdRewardNft / priceDolz;
 

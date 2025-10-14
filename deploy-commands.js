@@ -26,24 +26,6 @@ const commands = [
                 ))
         .toJSON(),
     new SlashCommandBuilder()
-        .setName('nft_holders')
-        .setDescription('Affiche les 🐋 holders de NFT pour une saison donnée')
-        .addIntegerOption(option =>
-            option.setName('season')
-                .setDescription('Numéro de la saison')
-                .setRequired(true)
-                .addChoices(
-                    { name: 'Saison 1', value: 1 },
-                    { name: 'Saison 2', value: 2 },
-                    { name: 'Saison 3', value: 3 },
-                    { name: 'Saison 4', value: 4 },
-                    { name: 'Saison 5', value: 5 },
-                    { name: 'Saison 6', value: 6 },
-                    { name: 'Saison 7', value: 7 },
-                    { name: 'Saison 8', value: 8 },
-                ))
-        .toJSON(),
-    new SlashCommandBuilder()
         .setName('nft_tracking')
         .setDescription('Affiche les listings, les holders et le ratio BBD/DOLZ pour une carte donnée (ex: g0100)')
         .addStringOption(option =>

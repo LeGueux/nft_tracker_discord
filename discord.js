@@ -10,7 +10,6 @@ import { IS_TEST_MODE, ALIVE_PING_INTERVAL, COMETH_API_INTERVAL } from './config
 import { sendStatusMessage } from './error-handler.js';
 import { callComethApiForLastListings, callComethApiForLastSales, getNFTData } from './cometh-api.js';
 import { handleSnipeForSeason } from './command-snipe.js';
-import { handleNftHoldersForSeason } from './command-nft-holders.js';
 import { handleNftTrackingForModel } from './command-nft-tracking.js';
 import { handleGetDataForWallet } from './command-wallet-data.js';
 import { handleGetChartSalesVolume, handleGetChartSalesVolumeBywallet } from './command-chart-sales-volume.js';
@@ -152,20 +151,19 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
-                // const nftHoldersEmbed = await handleNftHoldersForSeason(6);
-                // const nftTrackingEmbed = await handleNftTrackingForModel('g0124', 15, false);
-                const tokenId = '51729';  // Limited
+                const nftTrackingEmbed = await handleNftTrackingForModel('g0124', 5, false);
+                // const tokenId = '51729';  // Limited
                 // const tokenId = '51565';  // Rare
                 // const tokenId = '51495';  // Epic
                 // const tokenId = '51490';  // Legendary
-                const data = await getNFTData(tokenId);
-                const embedSale = await buildSaleListingNFTEmbed(
-                    data,
-                    process.env.FRANCK_ADDRESS_1,
-                    process.env.NICO_ADDRESS_1,
-                    1000,
-                    'sale',
-                );
+                // const data = await getNFTData(tokenId);
+                // const embedSale = await buildSaleListingNFTEmbed(
+                //     data,
+                //     process.env.FRANCK_ADDRESS_1,
+                //     process.env.NICO_ADDRESS_1,
+                //     1000,
+                //     'sale',
+                // );
                 // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1, true);
                 // const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
@@ -184,20 +182,19 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedAllSeasons] });
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
-                    // await thread.send({ embeds: [nftHoldersEmbed] });
-                    // await thread.send({ embeds: [nftTrackingEmbed] });
+                    await thread.send({ embeds: [nftTrackingEmbed] });
                     // await thread.send({ embeds: [walletFranckEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
-                    await thread.send({
-                        content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
-                        embeds: [embedSale],
-                        allowedMentions: {
-                            users: [
-                                process.env.FRANCK_DISCORD_USER_ID,
-                            ],
-                        },
-                    });
+                    // await thread.send({
+                    //     content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
+                    //     embeds: [embedSale],
+                    //     allowedMentions: {
+                    //         users: [
+                    //             process.env.FRANCK_DISCORD_USER_ID,
+                    //         ],
+                    //     },
+                    // });
                     process.exit(0);
                 }
             } catch (e) {
@@ -238,14 +235,6 @@ export function eventBotReady(discordClient) {
                     embeds: [embed],
                     components: row,
                 });
-            } else if (interaction.commandName === 'nft_holders') {
-                const season = interaction.options.getInteger('season');
-                const embed = await handleNftHoldersForSeason(season);
-                const row = buildSeasonButtons('nft_holders', season, false, true, false);
-                await interaction.editReply({
-                    embeds: [embed],
-                    components: row,
-                });
             } else if (interaction.commandName === 'nft_tracking') {
                 const modelId = interaction.options.getString('modelid');
                 const nbHolders = interaction.options.getInteger('nb_holders') ?? 15;
@@ -276,24 +265,16 @@ export function eventBotReady(discordClient) {
                 await interaction.editReply(embedWithChart);
             }
         } else if (interaction.isButton()) {
-            const match = interaction.customId.match(/select_season_(\d+)_(snipe|nft_holders)/);
+            const match = interaction.customId.match(/select_season_(\d+)_(snipe)/);
             if (!match) return;
 
             const season = parseInt(match[1]);
-            const context = match[2]; // 'snipe' ou 'nft_holders'
+            const context = match[2]; // 'snipe'
             console.log('interaction.customId Match', match, context, season);
             await interaction.deferUpdate(); // Important pour éviter "Échec de l'interaction"
             if (context === 'snipe') {
                 const snipeEmbedSeason = await handleSnipeForSeason(season);
                 const row = buildSeasonButtons(context, season, true, true, true);
-
-                await interaction.editReply({
-                    embeds: [snipeEmbedSeason],
-                    components: row
-                });
-            } else if (context === 'nft_holders') {
-                const snipeEmbedSeason = await handleNftHoldersForSeason(season);
-                const row = buildSeasonButtons(context, season, false, true, false);
 
                 await interaction.editReply({
                     embeds: [snipeEmbedSeason],
