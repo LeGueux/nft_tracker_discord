@@ -451,61 +451,6 @@ export async function searchFilledEventsByCriterias({
     }
 }
 
-export async function searchCardsByCriterias({
-    owner = null,
-    attributes = [],
-    onSaleOnly = false,
-    limit = 1,
-    skip = 0,
-    orderBy = 'PRICE',
-    direction = 'ASC',
-    returnOnlyTotal = false,
-} = {}) {
-    try {
-        console.log(`🔍 searchCardsByCriterias lancé à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
-        console.log(`🧪 Paramètres : ${JSON.stringify({ attributes, onSaleOnly, limit, skip, orderBy, direction })}`);
-
-        const body = {
-            contractAddress: process.env.NFT_CONTRACT_ADDRESS,
-            attributes, // tableau d’objets : ex [{ Season: 'S1' }, { Rarity: 'Rare' }]
-            limit,
-            skip,
-            orderBy,
-            direction,
-        };
-
-        if (onSaleOnly) {
-            body.isOnSale = true;
-        }
-
-        if (owner) {
-            body.owner = owner.toLowerCase();
-        }
-
-        const response = await fetch('https://api.marketplace.cometh.io/v1/assets/search',
-            {
-                method: 'POST',
-                headers: {
-                    accept: 'application/json',
-                    'content-type': 'application/json',
-                    apikey: process.env.COMETH_API_KEY,
-                },
-                body: JSON.stringify(body),
-            },
-        );
-
-        const data = await response.json();
-        return returnOnlyTotal ? data.total : data;
-    } catch (error) {
-        console.error('❌ Erreur dans searchCardsByCriterias:', error);
-        await sendStatusMessage(
-            discordClient,
-            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans searchCardsByCriterias - Rejection : \`${error}\``,
-        );
-        return { assets: [], total: 0 };
-    }
-}
-
 export async function searchCardsByCriteriasV2({
     attributes = [],
     limit = 1,

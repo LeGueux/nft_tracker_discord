@@ -1,6 +1,5 @@
 import { AttachmentBuilder, EmbedBuilder } from 'discord.js';
 import {
-    searchCardsByCriterias,
     searchCardsByCriteriasV2,
     getDolzUsername,
     getBabyDolzBalance,
