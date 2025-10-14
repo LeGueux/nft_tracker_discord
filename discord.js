@@ -151,7 +151,7 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
-                const nftTrackingEmbed = await handleNftTrackingForModel('g0124', 5, false);
+                // const nftTrackingEmbed = await handleNftTrackingForModel('g0124', 5, false);
                 // const tokenId = '51729';  // Limited
                 // const tokenId = '51565';  // Rare
                 // const tokenId = '51495';  // Epic
@@ -164,7 +164,7 @@ export function eventBotReady(discordClient) {
                 //     1000,
                 //     'sale',
                 // );
-                // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1, true);
+                const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1, true);
                 // const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
@@ -182,8 +182,8 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedAllSeasons] });
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
-                    await thread.send({ embeds: [nftTrackingEmbed] });
-                    // await thread.send({ embeds: [walletFranckEmbed] });
+                    // await thread.send({ embeds: [nftTrackingEmbed] });
+                    await thread.send({ embeds: [walletFranckEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
                     // await thread.send({
@@ -256,13 +256,13 @@ export function eventBotReady(discordClient) {
                 }
                 const embed = await handleGetDataForWallet(walletAddress, withFullDetails);
                 await interaction.editReply({ embeds: [embed] });
-            } else if (interaction.commandName === 'get_chart_sales_volume') {
-                const embedWithChart = await handleGetChartSalesVolume(false);
-                await interaction.editReply(embedWithChart);
-            } else if (interaction.commandName === 'get_chart_sales_volume_by_wallet') {
-                const address = interaction.options.getString('address');
-                const embedWithChart = await handleGetChartSalesVolumeBywallet(address);
-                await interaction.editReply(embedWithChart);
+            // } else if (interaction.commandName === 'get_chart_sales_volume') {
+            //     const embedWithChart = await handleGetChartSalesVolume(false);
+            //     await interaction.editReply(embedWithChart);
+            // } else if (interaction.commandName === 'get_chart_sales_volume_by_wallet') {
+            //     const address = interaction.options.getString('address');
+            //     const embedWithChart = await handleGetChartSalesVolumeBywallet(address);
+            //     await interaction.editReply(embedWithChart);
             }
         } else if (interaction.isButton()) {
             const match = interaction.customId.match(/select_season_(\d+)_(snipe)/);

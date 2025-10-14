@@ -101,34 +101,7 @@ export async function handleSnipeForSeason(season) {
     return await buildSnipeEmbed(dataFormatted, season);
 }
 
-export async function analyzeListingsFragility(data, snipeOnly = false) {
-    // searchCardsByCriteriasV2
-    // {
-    //     nftId: 60612,
-    //     rarity: 'Limited',
-    //     cardNumber: 'g0047',
-    //     serialNumber: '404',
-    //     name: 'Lexi MONTANA',
-    //     outfit: "Fallin' For You",
-    //     bestOffer: null,
-    //     listing: { price: 1599, currency: 'DOLZ', expireTime: 1762841667 },
-    //     lastSale: null
-    // }
-
-    // getNFTData
-    // {
-    //     tokenId: 62240,
-    //     name: 'YANGS - I Will Punish You',
-    //     image: 'https://cardsdata.dolz.io/iStripper/g0126/1/Limited/61_lgx.png',
-    //     rarity: 'Limited',
-    //     rarity_color: '#000000',
-    //     season: '7',
-    //     card_number: 'g0126',
-    //     serial_number: '61/370',
-    //     listing_price: 4570,
-    //     floor_price: 4570,
-    //     owner: '0xCcd2028dE154f6369269F8d91FAe7426EC059C30'
-    // }
+async function analyzeListingsFragility(data, snipeOnly = false) {
     const grouped = {};
     const rareFloorsByModel = {}; // floorRare par modèleId
 

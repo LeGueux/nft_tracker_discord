@@ -1,5 +1,5 @@
 import { COMETH_API_INTERVAL, NFT_LIST_BY_SEASON } from './config.js';
-import { searchCardsByCriterias, searchCardsByCriteriasV2 } from './cometh-api.js';
+import { searchCardsByCriteriasV2 } from './cometh-api.js';
 
 export function getRarityColor(rarity) {
     switch (rarity) {

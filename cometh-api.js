@@ -286,36 +286,6 @@ export async function getDolzPrice() {
     }
 }
 
-export async function getUserNFTs(address) {
-    try {
-        // Envoi de la requête POST à l'API avec le corps contenant le type de commande et le wallet address
-        const response = await fetch('https://back.dolz.io/api.php', {
-            method: 'POST',
-            headers: {
-                accept: 'application/json',
-                'content-type': 'application/json',
-            },
-            body: JSON.stringify({
-                command: 'getUserNFTs',
-                contractAddress: process.env.NFT_CONTRACT_ADDRESS,
-                walletAddress: address,
-            }),
-        });
-        // Parsing de la réponse JSON
-        const data = await response.json();
-
-        return data;
-    } catch (error) {
-        // Affichage de l'erreur en cas d'échec de la requête ou de parsing
-        console.error(
-            `Erreur lors de la récupération du prix du Dolz:`,
-            error,
-        );
-        // Retourne 0 par défaut en cas d'erreur
-        return 0;
-    }
-}
-
 export async function getNFTData(tokenId, withFloorPrice = true) {
     console.log(`Récupération des données pour le token ID: ${tokenId} (withFloorPrice: ${withFloorPrice})`);
     try {
@@ -396,7 +366,7 @@ export async function searchFilledEventsByCriterias({
     returnOnlyTotal = false,
 } = {}) {
     try {
-        console.log(`🔍 searchCardsByCriterias lancé à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
+        console.log(`🔍 searchFilledEventsByCriterias lancé à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
         console.log(`🧪 Paramètres : ${JSON.stringify({ attributes, limit })}`);
 
         const body = {
@@ -472,10 +442,10 @@ export async function searchFilledEventsByCriterias({
 
         return returnOnlyTotal ? result.total : result;
     } catch (error) {
-        console.error('❌ Erreur dans searchCardsByCriterias:', error);
+        console.error('❌ Erreur dans searchFilledEventsByCriterias:', error);
         await sendStatusMessage(
             discordClient,
-            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans searchCardsByCriterias - Rejection : \`${error}\``,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans searchFilledEventsByCriterias - Rejection : \`${error}\``,
         );
         return { assets: [], total: 0 };
     }
@@ -550,6 +520,7 @@ export async function searchCardsByCriteriasV2({
         console.log(`🧪 Paramètres : ${JSON.stringify({ attributes, limit, sort, status, walletAddress, listingOnly, returnOnlyTotal })}`);
 
         const baseBody = {
+            attributes: btoa(JSON.stringify(attributes)),
             contractAddress: process.env.NFT_CONTRACT_ADDRESS,
             command: 'getNFTsForAttributes',
             limit,
