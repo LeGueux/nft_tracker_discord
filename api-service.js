@@ -324,10 +324,6 @@ export async function searchCardsByCriteriasV2({
         return { results: allResults, total };
     } catch (error) {
         console.error('❌ Erreur dans searchCardsByCriteriasV2:', error);
-        await sendStatusMessage(
-            discordClient,
-            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans searchCardsByCriteriasV2 - Rejection : \`${error}\``,
-        );
         return { results: [], total: 0 };
     }
 }
@@ -360,10 +356,6 @@ export async function getEventsByWallet(walletAddress, unreadOffersOnly = false,
         return data;
     } catch (error) {
         console.error('❌ Erreur dans getEventsByWallet:', error);
-        await sendStatusMessage(
-            discordClient,
-            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans getEventsByWallet - Rejection : \`${error}\``,
-        );
         return {};
     }
 }
@@ -390,10 +382,6 @@ export async function getOffersByNFTId(nftId) {
         return data;
     } catch (error) {
         console.error('❌ Erreur dans getOffersByNFTId:', error);
-        await sendStatusMessage(
-            discordClient,
-            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans getOffersByNFTId - Rejection : \`${error}\``,
-        );
         return {};
     }
 }
