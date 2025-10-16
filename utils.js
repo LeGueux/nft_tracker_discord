@@ -1,4 +1,4 @@
-import { COMETH_API_INTERVAL_SEC, NFT_LIST_BY_SEASON } from './config.js';
+import { DOLZ_API_INTERVAL_SEC, NFT_LIST_BY_SEASON } from './config.js';
 import { searchCardsByCriteriasV2 } from './api-service.js';
 
 export function getRarityColor(rarity) {
@@ -17,7 +17,7 @@ export function getRarityColor(rarity) {
 export function checkDateIsValidSinceLastOneInterval(timestamp) {
     const now = Math.floor(Date.now() / 1000);
 
-    return now - timestamp <= COMETH_API_INTERVAL_SEC;
+    return now - timestamp <= DOLZ_API_INTERVAL_SEC;
 }
 
 export function getNFTSeasonByCardNumber(cardNumber) {

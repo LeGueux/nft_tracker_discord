@@ -6,7 +6,7 @@ import {
     ButtonStyle,
 } from 'discord.js';
 import { buildSaleListingNFTEmbed } from './embeds.js';
-import { IS_TEST_MODE, ALIVE_PING_INTERVAL, COMETH_API_INTERVAL_MS } from './config.js';
+import { IS_TEST_MODE, ALIVE_PING_INTERVAL, DOLZ_API_INTERVAL_MS } from './config.js';
 import { sendStatusMessage } from './error-handler.js';
 import { callApiToHandleNFTEvents, getNFTData } from './api-service.js';
 import { handleSnipeForSeason } from './command-snipe.js';
@@ -210,7 +210,7 @@ export function eventBotReady(discordClient) {
         setInterval(async () => {
             console.log('**********************************');
             await callApiToHandleNFTEvents(discordClient);
-        }, COMETH_API_INTERVAL_MS);
+        }, DOLZ_API_INTERVAL_MS);
 
         // Alive ping
         setInterval(async () => {
