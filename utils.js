@@ -1,5 +1,5 @@
-import { COMETH_API_INTERVAL, NFT_LIST_BY_SEASON } from './config.js';
-import { searchCardsByCriteriasV2 } from './cometh-api.js';
+import { COMETH_API_INTERVAL_SEC, NFT_LIST_BY_SEASON } from './config.js';
+import { searchCardsByCriteriasV2 } from './api-service.js';
 
 export function getRarityColor(rarity) {
     switch (rarity) {
@@ -14,13 +14,10 @@ export function getRarityColor(rarity) {
     }
 }
 
-export function checkDateIsValidSinceLastOneInterval(date) {
-    return date >= new Date(new Date().getTime() - COMETH_API_INTERVAL);
-}
+export function checkDateIsValidSinceLastOneInterval(timestamp) {
+    const now = Math.floor(Date.now() / 1000);
 
-// Convertit du wei en DOLZ
-export function weiToDolz(weiStr) {
-    return parseFloat(weiStr) / 1e18;
+    return now - timestamp <= COMETH_API_INTERVAL_SEC;
 }
 
 export function getNFTSeasonByCardNumber(cardNumber) {
@@ -50,14 +47,12 @@ export function getContentTagsDependsOnNFT(data, price, type) {
     if (isListing && isStandardSeason) {
         // FRANCK ONLY
         // Listing | All seasons                            | Price <= 6000 | Epic
-        // Listing | S6                                     | Price <= 2000 | NOT Limited
-        // Listing | S7                                     | Price <= 2000 | NOT Limited
+        // Listing | S6 et +                                | Price <= 2000 | NOT Limited
         // Listing | S6 Octokuro       g0065                | Price <= 5000 | Limited, Rare
         // Listing | S7 Emiri Momota   g0125                | Price <= 4000 | Limited, Rare
         // Listing | S8 Alexis Crystal g0124                | Price <= 2000
         if ((isEpic && price <= 6000) ||
-            (data.season === '6' && !isLimited && price <= 2000) ||
-            (data.season === '7' && !isLimited && price <= 2000) ||
+            (data.season >= '6' && !isLimited && price <= 2000) ||
             (['g0065'].includes(data.card_number) && price <= 5000) ||
             (['g0125'].includes(data.card_number) && price <= 4000) ||
             (['g0124'].includes(data.card_number) && price <= 2000)
@@ -65,7 +60,6 @@ export function getContentTagsDependsOnNFT(data, price, type) {
             return FRANCK;
         }
     }
-    // FRANCK ONLY
     return '';
 }
 
@@ -131,7 +125,7 @@ export async function getFloorPriceByModelAndRarity(modelId, rarity) {
     });
 
     const asset = result.results?.[0];
-    
+
     if (asset?.listing?.price) {
         return asset.listing.price;
     } else {

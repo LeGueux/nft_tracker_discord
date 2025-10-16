@@ -4,7 +4,7 @@ import {
     getDolzUsername,
     getBabyDolzBalance,
     getDolzPrice,
-} from './cometh-api.js';
+} from './api-service.js';
 import { getDolzBalance } from './alchemy-api.js';
 import {
     getNFTSeasonByCardNumber,
@@ -124,7 +124,7 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, type) {
 
     const embed = new EmbedBuilder()
         .setTitle(getTitle(type, data.name))
-        .setURL(`https://dolz.io/marketplace/nfts/${process.env.NFT_CONTRACT_ADDRESS}/${data.tokenId}`)
+        .setURL(`https://dolz.io/market/asset/${process.env.NFT_CONTRACT_ADDRESS}/${data.tokenId}`)
         .setImage(data.image)
         .setColor(data.rarity_color)
         .setTimestamp()

@@ -1,4 +1,3 @@
-import { searchFilledEventsByCriterias } from './cometh-api.js';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 import { buildChartSalesVolume } from './embeds.js';
 import dayjs from 'dayjs';
@@ -188,65 +187,65 @@ async function generateSalesChartByWallet(salesData) {
 
 export async function handleGetChartSalesVolume(withMockData = false) {
     console.log(`handleGetChartSalesVolume withMockData: ${withMockData}`);
-    let salesData;
-    if (withMockData) {
-        salesData = generateFakeSalesData(30);
-        console.log('Generated mock sales data:', salesData);
-    } else {
-        salesData = await searchFilledEventsByCriterias({
-            limit: 5000,
-        });
-        // console.log('Sales data:', salesData);
-    }
-    const imageBuffer = await generateSalesChart(salesData);
-    return await buildChartSalesVolume(imageBuffer);
+    // let salesData;
+    // if (withMockData) {
+    //     salesData = generateFakeSalesData(30);
+    //     console.log('Generated mock sales data:', salesData);
+    // } else {
+    //     salesData = await searchFilledEventsByCriterias({
+    //         limit: 5000,
+    //     });
+    //     // console.log('Sales data:', salesData);
+    // }
+    // const imageBuffer = await generateSalesChart(salesData);
+    // return await buildChartSalesVolume(imageBuffer);
 }
 
 export async function handleGetChartSalesVolumeBywallet(address) {
     console.log(`handleGetChartSalesVolumeBywallet`);
-    function mergeSales(makerSales, takerSales) {
-        const map = {};
+    // function mergeSales(makerSales, takerSales) {
+    //     const map = {};
 
-        // Ajout des Maker (ventes)
-        makerSales.forEach(({ date, volumeAchats, nbAchats, volumeVentes, nbVentes }) => {
-            if (!map[date]) {
-                map[date] = { date, volumeAchats: 0, nbAchats: 0, volumeVentes: 0, nbVentes: 0 };
-            }
-            map[date].volumeAchats = volumeAchats;
-            map[date].nbAchats = nbAchats;
-            map[date].volumeVentes = volumeVentes;
-            map[date].nbVentes = nbVentes;
-        });
+    //     // Ajout des Maker (ventes)
+    //     makerSales.forEach(({ date, volumeAchats, nbAchats, volumeVentes, nbVentes }) => {
+    //         if (!map[date]) {
+    //             map[date] = { date, volumeAchats: 0, nbAchats: 0, volumeVentes: 0, nbVentes: 0 };
+    //         }
+    //         map[date].volumeAchats = volumeAchats;
+    //         map[date].nbAchats = nbAchats;
+    //         map[date].volumeVentes = volumeVentes;
+    //         map[date].nbVentes = nbVentes;
+    //     });
 
-        // Ajout des Taker (achats)
-        takerSales.forEach(({ date, volumeAchats, nbAchats, volumeVentes, nbVentes }) => {
-            if (!map[date]) {
-                map[date] = { date, volumeAchats: 0, nbAchats: 0, volumeVentes: 0, nbVentes: 0 };
-            }
-            map[date].volumeAchats = volumeAchats;
-            map[date].nbAchats = nbAchats;
-            map[date].volumeVentes = volumeVentes;
-            map[date].nbVentes = nbVentes;
-        });
+    //     // Ajout des Taker (achats)
+    //     takerSales.forEach(({ date, volumeAchats, nbAchats, volumeVentes, nbVentes }) => {
+    //         if (!map[date]) {
+    //             map[date] = { date, volumeAchats: 0, nbAchats: 0, volumeVentes: 0, nbVentes: 0 };
+    //         }
+    //         map[date].volumeAchats = volumeAchats;
+    //         map[date].nbAchats = nbAchats;
+    //         map[date].volumeVentes = volumeVentes;
+    //         map[date].nbVentes = nbVentes;
+    //     });
 
-        // Conversion en tableau + tri par date
-        return Object.values(map).sort((a, b) => new Date(a.date) - new Date(b.date));
-    }
+    //     // Conversion en tableau + tri par date
+    //     return Object.values(map).sort((a, b) => new Date(a.date) - new Date(b.date));
+    // }
 
-    let makerSalesData, takerSalesData;
-    makerSalesData = await searchFilledEventsByCriterias({
-        maker: address,
-        limit: 5000,
-    });
-    takerSalesData = await searchFilledEventsByCriterias({
-        taker: address,
-        limit: 5000,
-    });
-    // console.log('Maker Sales data:', makerSalesData);
-    // console.log('Taker Sales data:', takerSalesData);
+    // let makerSalesData, takerSalesData;
+    // makerSalesData = await searchFilledEventsByCriterias({
+    //     maker: address,
+    //     limit: 5000,
+    // });
+    // takerSalesData = await searchFilledEventsByCriterias({
+    //     taker: address,
+    //     limit: 5000,
+    // });
+    // // console.log('Maker Sales data:', makerSalesData);
+    // // console.log('Taker Sales data:', takerSalesData);
 
-    const mergedData = mergeSales(makerSalesData, takerSalesData);
-    // console.log('All Sales data:', mergedData);
-    const imageBuffer = await generateSalesChartByWallet(mergedData);
-    return await buildChartSalesVolume(imageBuffer);
+    // const mergedData = mergeSales(makerSalesData, takerSalesData);
+    // // console.log('All Sales data:', mergedData);
+    // const imageBuffer = await generateSalesChartByWallet(mergedData);
+    // return await buildChartSalesVolume(imageBuffer);
 }

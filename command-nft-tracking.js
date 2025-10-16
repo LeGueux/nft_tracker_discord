@@ -1,4 +1,4 @@
-import { getDolzUsername, getNFTData, searchCardsByCriteriasV2 } from './cometh-api.js';
+import { getDolzUsername, getNFTData, searchCardsByCriteriasV2 } from './api-service.js';
 import { buildNftTrackingEmbed } from './embeds.js';
 import { IS_TEST_MODE, RARITY_ORDER } from './config.js';
 import { processWithConcurrencyLimit } from './utils.js';

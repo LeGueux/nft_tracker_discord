@@ -1,4 +1,4 @@
-import { searchCardsByCriteriasV2, getNFTData } from './cometh-api.js';
+import { searchCardsByCriteriasV2, getNFTData } from './api-service.js';
 import { buildSnipeEmbed } from './embeds.js';
 import { IS_TEST_MODE } from './config.js';
 

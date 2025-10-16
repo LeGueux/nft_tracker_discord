@@ -1,5 +1,6 @@
 export const IS_TEST_MODE = process.env.MODE === 'TEST';
-export const COMETH_API_INTERVAL = parseInt(process.env.COMETH_API_INTERVAL || '10', 10) * 60 * 1000;
+export const COMETH_API_INTERVAL_SEC = parseInt(process.env.COMETH_API_INTERVAL || '10', 10) * 60; // en secondes
+export const COMETH_API_INTERVAL_MS = COMETH_API_INTERVAL_SEC * 1000; // en ms
 export const ALIVE_PING_INTERVAL = parseInt(process.env.ALIVE_PING_INTERVAL || '10', 10) * 60 * 1000;
 export const NFT_LIST_BY_SEASON = {
     1: new Set(['g0001', 'g0003', 'g0004', 'g0029', 'g0024', 'g0007', 'g0009', 'g0011', 'g0012', 'g0074', 'g0015', 'g0013']),
@@ -12,4 +13,4 @@ export const NFT_LIST_BY_SEASON = {
     8: new Set(['g0137', 'g0124', 'g0143', 'g0141', 'g0140', 'g0144', 'g0132', 'g0133', 'g0138', 'g0139', 'g0142', 'g0134']),
     'Off-Season': new Set(['g0034', 'g0039', 'g0028', 'g0054', 'g0096', 'g0091']),
 };
-export const RARITY_ORDER = ['Limited', 'Rare', 'Epic', 'Legendary', 'Not Revealed']
+export const RARITY_ORDER = ['Limited', 'Rare', 'Epic', 'Legendary', 'Not Revealed'];

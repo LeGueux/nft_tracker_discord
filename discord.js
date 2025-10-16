@@ -6,9 +6,9 @@ import {
     ButtonStyle,
 } from 'discord.js';
 import { buildSaleListingNFTEmbed } from './embeds.js';
-import { IS_TEST_MODE, ALIVE_PING_INTERVAL, COMETH_API_INTERVAL } from './config.js';
+import { IS_TEST_MODE, ALIVE_PING_INTERVAL, COMETH_API_INTERVAL_MS } from './config.js';
 import { sendStatusMessage } from './error-handler.js';
-import { callComethApiForLastListings, callComethApiForLastSales, getNFTData } from './cometh-api.js';
+import { callApiToHandleNFTEvents, getNFTData } from './api-service.js';
 import { handleSnipeForSeason } from './command-snipe.js';
 import { handleNftTrackingForModel } from './command-nft-tracking.js';
 import { handleGetDataForWallet } from './command-wallet-data.js';
@@ -99,7 +99,7 @@ function buildSeasonButtons(suffix, currentSeason, includeAllRecap = true, inclu
 }
 
 export function getThreadIdForToken(type, from) {
-    if (from) {
+    if (type == 'sale' && from) {
         // Cas où from correspond à un utilisateur spécifique
         if ([process.env.FRANCK_ADDRESS_1.toLowerCase(), process.env.FRANCK_ADDRESS_2.toLowerCase()].includes(from.toLowerCase())) {
             return process.env.THREAD_ID_FRANCK;
@@ -164,7 +164,7 @@ export function eventBotReady(discordClient) {
                 //     1000,
                 //     'sale',
                 // );
-                const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1, true);
+                // const walletFranckEmbed = await handleGetDataForWallet(process.env.FRANCK_ADDRESS_1, true);
                 // const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
@@ -183,7 +183,7 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
                     // await thread.send({ embeds: [nftTrackingEmbed] });
-                    await thread.send({ embeds: [walletFranckEmbed] });
+                    // await thread.send({ embeds: [walletFranckEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
                     // await thread.send({
@@ -195,7 +195,7 @@ export function eventBotReady(discordClient) {
                     //         ],
                     //     },
                     // });
-                    process.exit(0);
+                    // process.exit(0);
                 }
             } catch (e) {
                 console.error('Erreur envoi test embed :', e);
@@ -205,13 +205,12 @@ export function eventBotReady(discordClient) {
                 );
             }
         }
-        // Start calling Cometh API with interval
-        await callComethApiForLastListings(discordClient);
-        await callComethApiForLastSales(discordClient);
+        // Start calling Dolz API with interval
+        await callApiToHandleNFTEvents(discordClient);
         setInterval(async () => {
-            await callComethApiForLastListings(discordClient);
-            await callComethApiForLastSales(discordClient);
-        }, COMETH_API_INTERVAL);
+            console.log('**********************************');
+            await callApiToHandleNFTEvents(discordClient);
+        }, COMETH_API_INTERVAL_MS);
 
         // Alive ping
         setInterval(async () => {
