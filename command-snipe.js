@@ -1,6 +1,6 @@
 import { searchCardsByCriteriasV2, getNFTData } from './api-service.js';
 import { buildSnipeEmbed } from './embeds.js';
-import { processWithConcurrencyLimit } from './utils.js';
+import { processWithConcurrencyLimit, getFloorPriceByModelAndRarity } from './utils.js';
 import { IS_TEST_MODE } from './config.js';
 
 export async function handleSnipeForSeason(season) {
@@ -13,7 +13,6 @@ export async function handleSnipeForSeason(season) {
         case 100:
             attributes = [
                 { 'name': 'Rarity', 'value': 'Limited' },
-                { 'name': 'Rarity', 'value': 'Rare' },
                 { 'name': 'Season', 'value': '1' },
                 { 'name': 'Season', 'value': '2' },
                 { 'name': 'Season', 'value': '3' },
@@ -30,7 +29,6 @@ export async function handleSnipeForSeason(season) {
         case 110:
             attributes = [
                 { 'name': 'Rarity', 'value': 'Limited' },
-                { 'name': 'Rarity', 'value': 'Rare' },
                 { 'name': 'Season', 'value': '1' },
                 { 'name': 'Season', 'value': '2' },
                 { 'name': 'Season', 'value': '3' },
@@ -45,7 +43,6 @@ export async function handleSnipeForSeason(season) {
         case 120:
             attributes = [
                 { 'name': 'Rarity', 'value': 'Limited' },
-                { 'name': 'Rarity', 'value': 'Rare' },
                 { 'name': 'Season', 'value': 'Special Edition' },
             ];
             isSnipeOnly = true;
@@ -53,14 +50,12 @@ export async function handleSnipeForSeason(season) {
         case 130:
             attributes = [
                 { 'name': 'Rarity', 'value': 'Limited' },
-                { 'name': 'Rarity', 'value': 'Rare' },
                 { 'name': 'Season', 'value': 'Off-Season' },
             ];
             break;
         default:
             attributes = [
                 { 'name': 'Rarity', 'value': 'Limited' },
-                { 'name': 'Rarity', 'value': 'Rare' },
                 { 'name': 'Season', 'value': season.toString() },
             ];
     }
@@ -104,55 +99,29 @@ export async function handleSnipeForSeason(season) {
 
 async function analyzeListingsFragility(data, snipeOnly = false) {
     const grouped = {};
-    const rareFloorsByModel = {}; // floorRare par modèleId
-    // Extraire tous les nftId uniques
-    const nftIds = [...new Set(data.results.map(a => a.nftId))];
 
-    // ⚙️ Limite à 10 appels réseau simultanés
-    // Limite la concurrence à `concurrency` appels API
-    const nftDataList = await processWithConcurrencyLimit(
-        data.results.map((asset, index) => ({ asset, index })),
+    // ⚙️ Récupérer les nftData avec une limite de concurrence
+    const nftDataMap = {};
+    await processWithConcurrencyLimit(
+        data.results,
         10,
-        async ({ asset, index }) => {
+        async (asset) => {
             const nftData = await getNFTData(asset.nftId, false);
-            return { index, asset, nftData };
+            nftDataMap[asset.nftId] = nftData;
         }
     );
-    // 🔹 Recréer le tableau dans l'ordre initial
-    nftDataList.sort((a, b) => a.index - b.index);
 
-    // Créer une map pour accès rapide par id
-    const nftDataMap = {};
-    nftIds.forEach((id, i) => {
-        nftDataMap[id] = nftDataList[i];
-    });
-
+    // 🧩 1️⃣ Regrouper les listings
     for (const asset of data.results) {
-        // ✅ récupération directe, sans nouvel appel
-        const nftData = nftDataMap[asset.nftId].nftData;
-        const name = asset.name.trim();
+        const nftData = nftDataMap[asset.nftId];
+        const name = asset.name?.trim();
         let priceDolz = asset.listing?.price ?? null;
-
         if (!name || !priceDolz) continue;
 
-        // Extraire rarity et modelId depuis animation_url
-        let rarity = asset.rarity;
-        let modelId = asset.cardNumber;
-
-        if (!['Limited', 'Rare'].includes(rarity)) continue;
-
-        if (rarity === 'Rare') {
-            if (!rareFloorsByModel[modelId]) {
-                rareFloorsByModel[modelId] = [];
-            }
-            rareFloorsByModel[modelId].push(priceDolz);
-        }
-
+        const modelId = asset.cardNumber;
         const keyName = `${name} ${modelId}`;
 
-        if (!grouped[keyName]) {
-            grouped[keyName] = { prices: [], rarity, modelId };
-        }
+        if (!grouped[keyName]) grouped[keyName] = { prices: [], modelId };
 
         const ownerMap = {
             [process.env.FRANCK_ADDRESS_1.toLowerCase()]: '-F1',
@@ -165,29 +134,39 @@ async function analyzeListingsFragility(data, snipeOnly = false) {
 
         const owner = nftData?.owner?.toLowerCase();
         const suffix = ownerMap[owner];
-        if (suffix) {
-            priceDolz = `${priceDolz}${suffix}`;
-        }
+        if (suffix) priceDolz = `${priceDolz}${suffix}`;
 
         grouped[keyName].prices.push(priceDolz);
     }
 
+    // 🧩 2️⃣ Récupérer tous les modelId uniques
+    const uniqueModelIds = [...new Set(Object.values(grouped).map(g => g.modelId))];
+
+    // ⚡ 3️⃣ Paralléliser les appels à getFloorPriceByModelAndRarity
+    const floorRareMap = {};
+    const floorRareResults = await processWithConcurrencyLimit(
+        uniqueModelIds,
+        10, // tu peux ajuster cette limite
+        async (modelId) => {
+            const floor = await getFloorPriceByModelAndRarity(modelId, 'Rare');
+            floorRareMap[modelId] = floor;
+        }
+    );
+
+    // 🧩 4️⃣ Calculs finaux
     const results = [];
 
-    for (const [name, { prices, rarity, modelId }] of Object.entries(grouped)) {
+    for (const [name, { prices, modelId }] of Object.entries(grouped)) {
         const cleanPrices = prices.map(price => {
             if (typeof price === 'string') {
                 const cleanedString = price.split('-')[0];
                 return parseInt(cleanedString, 10);
             }
-            // Si c'est déjà un nombre, on le retourne tel quel
             return price;
         });
-        const sortedPrices = cleanPrices.sort((a, b) => a - b);
 
-        // Calculer floorRare pour CE modèle
-        const rarePrices = modelId && rareFloorsByModel[modelId] ? rareFloorsByModel[modelId] : [];
-        const floorRare = rarePrices.length > 0 ? Math.min(...rarePrices) : null;
+        const sortedPrices = cleanPrices.sort((a, b) => a - b);
+        const floorRare = floorRareMap[modelId] ?? null;
 
         const filteredPrices = floorRare !== null
             ? sortedPrices.filter(price => price < floorRare)
@@ -199,25 +178,23 @@ async function analyzeListingsFragility(data, snipeOnly = false) {
         const next = filteredPrices[1] ?? null;
         const priceGap = next && floor ? ((next - floor) / floor) * 100 : null;
 
-        if (rarity === 'Limited' && floorRare !== null && floor >= floorRare) continue;
+        if (floorRare !== null && floor >= floorRare) continue;
 
         const simulatedGaps = simulateGapAfterPurchases(filteredPrices, 5);
         const isFragileLevel2 = simulatedGaps.some(s => s.priceGapPercent !== null && s.priceGapPercent >= 25);
 
         if (snipeOnly && (priceGap === null || priceGap < 25) && !isFragileLevel2) continue;
 
-        const maxPricesLength1 = Math.min(filteredPrices.length, 10);
-
         results.push({
             name,
             modelId,
             floor: prices[0],
             next: prices[1] ?? null,
-            prices: prices.slice(0, maxPricesLength1),
+            prices: prices.slice(0, 10),
             countLimitedBeforeRare: filteredPrices.length,
             priceGapPercent: priceGap,
             isFragileLevel1: priceGap !== null && priceGap >= 25,
-            isFragileLevel2: isFragileLevel2,
+            isFragileLevel2,
             simulatedGaps,
             floorRare,
         });
