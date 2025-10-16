@@ -1,5 +1,6 @@
 import { searchCardsByCriteriasV2, getNFTData } from './api-service.js';
 import { buildSnipeEmbed } from './embeds.js';
+import { processWithConcurrencyLimit } from './utils.js';
 import { IS_TEST_MODE } from './config.js';
 
 export async function handleSnipeForSeason(season) {
@@ -66,7 +67,7 @@ export async function handleSnipeForSeason(season) {
 
     const dataListings = await searchCardsByCriteriasV2({
         attributes,
-        limit: 10000,
+        limit: 100,
         status: 'Listed',
         listingOnly: true,
     });
@@ -79,8 +80,8 @@ export async function handleSnipeForSeason(season) {
                 const gapObj = item.simulatedGaps[i];
                 const gapValue = gapObj?.priceGapPercent;
                 gaps[`Gap ↑ After ${i + 1} Buy`] = gapValue !== null && gapValue !== undefined
-                ? `${gapValue.toFixed(2)}%`
-                : '-';
+                    ? `${gapValue.toFixed(2)}%`
+                    : '-';
             }
 
             return {
@@ -104,10 +105,31 @@ export async function handleSnipeForSeason(season) {
 async function analyzeListingsFragility(data, snipeOnly = false) {
     const grouped = {};
     const rareFloorsByModel = {}; // floorRare par modèleId
+    // Extraire tous les nftId uniques
+    const nftIds = [...new Set(data.results.map(a => a.nftId))];
+
+    // ⚙️ Limite à 10 appels réseau simultanés
+    // Limite la concurrence à `concurrency` appels API
+    const nftDataList = await processWithConcurrencyLimit(
+        data.results.map((asset, index) => ({ asset, index })),
+        10,
+        async ({ asset, index }) => {
+            const nftData = await getNFTData(asset.nftId, false);
+            return { index, asset, nftData };
+        }
+    );
+    // 🔹 Recréer le tableau dans l'ordre initial
+    nftDataList.sort((a, b) => a.index - b.index);
+
+    // Créer une map pour accès rapide par id
+    const nftDataMap = {};
+    nftIds.forEach((id, i) => {
+        nftDataMap[id] = nftDataList[i];
+    });
 
     for (const asset of data.results) {
-        // TODO find a way to batch these calls, if 200 cards means 200 calls...
-        // const nftData = await getNFTData(asset.nftId, false);
+        // ✅ récupération directe, sans nouvel appel
+        const nftData = nftDataMap[asset.nftId].nftData;
         const name = asset.name.trim();
         let priceDolz = asset.listing?.price ?? null;
 
@@ -126,26 +148,26 @@ async function analyzeListingsFragility(data, snipeOnly = false) {
             rareFloorsByModel[modelId].push(priceDolz);
         }
 
-        const keyName = modelId ? `${name} ${modelId}` : name;
+        const keyName = `${name} ${modelId}`;
 
         if (!grouped[keyName]) {
             grouped[keyName] = { prices: [], rarity, modelId };
         }
 
-        // TODO remettre plus tard si on veut différencier les listings par propriétaire
-        // const ownerMap = {
-        //     [process.env.FRANCK_ADDRESS_1.toLowerCase()]: '-F1',
-        //     [process.env.FRANCK_ADDRESS_2.toLowerCase()]: '-F2',
-        //     [process.env.NICO_ADDRESS_1.toLowerCase()]: '-N1',
-        //     [process.env.NICO_ADDRESS_2.toLowerCase()]: '-N2',
-        //     [process.env.BOB_ADDRESS_1.toLowerCase()]: '-B1',
-        //     [process.env.COCH_ADDRESS_1.toLowerCase()]: '-C1',
-        // };
+        const ownerMap = {
+            [process.env.FRANCK_ADDRESS_1.toLowerCase()]: '-F1',
+            [process.env.FRANCK_ADDRESS_2.toLowerCase()]: '-F2',
+            [process.env.NICO_ADDRESS_1.toLowerCase()]: '-N1',
+            [process.env.NICO_ADDRESS_2.toLowerCase()]: '-N2',
+            [process.env.BOB_ADDRESS_1.toLowerCase()]: '-B1',
+            [process.env.COCH_ADDRESS_1.toLowerCase()]: '-C1',
+        };
 
-        // const suffix = ownerMap[nftData?.owner?.toLowerCase()];
-        // if (suffix) {
-        //     priceDolz += suffix;
-        // }
+        const owner = nftData?.owner?.toLowerCase();
+        const suffix = ownerMap[owner];
+        if (suffix) {
+            priceDolz = `${priceDolz}${suffix}`;
+        }
 
         grouped[keyName].prices.push(priceDolz);
     }
