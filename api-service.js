@@ -34,7 +34,6 @@ export async function callApiToHandleNFTEvents(discordClient) {
         });
 
         const data = await response.json();
-        console.log(data);
         // console.log(data);
         for (const item of data.events) {
             console.log(item.nftId, item.type, item.typeFull, checkDateIsValidSinceLastOneInterval(item.date));
