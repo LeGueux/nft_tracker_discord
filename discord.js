@@ -195,7 +195,7 @@ export function eventBotReady(discordClient) {
                     //         ],
                     //     },
                     // });
-                    // process.exit(0);
+                    process.exit(0);
                 }
             } catch (e) {
                 console.error('Erreur envoi test embed :', e);

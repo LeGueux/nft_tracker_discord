@@ -211,7 +211,10 @@ export async function getNFTData(tokenId, withFloorPrice = true) {
         // Exemple d’URL basée sur ton ancien format d’image :
         const rarityType = rarity || 'Limited';
         const edition = traits.Edition?.[0] || '1';
-        const image = `https://cardsdata.dolz.io/iStripper/${cardNumber}/${edition}/${rarityType}/${serialBase}_lgx.png`;
+        let image = `https://cardsdata.dolz.io/iStripper/${cardNumber}/${edition}/${rarityType}/${serialBase}_lgx.png`;
+        if (rarityType === 'Not revealed') {
+            image = 'https://cardsdata.dolz.io/iStripper/hiddenDOLZ_smx.png';
+        }
 
         const listingPrice = data.marketInfos?.listing?.price || null;
         const owner = data.marketInfos?.owner || null;
