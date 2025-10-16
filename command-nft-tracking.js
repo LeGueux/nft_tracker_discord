@@ -15,7 +15,7 @@ export async function handleNftTrackingForModel(modelId, nbHolders = 15, withAdd
     // Limite la concurrence à `concurrency` appels API
     const nftResults = await processWithConcurrencyLimit(
         dataSearchResults.results.map((asset, index) => ({ asset, index })),
-        50,
+        10,
         async ({ asset, index }) => {
             const nftData = await getNFTData(asset.nftId, false);
             return { index, asset, nftData };
@@ -63,7 +63,7 @@ async function computeNftHoldersStats(nftResults, options = {}) {
 
     for (const { asset, nftData } of nftResults) {
         const name = asset.name.trim();
-        const owner = nftData.owner.toLowerCase();
+        const owner = nftData.owner?.toLowerCase();
         const isListed = asset.listing != null;
         // Extraire rarity et modelId depuis animation_url
         let rarity = asset.rarity;

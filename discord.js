@@ -151,7 +151,7 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
-                // const nftTrackingEmbed = await handleNftTrackingForModel('g0124', 5, false);
+                const nftTrackingEmbed = await handleNftTrackingForModel('g0053', 5, true);
                 // const tokenId = '51729';  // Limited
                 // const tokenId = '51565';  // Rare
                 // const tokenId = '51495';  // Epic
@@ -182,7 +182,7 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedAllSeasons] });
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
-                    // await thread.send({ embeds: [nftTrackingEmbed] });
+                    await thread.send({ embeds: [nftTrackingEmbed] });
                     // await thread.send({ embeds: [walletFranckEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
@@ -208,7 +208,6 @@ export function eventBotReady(discordClient) {
         // Start calling Dolz API with interval
         await callApiToHandleNFTEvents(discordClient);
         setInterval(async () => {
-            console.log('**********************************');
             await callApiToHandleNFTEvents(discordClient);
         }, DOLZ_API_INTERVAL_MS);
 
