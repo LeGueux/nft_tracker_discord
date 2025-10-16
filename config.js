@@ -14,3 +14,11 @@ export const NFT_LIST_BY_SEASON = {
     'Off-Season': new Set(['g0034', 'g0039', 'g0028', 'g0054', 'g0096', 'g0091']),
 };
 export const RARITY_ORDER = ['Limited', 'Rare', 'Epic', 'Legendary', 'Not Revealed'];
+export const WALLETS_TEAM = [
+    process.env.FRANCK_ADDRESS_1,
+    process.env.FRANCK_ADDRESS_2,
+    process.env.NICO_ADDRESS_1,
+    process.env.NICO_ADDRESS_2,
+    process.env.BOB_ADDRESS_1,
+    process.env.COCH_ADDRESS_1,
+];

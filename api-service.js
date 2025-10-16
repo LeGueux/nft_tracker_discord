@@ -331,3 +331,69 @@ export async function searchCardsByCriteriasV2({
         return { results: [], total: 0 };
     }
 }
+
+export async function getEventsByWallet(walletAddress, unreadOffersOnly = false, returnNFTIdOnly = false) {
+    try {
+        console.log(`🔍 getEventsByWallet lancé à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
+        console.log(`🧪 Paramètres walletAddress`, walletAddress, 'unreadOffersOnly: ', unreadOffersOnly, 'returnNFTIdOnly: ', returnNFTIdOnly);
+
+        const response = await fetch('https://back.dolz.io/apiMarket.php', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                command: 'getUserNotifications',
+                contractAddress: process.env.NFT_CONTRACT_ADDRESS,
+                walletAddress: walletAddress.toLowerCase(),
+            }),
+        });
+
+        let data = await response.json();
+        data = unreadOffersOnly ? data.filter(item => item.type === 'New Offer' && !item.read && checkDateIsValidSinceLastOneInterval(item.date)) : data;
+        if (returnNFTIdOnly) {
+            const nftIds = data?.map(e => e.nftId) || [];
+            return nftIds;
+        }
+
+        return data;
+    } catch (error) {
+        console.error('❌ Erreur dans getEventsByWallet:', error);
+        await sendStatusMessage(
+            discordClient,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans getEventsByWallet - Rejection : \`${error}\``,
+        );
+        return {};
+    }
+}
+
+export async function getOffersByNFTId(nftId) {
+    try {
+        console.log(`🔍 getOffersByNFTId lancé à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
+        console.log(`🧪 Paramètres nftId`, nftId);
+
+        const response = await fetch('https://back.dolz.io/apiMarket.php', {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json, text/plain, */*',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                command: 'getNFTOffers',
+                contractAddress: process.env.NFT_CONTRACT_ADDRESS,
+                nftId: nftId.toString(),
+            }),
+        });
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('❌ Erreur dans getOffersByNFTId:', error);
+        await sendStatusMessage(
+            discordClient,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur dans getOffersByNFTId - Rejection : \`${error}\``,
+        );
+        return {};
+    }
+}

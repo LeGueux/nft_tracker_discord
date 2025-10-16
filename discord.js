@@ -12,6 +12,7 @@ import { callApiToHandleNFTEvents, getNFTData } from './api-service.js';
 import { handleSnipeForSeason } from './command-snipe.js';
 import { handleNftTrackingForModel } from './command-nft-tracking.js';
 import { handleGetDataForWallet } from './command-wallet-data.js';
+import { handleOffersForOurTeam } from './handle-offers.js';
 import { handleGetChartSalesVolume, handleGetChartSalesVolumeBywallet } from './command-chart-sales-volume.js';
 
 export const discordClient = new Client({
@@ -151,7 +152,7 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
-                const nftTrackingEmbed = await handleNftTrackingForModel('g0053', 5, true);
+                // const nftTrackingEmbed = await handleNftTrackingForModel('g0053', 5, true);
                 // const tokenId = '51729';  // Limited
                 // const tokenId = '51565';  // Rare
                 // const tokenId = '51495';  // Epic
@@ -182,7 +183,7 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedAllSeasons] });
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
-                    await thread.send({ embeds: [nftTrackingEmbed] });
+                    // await thread.send({ embeds: [nftTrackingEmbed] });
                     // await thread.send({ embeds: [walletFranckEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
@@ -195,7 +196,7 @@ export function eventBotReady(discordClient) {
                     //         ],
                     //     },
                     // });
-                    process.exit(0);
+                    // process.exit(0);
                 }
             } catch (e) {
                 console.error('Erreur envoi test embed :', e);
@@ -207,8 +208,10 @@ export function eventBotReady(discordClient) {
         }
         // Start calling Dolz API with interval
         await callApiToHandleNFTEvents(discordClient);
+        await handleOffersForOurTeam(discordClient);
         setInterval(async () => {
             await callApiToHandleNFTEvents(discordClient);
+            await handleOffersForOurTeam(discordClient);
         }, DOLZ_API_INTERVAL_MS);
 
         // Alive ping
@@ -254,13 +257,13 @@ export function eventBotReady(discordClient) {
                 }
                 const embed = await handleGetDataForWallet(walletAddress, withFullDetails);
                 await interaction.editReply({ embeds: [embed] });
-            // } else if (interaction.commandName === 'get_chart_sales_volume') {
-            //     const embedWithChart = await handleGetChartSalesVolume(false);
-            //     await interaction.editReply(embedWithChart);
-            // } else if (interaction.commandName === 'get_chart_sales_volume_by_wallet') {
-            //     const address = interaction.options.getString('address');
-            //     const embedWithChart = await handleGetChartSalesVolumeBywallet(address);
-            //     await interaction.editReply(embedWithChart);
+                // } else if (interaction.commandName === 'get_chart_sales_volume') {
+                //     const embedWithChart = await handleGetChartSalesVolume(false);
+                //     await interaction.editReply(embedWithChart);
+                // } else if (interaction.commandName === 'get_chart_sales_volume_by_wallet') {
+                //     const address = interaction.options.getString('address');
+                //     const embedWithChart = await handleGetChartSalesVolumeBywallet(address);
+                //     await interaction.editReply(embedWithChart);
             }
         } else if (interaction.isButton()) {
             const match = interaction.customId.match(/select_season_(\d+)_(snipe)/);
