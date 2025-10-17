@@ -98,30 +98,33 @@ export function calculateBBDRewardNftByNFTData(nftData) {
     return Math.round(bbd * 100) / 100;
 }
 
-export async function getFloorPricesByModelAndRarity(pairs = []) {
-    const floorPrices = {};
+export async function getFloorPricesByModelAndRarity(pairs = [], concurrency = 10) {
+    console.log(`getFloorPricesByModelAndRarity`);
 
-    for (const { modelId, rarity } of pairs) {
+    const results = await processWithConcurrencyLimit(pairs, concurrency, async ({ modelId, rarity }) => {
         const key = `${modelId}-${rarity}`;
         try {
-            console.log(`Recherche pour modèle ${modelId} et rareté ${rarity} et key ${key}`);
-            floorPrices[key] = await getFloorPriceByModelAndRarity(modelId, rarity);
+            console.log(`Recherche FP pour key ${key}`);
+            const price = await getFloorPriceByModelAndRarity(modelId, rarity);
+            return { key, price: price ?? 0 };
         } catch (e) {
             console.error(`Erreur pour key ${key} :`, e);
-            floorPrices[key] = 0;
+            return { key, price: 0 };
         }
-    }
+    });
 
-    return floorPrices;
+    // Convertir [{key, price}] → { key: price }
+    return Object.fromEntries(results.map(r => [r.key, r.price]));
 }
 
 export async function getFloorPriceByModelAndRarity(modelId, rarity) {
-    console.log(`Recherche FP pour modèle ${modelId} et rareté ${rarity}`);
+    console.log(`getFloorPriceByModelAndRarity - Recherche FP pour modèle ${modelId} et rareté ${rarity}`);
     const result = await searchCardsByCriteriasV2({
         attributes: [{ 'name': 'Card Number', 'value': [modelId] }, { 'name': 'Rarity', 'value': rarity }],
         status: 'Listed',
         limit: 1,
         sort: 'priceLowToHigh',
+        listingOnly: true,
     });
 
     const asset = result.results?.[0];
