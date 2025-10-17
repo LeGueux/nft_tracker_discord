@@ -16,7 +16,8 @@ export async function handleOffersForOurTeam(discordClient) {
 
         for (const nftId of allNftIdsWithEvents) {
             const dataOffers = await getOffersByNFTId(nftId);
-            if (!dataOffers || dataOffers.length < 1) continue;
+            console.log('dataOffers:', dataOffers);
+            if (!dataOffers || dataOffers.length < 1 || !dataOffers[0]) continue;
             const offer = dataOffers[0];
             console.log('OFFER to handle:', offer);
             const data = await getNFTData(nftId);
