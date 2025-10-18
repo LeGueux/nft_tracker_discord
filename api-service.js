@@ -7,7 +7,6 @@ import {
     getFloorPriceByModelAndRarity,
 } from './utils.js';
 import { sendStatusMessage } from './error-handler.js';
-import { IS_TEST_MODE } from './config.js';
 
 export async function callApiToHandleNFTEvents(discordClient) {
     try {
@@ -70,7 +69,11 @@ export async function callApiToHandleNFTEvents(discordClient) {
             }
         }
     } catch (error) {
-        console.error('Erreur lors de la récupération des cartes:', error);
+        console.error('callApiToHandleNFTEvents - Erreur lors de la récupération des cartes:', error);
+        await sendStatusMessage(
+            discordClient,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Rejection : \`${e}\``,
+        );
     }
 }
 
