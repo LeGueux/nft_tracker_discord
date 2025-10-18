@@ -1,6 +1,7 @@
 import { getEventsByWallet, getOffersByNFTId, getNFTData } from './api-service.js';
 import { WALLETS_TEAM } from './config.js';
 import { buildSaleListingNFTEmbed } from './embeds.js';
+import { getDiscordUserToNotifyByWallet } from './utils.js';
 import { getThreadIdForToken } from './discord.js';
 import { sendStatusMessage } from './error-handler.js';
 
@@ -34,7 +35,16 @@ export async function handleOffersForOurTeam(discordClient) {
             const thread = await discordClient.channels.fetch(threadId);
             if (thread?.isTextBased()) {
                 await thread.send({
+                    content: getDiscordUserToNotifyByWallet(seller),
                     embeds: [embed],
+                    allowedMentions: {
+                        users: [
+                            process.env.FRANCK_DISCORD_USER_ID,
+                            process.env.NICO_DISCORD_USER_ID,
+                            process.env.BOB_DISCORD_USER_ID,
+                            process.env.COCH_DISCORD_USER_ID,
+                        ],
+                    },
                 });
             }
         }
