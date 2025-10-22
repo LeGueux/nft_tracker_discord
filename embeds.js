@@ -759,15 +759,13 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
             const ownedModels = new Set(models.map(m => m.modelId)).size;
             const missing = expectedModels - ownedModels;
 
-            seasonCompleteness = missing === 0
-                ? "✅ Complète"
-                : `❌ ${missing} modèle${missing > 1 ? "s" : ""} manquant${missing > 1 ? "s" : ""}`;
+            seasonCompleteness = missing === 0 ? "✅ Complète" : `❌ ${missing} modèle${missing > 1 ? "s" : ""} manquant${missing > 1 ? "s" : ""}`;
         }
 
         // Ajout du champ résumé
         embed.addFields({
-            name: `🧾 Saison ${season}`,
-            value: `${seasonCount} cartes${listedInfo}, ${formatNumber(seasonTotal)} DOLZ\n${seasonCompleteness}`
+            name: `🧾 Saison ${season} ${seasonCompleteness}`,
+            value: `${seasonCount} cartes${listedInfo}, ${formatNumber(seasonTotal)} DOLZ`
         });
 
         // Ajout du champ détails si demandé
