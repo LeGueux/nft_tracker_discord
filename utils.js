@@ -16,8 +16,18 @@ export function getRarityColor(rarity) {
 
 export function checkDateIsValidSinceLastOneInterval(timestamp) {
     const now = Math.floor(Date.now() / 1000);
+    const diff = now - timestamp;
 
-    return now - timestamp <= DOLZ_API_INTERVAL_SEC;
+    const isValid = diff <= DOLZ_API_INTERVAL_SEC;
+
+    console.log(
+        `[checkDateIsValidSinceLastOneInterval]`,
+        `Now: ${now}, Timestamp: ${timestamp}, Diff: ${diff}s,`,
+        `Threshold: ${DOLZ_API_INTERVAL_SEC}s,`,
+        `=> ${isValid ? "✅ Valid" : "❌ Too old"}`
+    );
+
+    return isValid;
 }
 
 export function getNFTSeasonByCardNumber(cardNumber) {
