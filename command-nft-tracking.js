@@ -1,20 +1,156 @@
 import { getDolzUsername, getNFTData, searchCardsByCriteriasV2 } from './api-service.js';
 import { buildNftTrackingEmbed } from './embeds.js';
 import { IS_TEST_MODE, RARITY_ORDER } from './config.js';
-import { processWithConcurrencyLimit } from './utils.js';
+import { range, processWithConcurrencyLimit, sortByListingPrice } from './utils.js';
+
 
 export async function handleNftTrackingForModel(modelId, nbHolders = 15, withAddress = false) {
     console.log(`handleNftTrackingForModel for modelId ${modelId} nbHolders: ${nbHolders} withAddress: ${withAddress}`);
 
-    let dataSearchResults = await searchCardsByCriteriasV2({
-        attributes: [{ 'name': 'Card Number', 'value': [modelId] }],
-        limit: 2000,
-    });
-    console.log(`handleNftTrackingForModel for modelId ${modelId} - Cards found: ${dataSearchResults.total}`);
+    const [
+        assetsLimited1To100,
+        assetsLimited101To200,
+        assetsLimited201To300,
+        assetsLimited301To400,
+        assetsLimited401To500,
+        assetsLimited501To600,
+        assetsLimited601To700,
+        assetsLimited701To800,
+        assetsLimited801To900,
+        assetsRare1To100,
+        assetsRare101To200,
+        assetsEpicLegendary,
+    ] = await Promise.all([
+        searchCardsByCriteriasV2({
+            attributes: [
+                { 'name': 'Card Number', 'value': [modelId] },
+                { 'name': 'Rarity', 'value': 'Limited' },
+                { 'name': 'Serial Number', 'value': range(1, 100) },
+            ],
+            limit: 100,
+            status: 'All',
+        }),
+        searchCardsByCriteriasV2({
+            attributes: [
+                { 'name': 'Card Number', 'value': [modelId] },
+                { 'name': 'Rarity', 'value': 'Limited' },
+                { 'name': 'Serial Number', 'value': range(101, 200) },
+            ],
+            limit: 100,
+            status: 'All',
+        }),
+        searchCardsByCriteriasV2({
+            attributes: [
+                { 'name': 'Card Number', 'value': [modelId] },
+                { 'name': 'Rarity', 'value': 'Limited' },
+                { 'name': 'Serial Number', 'value': range(201, 300) },
+            ],
+            limit: 100,
+            status: 'All',
+        }),
+        searchCardsByCriteriasV2({
+            attributes: [
+                { 'name': 'Card Number', 'value': [modelId] },
+                { 'name': 'Rarity', 'value': 'Limited' },
+                { 'name': 'Serial Number', 'value': range(301, 400) },
+            ],
+            limit: 100,
+            status: 'All',
+        }),
+        searchCardsByCriteriasV2({
+            attributes: [
+                { 'name': 'Card Number', 'value': [modelId] },
+                { 'name': 'Rarity', 'value': 'Limited' },
+                { 'name': 'Serial Number', 'value': range(401, 500) },
+            ],
+            limit: 100,
+            status: 'All',
+        }),
+        searchCardsByCriteriasV2({
+            attributes: [
+                { 'name': 'Card Number', 'value': [modelId] },
+                { 'name': 'Rarity', 'value': 'Limited' },
+                { 'name': 'Serial Number', 'value': range(501, 600) },
+            ],
+            limit: 100,
+            status: 'All',
+        }),
+        searchCardsByCriteriasV2({
+            attributes: [
+                { 'name': 'Card Number', 'value': [modelId] },
+                { 'name': 'Rarity', 'value': 'Limited' },
+                { 'name': 'Serial Number', 'value': range(601, 700) },
+            ],
+            limit: 100,
+            status: 'All',
+        }),
+        searchCardsByCriteriasV2({
+            attributes: [
+                { 'name': 'Card Number', 'value': [modelId] },
+                { 'name': 'Rarity', 'value': 'Limited' },
+                { 'name': 'Serial Number', 'value': range(701, 800) },
+            ],
+            limit: 100,
+            status: 'All',
+        }),
+        searchCardsByCriteriasV2({
+            attributes: [
+                { 'name': 'Card Number', 'value': [modelId] },
+                { 'name': 'Rarity', 'value': 'Limited' },
+                { 'name': 'Serial Number', 'value': range(801, 900) },
+            ],
+            limit: 100,
+            status: 'All',
+        }),
+        searchCardsByCriteriasV2({
+            attributes: [
+                { 'name': 'Card Number', 'value': [modelId] },
+                { 'name': 'Rarity', 'value': 'Rare' },
+                { 'name': 'Serial Number', 'value': range(1, 100) },
+            ],
+            limit: 100,
+            status: 'All',
+        }),
+        searchCardsByCriteriasV2({
+            attributes: [
+                { 'name': 'Card Number', 'value': [modelId] },
+                { 'name': 'Rarity', 'value': 'Rare' },
+                { 'name': 'Serial Number', 'value': range(101, 200) },
+            ],
+            limit: 100,
+            status: 'All',
+        }),
+        searchCardsByCriteriasV2({
+            attributes: [
+                { 'name': 'Card Number', 'value': [modelId] },
+                { 'name': 'Rarity', 'value': 'Epic' },
+                { 'name': 'Rarity', 'value': 'Legendary' },
+            ],
+            limit: 100,
+            status: 'All',
+        }),
+    ]);
+    // Fusionner tous les tableaux de cartes en un seul
+    let dataSearchResults = [
+        ...assetsLimited1To100.results,
+        ...assetsLimited101To200.results,
+        ...assetsLimited201To300.results,
+        ...assetsLimited301To400.results,
+        ...assetsLimited401To500.results,
+        ...assetsLimited501To600.results,
+        ...assetsLimited601To700.results,
+        ...assetsLimited701To800.results,
+        ...assetsLimited801To900.results,
+        ...assetsRare1To100.results,
+        ...assetsRare101To200.results,
+        ...assetsEpicLegendary.results,
+    ];
+    dataSearchResults = sortByListingPrice(dataSearchResults);
+    console.log(`handleNftTrackingForModel for modelId ${modelId} - Cards found: ${dataSearchResults.length}`);
 
     // Limite la concurrence à `concurrency` appels API
     const nftResults = await processWithConcurrencyLimit(
-        dataSearchResults.results.map((asset, index) => ({ asset, index })),
+        dataSearchResults.map((asset, index) => ({ asset, index })),
         10,
         async ({ asset, index }) => {
             const nftData = await getNFTData(asset.nftId, false);
@@ -45,7 +181,7 @@ export async function handleNftTrackingForModel(modelId, nbHolders = 15, withAdd
         }
     }
 
-    const assetRarityFirst = dataSearchResults.results[0]?.rarity;
+    const assetRarityFirst = dataSearchResults[0]?.rarity;
     const isUnrevealed = assetRarityFirst === 'Not revealed';
 
     return await buildNftTrackingEmbed(nftHoldersStats, nftResults, modelId, isUnrevealed, nbHolders, withAddress);

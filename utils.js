@@ -1,6 +1,8 @@
 import { DOLZ_API_INTERVAL_SEC, NFT_LIST_BY_SEASON } from './config.js';
 import { searchCardsByCriteriasV2 } from './api-service.js';
 
+export const range = (debut, fin) => Array.from({ length: fin - debut + 1 }, (_, i) => debut + i);
+
 export function getRarityColor(rarity) {
     switch (rarity) {
         case 'Rare':
@@ -188,4 +190,12 @@ export function getDiscordUserToNotifyByWallet(walletAddress) {
     };
 
     return ownerMap[walletAddress.toLowerCase()] ?? '';
+}
+
+export function sortByListingPrice(liste) {
+    return liste.sort((a, b) => {
+        const prixA = a.listing ? a.listing.price : 0;
+        const prixB = b.listing ? b.listing.price : 0;
+        return prixA - prixB; // tri croissant
+    });
 }
