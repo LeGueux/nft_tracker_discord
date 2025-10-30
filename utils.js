@@ -19,8 +19,9 @@ export function getRarityColor(rarity) {
 export function checkDateIsValidSinceLastOneInterval(timestamp) {
     const now = Math.floor(Date.now() / 1000);
     const diff = now - timestamp;
+    const toleranceSec = 15;
 
-    const isValid = diff <= DOLZ_API_INTERVAL_SEC;
+    const isValid = diff <= (DOLZ_API_INTERVAL_SEC + toleranceSec);
 
     console.log(
         `[checkDateIsValidSinceLastOneInterval]`,
