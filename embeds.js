@@ -381,14 +381,6 @@ export async function buildNftTrackingEmbed(nftHoldersStats, nftResults, modelId
         walletsPerModel,
     } = nftHoldersStats;
 
-    const rarityEmojis = {
-        'Limited': `🟢L`,
-        'Rare': '🟡R',
-        'Epic': '💎E',
-        'Legendary': '👑LG',
-        'Not Revealed': '❔ NR'
-    };
-
     let embed = new EmbedBuilder()
         .setTitle(`<:snipe:1310218808123723829> Tracking card ${modelId}`)
         .setColor(0x00ffcc)
@@ -404,7 +396,7 @@ export async function buildNftTrackingEmbed(nftHoldersStats, nftResults, modelId
 
             // Comptage du nombre de wallets distincts par rareté
             const rarityWalletsCount = {};
-            for (const rarity of Object.keys(rarityEmojis)) {
+            for (const rarity of Object.keys(rarityShort)) {
                 rarityWalletsCount[rarity] = topList.filter(holder => (holder[rarity] ?? 0) > 0).length;
             }
 
@@ -412,7 +404,7 @@ export async function buildNftTrackingEmbed(nftHoldersStats, nftResults, modelId
             holdersLines.push(
                 Object.entries(rarityWalletsCount)
                     .filter(([r, count]) => count > 0)
-                    .map(([r, count]) => `${rarityEmojis[r]}: ${count} wallet${count > 1 ? 's' : ''}`)
+                    .map(([r, count]) => `${rarityShort[r]}: ${count} wallet${count > 1 ? 's' : ''}`)
                     .join(' | ')
             );
 
@@ -433,7 +425,7 @@ export async function buildNftTrackingEmbed(nftHoldersStats, nftResults, modelId
                 const percentStr = `${parseFloat(holder.percentOwned).toFixed(1)}%`.padEnd(5);
                 const rarityStr = RARITY_ORDER
                     .filter(r => (holder[r] ?? 0) > 0)
-                    .map(r => `${rarityEmojis[r]}${holder[r]}`)
+                    .map(r => `${rarityShort[r]}${holder[r]}`)
                     .join(' ');
 
                 holdersLines.push(`${medal.padEnd(4)} ${holderUsername.padEnd(13)} ${totalStr.padStart(8)} ${percentStr} ${rarityStr}`);
@@ -493,7 +485,8 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
         allS6AssetsWallet,
         allS7AssetsWallet,
         allS8AssetsWallet,
-        allHighRarityAndNotRevealedAssetsWallet,
+        allEpicAssetsWallet,
+        allLedgendaryAndNotRevealedAssetsWallet,
         allNotSeasonAssetsWallet,
         babyDolzBalanceWallet,
         dolzBalanceWallet,
@@ -582,6 +575,13 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
         searchCardsByCriteriasV2({
             attributes: [
                 { 'name': 'Rarity', 'value': 'Epic' },
+            ],
+            limit: 100,
+            status: 'Owned',
+            walletAddress: from,
+        }),
+        searchCardsByCriteriasV2({
+            attributes: [
                 { 'name': 'Rarity', 'value': 'Legendary' },
                 { 'name': 'Rarity', 'value': 'Not revealed' },
             ],
@@ -614,7 +614,8 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
         ...allS6AssetsWallet.results,
         ...allS7AssetsWallet.results,
         ...allS8AssetsWallet.results,
-        ...allHighRarityAndNotRevealedAssetsWallet.results,
+        ...allEpicAssetsWallet.results,
+        ...allLedgendaryAndNotRevealedAssetsWallet.results,
         ...allNotSeasonAssetsWallet.results,
     ];
     const totalListedAssetsWallet = structuredClone(allAssetsWallet).filter(item => item.listing !== null).length;
@@ -627,7 +628,7 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
         const rarity = asset.rarity;
         const modelId = asset.cardNumber;
 
-        if (['Limited', 'Rare'].includes(rarity)) {
+        if (['Limited', 'Rare', 'Epic'].includes(rarity)) {
             grouped[modelId] ??= {};
             grouped[modelId][rarity] ??= { count: 0, listed: 0 };
             grouped[modelId][rarity].count += 1;
@@ -679,14 +680,12 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
         {
             name: '💰 Estimée en DOLZ (Rare/Limited évaluées)',
             value: `${formatNumber(totalDolzEstimated)} DOLZ (au floor)\n` +
-                `📦 Epic/Legendary/Not Revealed ignorées : ${others.length} cartes`,
+                `📦 Legendary/Not Revealed ignorées : ${others.length} cartes`,
         }
     ]);
 
     // --- Résumé par saison
-    const displayOrder = [
-        '1', '2', '3', '4', '5', '6', '7', '8', 'Off-Season', 'Special Edition'
-    ];
+    const displayOrder = ['1', '2', '3', '4', '5', '6', '7', '8', 'Off-Season', 'Special Edition'];
 
     for (const season of displayOrder) {
         const models = groupedBySeason[season];
