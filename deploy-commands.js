@@ -65,19 +65,6 @@ const commands = [
                 .setDescription('Affiche le détail complet du wallet (défaut: false)')
         )
         .toJSON(),
-    new SlashCommandBuilder()
-        .setName('get_chart_sales_volume')
-        .setDescription('Affiche le volume de transactions DOLZ sur 30 jours')
-        .toJSON(),
-    new SlashCommandBuilder()
-        .setName('get_chart_sales_volume_by_wallet')
-        .setDescription('Affiche le volume de transactions DOLZ sur 30 jours')
-        .addStringOption(option =>
-            option.setName('address')
-                .setDescription('L\'adresse du wallet (ex: 0x1234567890abcdef1234567890abcdef12345678)')
-                .setRequired(true)
-        )
-        .toJSON(),
 ];
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);
