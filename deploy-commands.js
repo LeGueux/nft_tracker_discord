@@ -65,6 +65,25 @@ const commands = [
                 .setDescription('Affiche le détail complet du wallet (défaut: false)')
         )
         .toJSON(),
+    new SlashCommandBuilder()
+        .setName('get_wallet_basic_data')
+        .setDescription('Affiche les données de base d\'un wallet spécifique')
+        .addStringOption(option =>
+            option.setName('address')
+                .setDescription('L\'adresse du wallet (ex: 0x1234567890abcdef1234567890abcdef12345678)')
+        )
+        .addStringOption(option =>
+            option
+                .setName('person')
+                .setDescription('Sélectionne une personne')
+                .addChoices(
+                    { name: 'Franck', value: process.env.FRANCK_ADDRESS_1 },
+                    { name: 'Nico', value: process.env.NICO_ADDRESS_1 },
+                    { name: 'Bob', value: process.env.BOB_ADDRESS_1 },
+                    { name: 'Coch', value: process.env.COCH_ADDRESS_1 },
+                )
+        )
+        .toJSON(),
 ];
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);
