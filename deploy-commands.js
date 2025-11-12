@@ -64,24 +64,9 @@ const commands = [
             option.setName('with_full_details')
                 .setDescription('Affiche le détail complet du wallet (défaut: false)')
         )
-        .toJSON(),
-    new SlashCommandBuilder()
-        .setName('get_wallet_basic_data')
-        .setDescription('Affiche les données de base d\'un wallet spécifique')
-        .addStringOption(option =>
-            option.setName('address')
-                .setDescription('L\'adresse du wallet (ex: 0x1234567890abcdef1234567890abcdef12345678)')
-        )
-        .addStringOption(option =>
-            option
-                .setName('person')
-                .setDescription('Sélectionne une personne')
-                .addChoices(
-                    { name: 'Franck', value: process.env.FRANCK_ADDRESS_1 },
-                    { name: 'Nico', value: process.env.NICO_ADDRESS_1 },
-                    { name: 'Bob', value: process.env.BOB_ADDRESS_1 },
-                    { name: 'Coch', value: process.env.COCH_ADDRESS_1 },
-                )
+        .addBooleanOption(option =>
+            option.setName('basic_data_only')
+                .setDescription('Affiche le uniquement le minimum de data du wallet (défaut: false)')
         )
         .toJSON(),
 ];

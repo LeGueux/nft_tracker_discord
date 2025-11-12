@@ -5,7 +5,7 @@ import {
     ButtonBuilder,
     ButtonStyle,
 } from 'discord.js';
-import { buildSaleListingNFTEmbed, buildWalletDataEmbed, buildWalletBasicDataEmbed } from './embeds.js';
+import { buildSaleListingNFTEmbed, buildWalletDataEmbed } from './embeds.js';
 import { IS_TEST_MODE, ALIVE_PING_INTERVAL, DOLZ_API_INTERVAL_MS } from './config.js';
 import { sendStatusMessage } from './error-handler.js';
 import { callApiToHandleNFTEvents, getNFTData } from './api-service.js';
@@ -165,7 +165,6 @@ export function eventBotReady(discordClient) {
                 //     'sale',
                 // );
                 // const walletDataEmbed = await buildWalletDataEmbed(process.env.FRANCK_ADDRESS_1, true);
-                const walletBasicDataEmbed = await buildWalletBasicDataEmbed(process.env.FRANCK_ADDRESS_1);
                 // const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
@@ -185,7 +184,6 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedOS] });
                     // await thread.send({ embeds: [nftTrackingEmbed] });
                     // await thread.send({ embeds: [walletDataEmbed] });
-                    await thread.send({ embeds: [walletBasicDataEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
                     // await thread.send({
@@ -197,7 +195,7 @@ export function eventBotReady(discordClient) {
                     //         ],
                     //     },
                     // });
-                    process.exit(0);
+                    // process.exit(0);
                 }
             } catch (e) {
                 console.error('Erreur envoi test embed :', e);
@@ -247,6 +245,7 @@ export function eventBotReady(discordClient) {
                 const address = interaction.options.getString('address');
                 const person = interaction.options.getString('person');
                 const withFullDetails = interaction.options.getBoolean('with_full_details') ?? false;
+                const basicDataOnly = interaction.options.getBoolean('basic_data_only') ?? false;
                 let walletAddress;
 
                 if (address) {
@@ -256,21 +255,7 @@ export function eventBotReady(discordClient) {
                 } else {
                     return interaction.reply({ content: '⚠️ Tu dois renseigner une adresse ou choisir une personne.', ephemeral: true });
                 }
-                const embed = await buildWalletDataEmbed(walletAddress, withFullDetails);
-                await interaction.editReply({ embeds: [embed] });
-            } else if (interaction.commandName === 'get_wallet_basic_data') {
-                const address = interaction.options.getString('address');
-                const person = interaction.options.getString('person');
-                let walletAddress;
-
-                if (address) {
-                    walletAddress = address;
-                } else if (person) {
-                    walletAddress = person;
-                } else {
-                    return interaction.reply({ content: '⚠️ Tu dois renseigner une adresse ou choisir une personne.', ephemeral: true });
-                }
-                const embed = await buildWalletBasicDataEmbed(walletAddress);
+                const embed = await buildWalletDataEmbed(walletAddress, withFullDetails, basicDataOnly);
                 await interaction.editReply({ embeds: [embed] });
             }
             // } else if (interaction.commandName === 'get_chart_sales_volume') {

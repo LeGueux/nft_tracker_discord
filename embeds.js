@@ -470,7 +470,7 @@ export async function buildNftTrackingEmbed(nftHoldersStats, nftResults, modelId
     }
 }
 
-export async function buildWalletDataEmbed(from, withFullDetails = false) {
+export async function buildWalletDataEmbed(from, withFullDetails = false, basicDataOnly = false) {
     console.log(`buildWalletDataEmbed for wallet ${from} withFullDetails ${withFullDetails}`);
     const embed = new EmbedBuilder()
         .setURL(`https://dolz.io/market/profile/${from}`)
@@ -623,6 +623,22 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
     const grouped = {}; // { [modelId]: { [rarity]: count } }
     const others = [];
 
+    // --- Résumé global du wallet
+    embed.addFields([
+        {
+            name: `🙋‍♂️ Wallet: ${getWhaleEmoji(allAssetsWallet.length, dolzBalanceWallet)} ${username}`,
+            value:
+                `🔗 [${from}](https://dolz.io/market/profile/${from})\n` +
+                `Total Assets: ${allAssetsWallet.length}🃏 ${totalListedAssetsWallet}🛒\n` +
+                `Total DOLZ: ${formatNumber(dolzBalanceWallet)}\n` +
+                `Total BabyDOLZ: ${formatNumber(babyDolzBalanceWallet)}\n`,
+        }
+    ]);
+
+    if (basicDataOnly) {
+        return embed;
+    }
+
     for (const asset of allAssetsWallet) {
         // Extraire rarity et modelId depuis animation_url
         const rarity = asset.rarity;
@@ -667,16 +683,8 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
         }
     }
 
-    // --- Résumé global du wallet
+    // --- Estimation du wallet
     embed.addFields([
-        {
-            name: `🙋‍♂️ Wallet: ${getWhaleEmoji(allAssetsWallet.length, dolzBalanceWallet)} ${username}`,
-            value:
-                `🔗 [${from}](https://dolz.io/market/profile/${from})\n` +
-                `Total Assets: ${allAssetsWallet.length}🃏 ${totalListedAssetsWallet}🛒\n` +
-                `Total DOLZ: ${formatNumber(dolzBalanceWallet)}\n` +
-                `Total BabyDOLZ: ${formatNumber(babyDolzBalanceWallet)}\n`,
-        },
         {
             name: '💰 Estimée en DOLZ (Rare/Limited évaluées)',
             value: `${formatNumber(totalDolzEstimated)} DOLZ (au floor)\n` +
@@ -778,172 +786,6 @@ export async function buildWalletDataEmbed(from, withFullDetails = false) {
             }
         }
     }
-
-    return embed;
-}
-
-export async function buildWalletBasicDataEmbed(from) {
-    console.log(`buildWalletBasicDataEmbed for wallet ${from}`);
-    const embed = new EmbedBuilder()
-        .setURL(`https://dolz.io/market/profile/${from}`)
-        .setTimestamp();
-
-    const [
-        allS1AssetsWallet,
-        allS2AssetsWallet,
-        allS3AssetsWallet,
-        allS4AssetsWallet,
-        allS5AssetsWallet,
-        allS6AssetsWallet,
-        allS7AssetsWallet,
-        allS8AssetsWallet,
-        allEpicAssetsWallet,
-        allLedgendaryAndNotRevealedAssetsWallet,
-        allNotSeasonAssetsWallet,
-        babyDolzBalanceWallet,
-        dolzBalanceWallet,
-        usernameData,
-    ] = await Promise.all([
-        searchCardsByCriteriasV2({
-            attributes: [
-                { 'name': 'Rarity', 'value': 'Limited' },
-                { 'name': 'Rarity', 'value': 'Rare' },
-                { 'name': 'Season', 'value': '1' },
-            ],
-            limit: 100,
-            status: 'Owned',
-            walletAddress: from,
-        }),
-        searchCardsByCriteriasV2({
-            attributes: [
-                { 'name': 'Rarity', 'value': 'Limited' },
-                { 'name': 'Rarity', 'value': 'Rare' },
-                { 'name': 'Season', 'value': '2' },
-            ],
-            limit: 100,
-            status: 'Owned',
-            walletAddress: from,
-        }),
-        searchCardsByCriteriasV2({
-            attributes: [
-                { 'name': 'Rarity', 'value': 'Limited' },
-                { 'name': 'Rarity', 'value': 'Rare' },
-                { 'name': 'Season', 'value': '3' },
-            ],
-            limit: 100,
-            status: 'Owned',
-            walletAddress: from,
-        }),
-        searchCardsByCriteriasV2({
-            attributes: [
-                { 'name': 'Rarity', 'value': 'Limited' },
-                { 'name': 'Rarity', 'value': 'Rare' },
-                { 'name': 'Season', 'value': '4' },
-            ],
-            limit: 100,
-            status: 'Owned',
-            walletAddress: from,
-        }),
-        searchCardsByCriteriasV2({
-            attributes: [
-                { 'name': 'Rarity', 'value': 'Limited' },
-                { 'name': 'Rarity', 'value': 'Rare' },
-                { 'name': 'Season', 'value': '5' },
-            ],
-            limit: 100,
-            status: 'Owned',
-            walletAddress: from,
-        }),
-        searchCardsByCriteriasV2({
-            attributes: [
-                { 'name': 'Rarity', 'value': 'Limited' },
-                { 'name': 'Rarity', 'value': 'Rare' },
-                { 'name': 'Season', 'value': '6' },
-            ],
-            limit: 100,
-            status: 'Owned',
-            walletAddress: from,
-        }),
-        searchCardsByCriteriasV2({
-            attributes: [
-                { 'name': 'Rarity', 'value': 'Limited' },
-                { 'name': 'Rarity', 'value': 'Rare' },
-                { 'name': 'Season', 'value': '7' },
-            ],
-            limit: 100,
-            status: 'Owned',
-            walletAddress: from,
-        }),
-        searchCardsByCriteriasV2({
-            attributes: [
-                { 'name': 'Rarity', 'value': 'Limited' },
-                { 'name': 'Rarity', 'value': 'Rare' },
-                { 'name': 'Season', 'value': '8' },
-            ],
-            limit: 100,
-            status: 'Owned',
-            walletAddress: from,
-        }),
-        searchCardsByCriteriasV2({
-            attributes: [
-                { 'name': 'Rarity', 'value': 'Epic' },
-            ],
-            limit: 100,
-            status: 'Owned',
-            walletAddress: from,
-        }),
-        searchCardsByCriteriasV2({
-            attributes: [
-                { 'name': 'Rarity', 'value': 'Legendary' },
-                { 'name': 'Rarity', 'value': 'Not revealed' },
-            ],
-            limit: 100,
-            status: 'Owned',
-            walletAddress: from,
-        }),
-        searchCardsByCriteriasV2({
-            attributes: [
-                { 'name': 'Rarity', 'value': 'Limited' },
-                { 'name': 'Rarity', 'value': 'Rare' },
-                { 'name': 'Season', 'value': 'Off-Season' },
-                { 'name': 'Season', 'value': 'Special Edition' },
-            ],
-            limit: 100,
-            status: 'Owned',
-            walletAddress: from,
-        }),
-        getBabyDolzBalance(from),
-        getDolzBalance(from),
-        getDolzUsername(from),
-    ]);
-    // Fusionner tous les tableaux de cartes en un seul
-    const allAssetsWallet = [
-        ...allS1AssetsWallet.results,
-        ...allS2AssetsWallet.results,
-        ...allS3AssetsWallet.results,
-        ...allS4AssetsWallet.results,
-        ...allS5AssetsWallet.results,
-        ...allS6AssetsWallet.results,
-        ...allS7AssetsWallet.results,
-        ...allS8AssetsWallet.results,
-        ...allEpicAssetsWallet.results,
-        ...allLedgendaryAndNotRevealedAssetsWallet.results,
-        ...allNotSeasonAssetsWallet.results,
-    ];
-    const totalListedAssetsWallet = structuredClone(allAssetsWallet).filter(item => item.listing !== null).length;
-    const username = (usernameData[0]?.duUsername ?? '').split('#')[0];
-
-    // --- Résumé global du wallet
-    embed.addFields([
-        {
-            name: `🙋‍♂️ Wallet: ${getWhaleEmoji(allAssetsWallet.length, dolzBalanceWallet)} ${username}`,
-            value:
-                `🔗 [${from}](https://dolz.io/market/profile/${from})\n` +
-                `Total Assets: ${allAssetsWallet.length}🃏 ${totalListedAssetsWallet}🛒\n` +
-                `Total DOLZ: ${formatNumber(dolzBalanceWallet)}\n` +
-                `Total BabyDOLZ: ${formatNumber(babyDolzBalanceWallet)}\n`,
-        }
-    ]);
 
     return embed;
 }
