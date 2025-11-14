@@ -197,11 +197,11 @@ export function eventBotReady(discordClient) {
                     // });
                     // process.exit(0);
                 }
-            } catch (e) {
-                console.error('Erreur envoi test embed :', e);
+            } catch (error) {
+                console.error('Erreur envoi test embed :', error);
                 await sendStatusMessage(
                     discordClient,
-                    `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Rejection : \`${e}\``,
+                    `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Rejection : \`${error}\``,
                 );
             }
         }

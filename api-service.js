@@ -73,7 +73,7 @@ export async function callApiToHandleNFTEvents(discordClient) {
         console.error('callApiToHandleNFTEvents - Erreur lors de la récupération des cartes:', error);
         await sendStatusMessage(
             discordClient,
-            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Rejection : \`${e}\``,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Rejection : \`${error}\``,
         );
     }
 }
