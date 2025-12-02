@@ -287,7 +287,7 @@ export function eventBotReady(discordClient) {
             const context = match[2]; // 'snipe'
 
             // ⬅️ Répond immédiatement pour ne pas bloquer
-            await interaction.deferReply({ ephemeral: false });
+            await interaction.deferUpdate();
 
             await interaction.editReply({
                 embeds: [
@@ -299,6 +299,7 @@ export function eventBotReady(discordClient) {
                 ],
                 components: [],
             });
+
 
             if (context === 'snipe') {
                 const snipeEmbedSeason = await handleSnipeForSeason(season);
