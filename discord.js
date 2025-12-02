@@ -287,11 +287,10 @@ export function eventBotReady(discordClient) {
             const season = parseInt(match[1]);
             const context = match[2]; // 'snipe'
 
-            // ⬅️ Répond immédiatement pour ne pas bloquer
-            await interaction.deferUpdate();
+            // 1️⃣ Répond immédiatement → pas de timeout, pas d’Unknown interaction
+            await interaction.deferReply({ flags: 0 });
 
             if (context === 'snipe') {
-                const snipeEmbedSeason = await handleSnipeForSeason(season);
                 const row = buildSeasonButtons(context, season, true, true, true);
                 await interaction.editReply({
                     embeds: [
@@ -304,6 +303,7 @@ export function eventBotReady(discordClient) {
                     components: row,
                 });
 
+                const snipeEmbedSeason = await handleSnipeForSeason(season);
                 await interaction.editReply({
                     embeds: [snipeEmbedSeason],
                     components: row
