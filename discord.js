@@ -289,21 +289,19 @@ export function eventBotReady(discordClient) {
             // ⬅️ Répond immédiatement pour ne pas bloquer
             await interaction.deferUpdate();
 
-            await interaction.editReply({
-                embeds: [
-                    {
-                        title: "🔄 Chargement...",
-                        description: `Récupération des données en cours.`,
-                        color: 0xcccccc,
-                    }
-                ],
-                components: [],
-            });
-
-
             if (context === 'snipe') {
                 const snipeEmbedSeason = await handleSnipeForSeason(season);
                 const row = buildSeasonButtons(context, season, true, true, true);
+                await interaction.editReply({
+                    embeds: [
+                        {
+                            title: "🔄 Chargement...",
+                            description: `Récupération des données en cours.`,
+                            color: 0xcccccc,
+                        }
+                    ],
+                    components: row,
+                });
 
                 await interaction.editReply({
                     embeds: [snipeEmbedSeason],
