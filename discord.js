@@ -50,7 +50,8 @@ function buildSeasonButtons(suffix, currentSeason, includeAllRecap = true, inclu
         // Season 6 and more Snipe ONLY Buttons ID=111
         const buttonSeason6AndMoreOnly = new ButtonBuilder()
             .setCustomId(`select_season_111_${suffix}`)
-            .setLabel(`HOT S6+`)
+            .setEmoji('🔥')
+            .setLabel(`S6+`)
             .setStyle(111 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
 
         if (currentRow.components.length === 5) {
