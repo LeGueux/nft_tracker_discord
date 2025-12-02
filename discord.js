@@ -285,8 +285,21 @@ export function eventBotReady(discordClient) {
 
             const season = parseInt(match[1]);
             const context = match[2]; // 'snipe'
-            console.log('interaction.customId Match', match, context, season);
-            await interaction.deferUpdate(); // Important pour éviter "Échec de l'interaction"
+
+            // ⬅️ Répond immédiatement pour ne pas bloquer
+            await interaction.deferReply({ ephemeral: false });
+
+            await interaction.editReply({
+                embeds: [
+                    {
+                        title: "🔄 Chargement...",
+                        description: `Récupération des données en cours.`,
+                        color: 0xcccccc,
+                    }
+                ],
+                components: [],
+            });
+
             if (context === 'snipe') {
                 const snipeEmbedSeason = await handleSnipeForSeason(season);
                 const row = buildSeasonButtons(context, season, true, true, true);
