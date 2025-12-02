@@ -26,7 +26,8 @@ function buildSeasonButtons(suffix, currentSeason, includeAllRecap = true, inclu
         // All Season Snipe ONLY Buttons ID=100
         const buttonAll = new ButtonBuilder()
             .setCustomId(`select_season_100_${suffix}`)
-            .setLabel(`HOT All`)
+            .setEmoji('🔥')
+            .setLabel(`All`)
             .setStyle(100 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
 
         if (currentRow.components.length === 5) {
@@ -38,7 +39,8 @@ function buildSeasonButtons(suffix, currentSeason, includeAllRecap = true, inclu
         // All Season Snipe ONLY Buttons ID=110
         const buttonAllSeasonsOnly = new ButtonBuilder()
             .setCustomId(`select_season_110_${suffix}`)
-            .setLabel(`HOT S1-S8`)
+            .setEmoji('🔥')
+            .setLabel(`S1-S8`)
             .setStyle(110 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
 
         if (currentRow.components.length === 5) {
@@ -288,7 +290,7 @@ export function eventBotReady(discordClient) {
             const context = match[2]; // 'snipe'
 
             // 1️⃣ Répond immédiatement → pas de timeout, pas d’Unknown interaction
-            await interaction.deferReply({ flags: 0 });
+            await interaction.deferUpdate();
 
             if (context === 'snipe') {
                 const row = buildSeasonButtons(context, season, true, true, true);
