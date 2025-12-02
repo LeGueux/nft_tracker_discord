@@ -46,6 +46,18 @@ function buildSeasonButtons(suffix, currentSeason, includeAllRecap = true, inclu
             currentRow = new ActionRowBuilder();
         }
         currentRow.addComponents(buttonAllSeasonsOnly);
+
+        // Season 6 and more Snipe ONLY Buttons ID=111
+        const buttonSeason6AndMoreOnly = new ButtonBuilder()
+            .setCustomId(`select_season_111_${suffix}`)
+            .setLabel(`HOT S6+`)
+            .setStyle(111 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
+
+        if (currentRow.components.length === 5) {
+            rows.push(currentRow);
+            currentRow = new ActionRowBuilder();
+        }
+        currentRow.addComponents(buttonSeason6AndMoreOnly);
     }
 
     for (let i = 1; i <= 8; i++) {
@@ -149,6 +161,7 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbed8 = await handleSnipeForSeason(8);
                 // const snipeEmbedAll = await handleSnipeForSeason(100);
                 // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
+                // const snipeEmbedHotS6AndMore = await handleSnipeForSeason(111);
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
                 // const nftTrackingEmbed = await handleNftTrackingForModel('g0053', 5, true);
@@ -180,6 +193,7 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbed8] });
                     // await thread.send({ embeds: [snipeEmbedAll] });
                     // await thread.send({ embeds: [snipeEmbedAllSeasons] });
+                    // await thread.send({ embeds: [snipeEmbedHotS6AndMore] });
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
                     // await thread.send({ embeds: [nftTrackingEmbed] });

@@ -13,6 +13,7 @@ export async function handleSnipeForSeason(season) {
     const seasonMap = {
         100: { seasons: ['1', '2', '3', '4', '5', '6', '7', '8', 'Special Edition', 'Off-Season'], snipe: true, gaps: 2 },
         110: { seasons: ['1', '2', '3', '4', '5', '6', '7', '8'], snipe: true, gaps: 2 },
+        111: { seasons: ['6', '7', '8'], snipe: true, gaps: 2 },
         120: { seasons: ['Special Edition'], snipe: true },
         130: { seasons: ['Off-Season'], snipe: false },
     };
