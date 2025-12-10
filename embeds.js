@@ -485,6 +485,7 @@ export async function buildWalletDataEmbed(from, withFullDetails = false, basicD
         allS6AssetsWallet,
         allS7AssetsWallet,
         allS8AssetsWallet,
+        allS9AssetsWallet,
         allEpicAssetsWallet,
         allLedgendaryAndNotRevealedAssetsWallet,
         allNotSeasonAssetsWallet,
@@ -574,6 +575,16 @@ export async function buildWalletDataEmbed(from, withFullDetails = false, basicD
         }),
         searchCardsByCriteriasV2({
             attributes: [
+                { 'name': 'Rarity', 'value': 'Limited' },
+                { 'name': 'Rarity', 'value': 'Rare' },
+                { 'name': 'Season', 'value': '9' },
+            ],
+            limit: 100,
+            status: 'Owned',
+            walletAddress: from,
+        }),
+        searchCardsByCriteriasV2({
+            attributes: [
                 { 'name': 'Rarity', 'value': 'Epic' },
             ],
             limit: 100,
@@ -614,6 +625,7 @@ export async function buildWalletDataEmbed(from, withFullDetails = false, basicD
         ...allS6AssetsWallet.results,
         ...allS7AssetsWallet.results,
         ...allS8AssetsWallet.results,
+        ...allS9AssetsWallet.results,
         ...allEpicAssetsWallet.results,
         ...allLedgendaryAndNotRevealedAssetsWallet.results,
         ...allNotSeasonAssetsWallet.results,
@@ -693,7 +705,7 @@ export async function buildWalletDataEmbed(from, withFullDetails = false, basicD
     ]);
 
     // --- Résumé par saison
-    const displayOrder = ['1', '2', '3', '4', '5', '6', '7', '8', 'Off-Season', 'Special Edition'];
+    const displayOrder = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'Off-Season', 'Special Edition'];
 
     for (const season of displayOrder) {
         const models = groupedBySeason[season];

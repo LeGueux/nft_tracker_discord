@@ -12,7 +12,7 @@ const commands = [
                 .setRequired(true)
                 .addChoices(
                     { name: 'ALL', value: 100 },
-                    { name: 'S1-S8', value: 110 },
+                    { name: 'S1-S9', value: 110 },
                     { name: 'Saison 1', value: 1 },
                     { name: 'Saison 2', value: 2 },
                     { name: 'Saison 3', value: 3 },
@@ -21,6 +21,7 @@ const commands = [
                     { name: 'Saison 6', value: 6 },
                     { name: 'Saison 7', value: 7 },
                     { name: 'Saison 8', value: 8 },
+                    { name: 'Saison 9', value: 9 },
                     { name: 'SPE-S', value: 120 },
                     { name: 'OFF-S', value: 130 },
                 ))
