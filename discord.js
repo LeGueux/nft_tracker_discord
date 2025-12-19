@@ -13,6 +13,7 @@ import { handleSnipeForSeason } from './command-snipe.js';
 import { handleNftTrackingForModel } from './command-nft-tracking.js';
 import { handleOffersForOurTeam } from './handle-offers.js';
 import { handleGetChartSalesVolume, handleGetChartSalesVolumeBywallet } from './command-chart-sales-volume.js';
+import { getDolzBalance } from './alchemy-api.js';
 
 export const discordClient = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -154,6 +155,8 @@ export function eventBotReady(discordClient) {
 
         if (IS_TEST_MODE) {
             try {
+                // const dolzBalance = await getDolzBalance(process.env.FRANCK_ADDRESS_1);
+                // console.log(`Solde DOLZ pour l'adresse de Franck : ${dolzBalance}`);
                 // const snipeEmbed1 = await handleSnipeForSeason(1);
                 // const snipeEmbed2 = await handleSnipeForSeason(2);
                 // const snipeEmbed3 = await handleSnipeForSeason(3);
