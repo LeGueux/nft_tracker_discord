@@ -246,7 +246,7 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
             }
 
             let blocTitle = `${getPrefixNameEmojiBySeason(getNFTSeasonByCardNumber(item.modelId))} ${item.isFragileLevel1 ? '🔥' : '🧊'}${item.isFragileLevel2 ? '🔥' : '🧊'} `;
-            blocTitle += `${item.name}`;
+            blocTitle += `[${item.name}](https://dolz.io/market/${process.env.NFT_CONTRACT_ADDRESS}?Card+Number=${item.modelId})`;
 
             embed.addFields({
                 name: '',
@@ -382,6 +382,7 @@ export async function buildNftTrackingEmbed(nftHoldersStats, nftResults, modelId
     } = nftHoldersStats;
 
     let embed = new EmbedBuilder()
+        .setURL(`https://dolz.io/market/${process.env.NFT_CONTRACT_ADDRESS}?Card+Number=${modelId}`)
         .setTitle(`<:snipe:1310218808123723829> Tracking card ${modelId}`)
         .setColor(0x00ffcc)
         .setTimestamp();
