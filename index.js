@@ -1,5 +1,5 @@
 import 'dotenv/config';
-// import express from 'express';
+import express from 'express';
 import { discordClient, eventBotReady } from './discord.js';
 import { setupErrorHandlers } from './shared/error-handler.js';
 
