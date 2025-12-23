@@ -155,8 +155,8 @@ export function eventBotReady(discordClient) {
 
         if (IS_TEST_MODE) {
             try {
-                const dolzBalance = await getDolzBalance(process.env.FRANCK_ADDRESS_1);
-                console.log(`Solde DOLZ pour l'adresse de Franck : ${dolzBalance}`);
+                // const dolzBalance = await getDolzBalance(process.env.FRANCK_ADDRESS_1);
+                // console.log(`Solde DOLZ pour l'adresse de Franck : ${dolzBalance}`);
                 // const snipeEmbed1 = await handleSnipeForSeason(1);
                 // const snipeEmbed2 = await handleSnipeForSeason(2);
                 // const snipeEmbed3 = await handleSnipeForSeason(3);
