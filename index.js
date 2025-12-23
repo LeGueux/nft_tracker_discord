@@ -1,7 +1,7 @@
 import 'dotenv/config';
-import express from 'express';
+// import express from 'express';
 import { discordClient, eventBotReady } from './discord.js';
-import { setupErrorHandlers } from './error-handler.js';
+import { setupErrorHandlers } from './shared/error-handler.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
