@@ -5,15 +5,15 @@ import {
     ButtonBuilder,
     ButtonStyle,
 } from 'discord.js';
-import { buildSaleListingNFTEmbed, buildWalletDataEmbed } from './embeds.js';
-import { IS_TEST_MODE, ALIVE_PING_INTERVAL, DOLZ_API_INTERVAL_MS } from './config.js';
-import { sendStatusMessage } from './error-handler.js';
-import { callApiToHandleNFTEvents, getNFTData } from './api-service.js';
-import { handleSnipeForSeason } from './command-snipe.js';
-import { handleNftTrackingForModel } from './command-nft-tracking.js';
-import { handleOffersForOurTeam } from './handle-offers.js';
-import { handleGetChartSalesVolume, handleGetChartSalesVolumeBywallet } from './command-chart-sales-volume.js';
-import { getDolzBalance } from './alchemy-api.js';
+import { buildSaleListingNFTEmbed, buildWalletDataEmbed } from './dolz/embeds.js';
+import { IS_TEST_MODE, ALIVE_PING_INTERVAL, DOLZ_API_INTERVAL_MS } from './dolz/config.js';
+import { sendStatusMessage } from './shared/error-handler.js';
+import { callApiToHandleNFTEvents, getNFTData } from './dolz/api-service.js';
+import { handleSnipeForSeason } from './dolz/command-snipe.js';
+import { handleNftTrackingForModel } from './dolz/command-nft-tracking.js';
+import { handleOffersForOurTeam } from './dolz/handle-offers.js';
+import { handleGetChartSalesVolume, handleGetChartSalesVolumeBywallet } from './dolz/command-chart-sales-volume.js';
+import { getDolzBalance } from './shared/alchemy-api.js';
 
 export const discordClient = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -184,7 +184,7 @@ export function eventBotReady(discordClient) {
                 //     1000,
                 //     'sale',
                 // );
-                // const walletDataEmbed = await buildWalletDataEmbed(process.env.FRANCK_ADDRESS_1, true);
+                const walletDataEmbed = await buildWalletDataEmbed(process.env.FRANCK_ADDRESS_1, true);
                 // const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
@@ -205,7 +205,7 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
                     // await thread.send({ embeds: [nftTrackingEmbed] });
-                    // await thread.send({ embeds: [walletDataEmbed] });
+                    await thread.send({ embeds: [walletDataEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
                     // await thread.send({
@@ -217,7 +217,7 @@ export function eventBotReady(discordClient) {
                     //         ],
                     //     },
                     // });
-                    // process.exit(0);
+                    process.exit(0);
                 }
             } catch (error) {
                 console.error('Erreur envoi test embed :', error);

@@ -1,4 +1,4 @@
-import { getThreadIdForToken } from './discord.js';
+import { getThreadIdForToken } from '../discord.js';
 
 export async function sendStatusMessage(discordClient, content) {
     try {

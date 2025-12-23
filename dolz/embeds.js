@@ -5,7 +5,7 @@ import {
     getBabyDolzBalance,
     getDolzPrice,
 } from './api-service.js';
-import { getDolzBalance } from './alchemy-api.js';
+import { getDolzBalance } from '../shared/alchemy-api.js';
 import {
     getNFTSeasonByCardNumber,
     calculateBBDRewardNftByNFTData,

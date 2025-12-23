@@ -1,12 +1,12 @@
 import { buildSaleListingNFTEmbed } from './embeds.js';
-import { getThreadIdForToken } from './discord.js';
+import { getThreadIdForToken } from '../discord.js';
 import {
     getRarityColor,
     checkDateIsValidSinceLastOneInterval,
     getContentTagsDependsOnNFT,
     getFloorPriceByModelAndRarity,
 } from './utils.js';
-import { sendStatusMessage } from './error-handler.js';
+import { sendStatusMessage } from '../shared/error-handler.js';
 
 export async function callApiToHandleNFTEvents(discordClient) {
     try {

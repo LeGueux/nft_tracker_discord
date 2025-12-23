@@ -2,8 +2,8 @@ import { getEventsByWallet, getOffersByNFTId, getNFTData } from './api-service.j
 import { WALLETS_TEAM } from './config.js';
 import { buildSaleListingNFTEmbed } from './embeds.js';
 import { getDiscordUserToNotifyByWallet } from './utils.js';
-import { getThreadIdForToken } from './discord.js';
-import { sendStatusMessage } from './error-handler.js';
+import { getThreadIdForToken } from '../discord.js';
+import { sendStatusMessage } from '../shared/error-handler.js';
 
 export async function handleOffersForOurTeam(discordClient) {
     try {
