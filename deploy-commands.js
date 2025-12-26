@@ -70,6 +70,10 @@ const commands = [
                 .setDescription('Affiche le uniquement le minimum de data du wallet (défaut: false)')
         )
         .toJSON(),
+    new SlashCommandBuilder()
+        .setName('pm_actives_positions')
+        .setDescription('Affiche les positions actives sur Polymarket pour Franck, Nico et Bob')
+        .toJSON(),
 ];
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);

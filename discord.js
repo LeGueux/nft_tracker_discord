@@ -6,6 +6,7 @@ import {
     ButtonStyle,
 } from 'discord.js';
 import { buildSaleListingNFTEmbed, buildWalletDataEmbed } from './dolz/embeds.js';
+import { buildPolymarketPositionsEmbed } from './polymarket/embeds.js';
 import { IS_TEST_MODE, ALIVE_PING_INTERVAL, DOLZ_API_INTERVAL_MS } from './dolz/config.js';
 import { sendStatusMessage } from './shared/error-handler.js';
 import { callApiToHandleNFTEvents, getNFTData } from './dolz/api-service.js';
@@ -14,6 +15,7 @@ import { handleNftTrackingForModel } from './dolz/command-nft-tracking.js';
 import { handleOffersForOurTeam } from './dolz/handle-offers.js';
 import { handleGetChartSalesVolume, handleGetChartSalesVolumeBywallet } from './dolz/command-chart-sales-volume.js';
 import { getDolzBalance } from './shared/alchemy-api.js';
+import { getPolymarketPositionsBalance, getUserPositions } from './polymarket/polymarket-api.js';
 
 export const discordClient = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -114,6 +116,29 @@ function buildSeasonButtons(suffix, currentSeason, includeAllRecap = true, inclu
     return rows;
 }
 
+function buildPolymarketActivePositionsButtons() {
+    const rows = [];
+    let currentRow = new ActionRowBuilder();
+
+    // Off-Season Button ID=130
+    const buttonRefresh = new ButtonBuilder()
+        .setCustomId(`refresh_pm_positions`)
+        .setLabel(`Refresh`);
+
+    if (currentRow.components.length === 5) {
+        rows.push(currentRow);
+        currentRow = new ActionRowBuilder();
+    }
+    currentRow.addComponents(buttonRefresh);
+
+    // Push the last row if it has any buttons
+    if (currentRow.components.length > 0) {
+        rows.push(currentRow);
+    }
+
+    return rows;
+}
+
 export function getThreadIdForToken(type, from) {
     if (type == 'sale' && from) {
         // Cas où from correspond à un utilisateur spécifique
@@ -144,9 +169,9 @@ export function getThreadIdForToken(type, from) {
     }
 }
 
-// Discord bot ready
+// Discord bot clientReady
 export function eventBotReady(discordClient) {
-    discordClient.once('ready', async () => {
+    discordClient.once('clientReady', async () => {
         console.log(`✅ Bot démarré à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
         await sendStatusMessage(
             discordClient,
@@ -184,12 +209,22 @@ export function eventBotReady(discordClient) {
                 //     1000,
                 //     'sale',
                 // );
-                const walletDataEmbed = await buildWalletDataEmbed(process.env.FRANCK_ADDRESS_1, true);
+                // const walletDataEmbed = await buildWalletDataEmbed(process.env.FRANCK_ADDRESS_1, true);
                 // const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
+                // POLYMARKET
+                // const polymarketFranckActivePositions = await getUserPositions(process.env.FRANCK_POLYMARKET_ADDRESS);
+                // const polymarketNicoActivePositions = await getUserPositions(process.env.NICO_POLYMARKET_ADDRESS);
+                // const polymarketBobActivePositions = await getUserPositions(process.env.BOB_POLYMARKET_ADDRESS);
+                // console.log(polymarketFranckActivePositions);
+                // console.log(polymarketNicoActivePositions);
+                // console.log(polymarketBobActivePositions);
+                // const polymarketPositionsEmbed = await buildPolymarketPositionsEmbed(discordClient, polymarketFranckActivePositions, polymarketNicoActivePositions, polymarketBobActivePositions);
+
                 const thread = await discordClient.channels.fetch(getThreadIdForToken('default'));
                 if (thread?.isTextBased()) {
+                    // DOLZ
                     // await thread.send({ embeds: [snipeEmbed1] });
                     // await thread.send({ embeds: [snipeEmbed2] });
                     // await thread.send({ embeds: [snipeEmbed3] });
@@ -205,7 +240,7 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
                     // await thread.send({ embeds: [nftTrackingEmbed] });
-                    await thread.send({ embeds: [walletDataEmbed] });
+                    // await thread.send({ embeds: [walletDataEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
                     // await thread.send({
@@ -217,7 +252,11 @@ export function eventBotReady(discordClient) {
                     //         ],
                     //     },
                     // });
-                    process.exit(0);
+
+                    // POLYMARKET
+                    // await thread.send({ embeds: [polymarketPositionsEmbed] });
+
+                    // process.exit(0);
                 }
             } catch (error) {
                 console.error('Erreur envoi test embed :', error);
@@ -225,6 +264,7 @@ export function eventBotReady(discordClient) {
                     discordClient,
                     `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Rejection : \`${error}\``,
                 );
+                process.exit(0);
             }
         }
         // Start calling Dolz API with interval
@@ -279,6 +319,16 @@ export function eventBotReady(discordClient) {
                 }
                 const embed = await buildWalletDataEmbed(walletAddress, withFullDetails, basicDataOnly);
                 await interaction.editReply({ embeds: [embed] });
+            } else if (interaction.commandName === 'pm_actives_positions') {
+                const polymarketFranckActivePositions = await getUserPositions(process.env.FRANCK_POLYMARKET_ADDRESS);
+                const polymarketNicoActivePositions = await getUserPositions(process.env.NICO_POLYMARKET_ADDRESS);
+                const polymarketBobActivePositions = await getUserPositions(process.env.BOB_POLYMARKET_ADDRESS);
+                const embed = await buildPolymarketPositionsEmbed(discordClient, polymarketFranckActivePositions, polymarketNicoActivePositions, polymarketBobActivePositions);
+                const row = buildPolymarketActivePositionsButtons();
+                await interaction.editReply({
+                    embeds: [embed],
+                    components: row,
+                });
             }
             // } else if (interaction.commandName === 'get_chart_sales_volume') {
             //     const embedWithChart = await handleGetChartSalesVolume(false);
@@ -288,8 +338,10 @@ export function eventBotReady(discordClient) {
             //     const embedWithChart = await handleGetChartSalesVolumeBywallet(address);
             //     await interaction.editReply(embedWithChart);
         } else if (interaction.isButton()) {
+
             const match = interaction.customId.match(/select_season_(\d+)_(snipe)/);
-            if (!match) return;
+            const isRefreshPmPositions = interaction.customId === 'refresh_pm_positions';
+            if (!match && !isRefreshPmPositions) return;
 
             const season = parseInt(match[1]);
             const context = match[2]; // 'snipe'
@@ -314,6 +366,26 @@ export function eventBotReady(discordClient) {
                 await interaction.editReply({
                     embeds: [snipeEmbedSeason],
                     components: row
+                });
+            } else if (isRefreshPmPositions) {
+                await interaction.editReply({
+                    embeds: [
+                        {
+                            title: "🔄 Chargement...",
+                            description: `Récupération des données en cours.`,
+                            color: 0xcccccc,
+                        }
+                    ],
+                    components: row,
+                });
+                const polymarketFranckActivePositions = await getUserPositions(process.env.FRANCK_POLYMARKET_ADDRESS);
+                const polymarketNicoActivePositions = await getUserPositions(process.env.NICO_POLYMARKET_ADDRESS);
+                const polymarketBobActivePositions = await getUserPositions(process.env.BOB_POLYMARKET_ADDRESS);
+                const embed = await buildPolymarketPositionsEmbed(discordClient, polymarketFranckActivePositions, polymarketNicoActivePositions, polymarketBobActivePositions);
+                const row = buildPolymarketActivePositionsButtons();
+                await interaction.editReply({
+                    embeds: [embed],
+                    components: row,
                 });
             }
         }
