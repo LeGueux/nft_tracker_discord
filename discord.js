@@ -123,7 +123,9 @@ function buildPolymarketActivePositionsButtons() {
     // Off-Season Button ID=130
     const buttonRefresh = new ButtonBuilder()
         .setCustomId(`refresh_pm_positions`)
-        .setLabel(`Refresh`);
+        .setLabel(`Refresh`)
+        .setEmoji('🔄')
+        .setStyle(ButtonStyle.Secondary);
 
     if (currentRow.components.length === 5) {
         rows.push(currentRow);
@@ -254,7 +256,12 @@ export function eventBotReady(discordClient) {
                     // });
 
                     // POLYMARKET
-                    // await thread.send({ embeds: [polymarketPositionsEmbed] });
+                    // const row = buildPolymarketActivePositionsButtons();
+                    // await interaction.editReply({
+                    //     embeds: [polymarketPositionsEmbed],
+                    //     components: row,
+                    // });
+                    // await thread.send({ embeds: [polymarketPositionsEmbed], components: row });
 
                     // process.exit(0);
                 }
