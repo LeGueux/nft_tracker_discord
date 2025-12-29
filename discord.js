@@ -15,7 +15,6 @@ import { handleNftTrackingForModel } from './dolz/command-nft-tracking.js';
 import { handleOffersForOurTeam } from './dolz/handle-offers.js';
 import { handleGetChartSalesVolume, handleGetChartSalesVolumeBywallet } from './dolz/command-chart-sales-volume.js';
 import { getDolzBalance } from './shared/alchemy-api.js';
-import { getPolymarketPositionsBalance, getUserPositions } from './polymarket/polymarket-api.js';
 
 export const discordClient = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],

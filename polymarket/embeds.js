@@ -1,5 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { sendStatusMessage } from '../shared/error-handler.js';
+import { getUserPositions } from './polymarket/polymarket-api.js';
 
 function buildPositionDescription(pos) {
     const lines = [];
