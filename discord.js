@@ -338,8 +338,14 @@ export function eventBotReady(discordClient) {
         } else if (interaction.isButton()) {
             const match = interaction.customId.match(/select_season_(\d+)_(snipe)/);
             const isRefreshPmPositions = interaction.customId === 'refresh_pm_positions';
+
+            // Aucun bouton reconnu
             if (!match && !isRefreshPmPositions) return;
 
+            // 1️⃣ Toujours defer pour éviter timeout
+            await interaction.deferUpdate();
+
+            // 🔄 REFRESH POLYMARKET
             if (isRefreshPmPositions) {
                 await interaction.editReply({
                     embeds: [
@@ -358,11 +364,9 @@ export function eventBotReady(discordClient) {
                     components: row,
                 });
             } else {
+                // 🎯 SNIPE
                 const season = parseInt(match[1]);
                 const context = match[2]; // 'snipe'
-
-                // 1️⃣ Répond immédiatement → pas de timeout, pas d’Unknown interaction
-                await interaction.deferUpdate();
 
                 if (context === 'snipe') {
                     const row = buildSeasonButtons(context, season, true, true, true);
