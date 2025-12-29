@@ -15,9 +15,12 @@ function buildPositionDescription(pos) {
     return lines.join('\n');
 }
 
-export async function buildPolymarketPositionsEmbed(discordClient, franckPositions, NicoPositions, BobPositions) {
+export async function buildPolymarketPositionsEmbed(discordClient) {
     console.log('Building Polymarket Positions Embed... | buildPolymarketPositionsEmbed');
     try {
+        const franckPositions = await getUserPositions(process.env.FRANCK_POLYMARKET_ADDRESS);
+        const NicoPositions = await getUserPositions(process.env.NICO_POLYMARKET_ADDRESS);
+        const BobPositions = await getUserPositions(process.env.BOB_POLYMARKET_ADDRESS);
         let embed = new EmbedBuilder()
             .setTitle('📈 Polymarket - Actives Positions')
             .setColor(0x00ff00)

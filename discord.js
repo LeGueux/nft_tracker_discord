@@ -216,13 +216,7 @@ export function eventBotReady(discordClient) {
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
                 // POLYMARKET
-                // const polymarketFranckActivePositions = await getUserPositions(process.env.FRANCK_POLYMARKET_ADDRESS);
-                // const polymarketNicoActivePositions = await getUserPositions(process.env.NICO_POLYMARKET_ADDRESS);
-                // const polymarketBobActivePositions = await getUserPositions(process.env.BOB_POLYMARKET_ADDRESS);
-                // console.log(polymarketFranckActivePositions);
-                // console.log(polymarketNicoActivePositions);
-                // console.log(polymarketBobActivePositions);
-                // const polymarketPositionsEmbed = await buildPolymarketPositionsEmbed(discordClient, polymarketFranckActivePositions, polymarketNicoActivePositions, polymarketBobActivePositions);
+                // const polymarketPositionsEmbed = await buildPolymarketPositionsEmbed(discordClient);
 
                 const thread = await discordClient.channels.fetch(getThreadIdForToken('default'));
                 if (thread?.isTextBased()) {
@@ -327,10 +321,7 @@ export function eventBotReady(discordClient) {
                 const embed = await buildWalletDataEmbed(walletAddress, withFullDetails, basicDataOnly);
                 await interaction.editReply({ embeds: [embed] });
             } else if (interaction.commandName === 'pm_actives_positions') {
-                const polymarketFranckActivePositions = await getUserPositions(process.env.FRANCK_POLYMARKET_ADDRESS);
-                const polymarketNicoActivePositions = await getUserPositions(process.env.NICO_POLYMARKET_ADDRESS);
-                const polymarketBobActivePositions = await getUserPositions(process.env.BOB_POLYMARKET_ADDRESS);
-                const embed = await buildPolymarketPositionsEmbed(discordClient, polymarketFranckActivePositions, polymarketNicoActivePositions, polymarketBobActivePositions);
+                const embed = await buildPolymarketPositionsEmbed(discordClient);
                 const row = buildPolymarketActivePositionsButtons();
                 await interaction.editReply({
                     embeds: [embed],
@@ -345,19 +336,11 @@ export function eventBotReady(discordClient) {
             //     const embedWithChart = await handleGetChartSalesVolumeBywallet(address);
             //     await interaction.editReply(embedWithChart);
         } else if (interaction.isButton()) {
-
             const match = interaction.customId.match(/select_season_(\d+)_(snipe)/);
             const isRefreshPmPositions = interaction.customId === 'refresh_pm_positions';
             if (!match && !isRefreshPmPositions) return;
 
-            const season = parseInt(match[1]);
-            const context = match[2]; // 'snipe'
-
-            // 1️⃣ Répond immédiatement → pas de timeout, pas d’Unknown interaction
-            await interaction.deferUpdate();
-
-            if (context === 'snipe') {
-                const row = buildSeasonButtons(context, season, true, true, true);
+            if (isRefreshPmPositions) {
                 await interaction.editReply({
                     embeds: [
                         {
@@ -368,32 +351,55 @@ export function eventBotReady(discordClient) {
                     ],
                     components: row,
                 });
-
-                const snipeEmbedSeason = await handleSnipeForSeason(season);
-                await interaction.editReply({
-                    embeds: [snipeEmbedSeason],
-                    components: row
-                });
-            } else if (isRefreshPmPositions) {
-                await interaction.editReply({
-                    embeds: [
-                        {
-                            title: "🔄 Chargement...",
-                            description: `Récupération des données en cours.`,
-                            color: 0xcccccc,
-                        }
-                    ],
-                    components: row,
-                });
-                const polymarketFranckActivePositions = await getUserPositions(process.env.FRANCK_POLYMARKET_ADDRESS);
-                const polymarketNicoActivePositions = await getUserPositions(process.env.NICO_POLYMARKET_ADDRESS);
-                const polymarketBobActivePositions = await getUserPositions(process.env.BOB_POLYMARKET_ADDRESS);
-                const embed = await buildPolymarketPositionsEmbed(discordClient, polymarketFranckActivePositions, polymarketNicoActivePositions, polymarketBobActivePositions);
+                const embed = await buildPolymarketPositionsEmbed(discordClient);
                 const row = buildPolymarketActivePositionsButtons();
                 await interaction.editReply({
                     embeds: [embed],
                     components: row,
                 });
+            } else {
+                const season = parseInt(match[1]);
+                const context = match[2]; // 'snipe'
+
+                // 1️⃣ Répond immédiatement → pas de timeout, pas d’Unknown interaction
+                await interaction.deferUpdate();
+
+                if (context === 'snipe') {
+                    const row = buildSeasonButtons(context, season, true, true, true);
+                    await interaction.editReply({
+                        embeds: [
+                            {
+                                title: "🔄 Chargement...",
+                                description: `Récupération des données en cours.`,
+                                color: 0xcccccc,
+                            }
+                        ],
+                        components: row,
+                    });
+
+                    const snipeEmbedSeason = await handleSnipeForSeason(season);
+                    await interaction.editReply({
+                        embeds: [snipeEmbedSeason],
+                        components: row
+                    });
+                } else if (isRefreshPmPositions) {
+                    await interaction.editReply({
+                        embeds: [
+                            {
+                                title: "🔄 Chargement...",
+                                description: `Récupération des données en cours.`,
+                                color: 0xcccccc,
+                            }
+                        ],
+                        components: row,
+                    });
+                    const embed = await buildPolymarketPositionsEmbed(discordClient);
+                    const row = buildPolymarketActivePositionsButtons();
+                    await interaction.editReply({
+                        embeds: [embed],
+                        components: row,
+                    });
+                }
             }
         }
     });
