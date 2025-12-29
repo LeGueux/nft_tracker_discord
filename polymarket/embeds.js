@@ -9,8 +9,8 @@ function buildPositionDescription(pos) {
     lines.push(`🎯 ${pos.outcome} ${(pos.curPrice * 100).toFixed(1)}¢`);
     lines.push(`📊 ${pos.size.toFixed(1)} shares`);
     lines.push(`💵 Avg: ${(pos.avgPrice * 100).toFixed(1)}%`);
-    lines.push(`💰 Current: $ ${pos.currentValue.toFixed(2)}`);
-    lines.push(`${pnlEmoji} PnL: $ ${pos.cashPnl.toFixed(2)} (${pos.percentPnl.toFixed(2)}%)`);
+    lines.push(`💰 Current: ${pos.currentValue.toFixed(2)}$`);
+    lines.push(`${pnlEmoji} PnL: ${pos.cashPnl.toFixed(2)}$ (${pos.percentPnl.toFixed(2)}%)`);
     lines.push(`🕒 End: ${new Date(pos.endDate).toLocaleDateString('fr-FR')}`);
 
     return lines.join('\n');
@@ -59,8 +59,8 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
         console.log(`Total Positions: ${totalPositions}, Total Value: $${totalValue.toFixed(2)}, Total PnL: $${totalPnL.toFixed(2)}`);
 
         embed.addFields({
-            name: `📊 Summary - ${userName}`,
-            value: `📈 Positions: ${totalPositions}\n💰 Current Value: $ ${totalValue.toFixed(2)}\n${totalPnL >= 0 ? '📈' : '📉'} PnL: $ ${totalPnL.toFixed(2)}`,
+            name: `📊 ${userName}`,
+            value: `📈 ${totalPositions} positions\n💰 Current Value: ${totalValue.toFixed(2)}$\n${totalPnL >= 0 ? '📈' : '📉'} PnL: ${totalPnL.toFixed(2)}$`,
             inline: false,
         });
 
