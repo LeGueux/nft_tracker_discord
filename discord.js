@@ -346,6 +346,7 @@ export function eventBotReady(discordClient) {
 
             // 🔄 REFRESH POLYMARKET
             if (isRefreshPmPositions) {
+                const row = buildPolymarketActivePositionsButtons();
                 await interaction.editReply({
                     embeds: [
                         {
@@ -357,7 +358,6 @@ export function eventBotReady(discordClient) {
                     components: row,
                 });
                 const embed = await buildPolymarketPositionsEmbed(discordClient);
-                const row = buildPolymarketActivePositionsButtons();
                 await interaction.editReply({
                     embeds: [embed],
                     components: row,
@@ -384,23 +384,6 @@ export function eventBotReady(discordClient) {
                     await interaction.editReply({
                         embeds: [snipeEmbedSeason],
                         components: row
-                    });
-                } else if (isRefreshPmPositions) {
-                    await interaction.editReply({
-                        embeds: [
-                            {
-                                title: "🔄 Chargement...",
-                                description: `Récupération des données en cours.`,
-                                color: 0xcccccc,
-                            }
-                        ],
-                        components: row,
-                    });
-                    const embed = await buildPolymarketPositionsEmbed(discordClient);
-                    const row = buildPolymarketActivePositionsButtons();
-                    await interaction.editReply({
-                        embeds: [embed],
-                        components: row,
                     });
                 }
             }
