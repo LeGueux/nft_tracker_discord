@@ -215,6 +215,7 @@ export function eventBotReady(discordClient) {
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
                 // POLYMARKET
+                // const test = await getPolymarketUsdcBalance(process.env.FRANCK_POLYMARKET_ADDRESS);
                 // const polymarketPositionsEmbed = await buildPolymarketPositionsEmbed(discordClient);
 
                 const thread = await discordClient.channels.fetch(getThreadIdForToken('default'));

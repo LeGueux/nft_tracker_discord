@@ -1,13 +1,24 @@
 export async function getDolzBalance(address) {
-    const dolzBalance = await getEvmTokenAccountBalance(
+    const balance = await getEvmTokenAccountBalance(
         process.env.POLYGON_CHAIN_ID,
         process.env.TOKEN_DOLZ_POL_CONTRACT_ADDRESS,
-        address
+        address,
+        1e18
     );
-    return dolzBalance || 0;
+    return balance || 0;
 };
 
-export async function getEvmTokenAccountBalance(chainId, contractaddress, address) {
+export async function getPolymarketUsdcBalance(address) {
+    const balance = await getEvmTokenAccountBalance(
+        process.env.POLYGON_CHAIN_ID,
+        process.env.TOKEN_USDC_POL_CONTRACT_ADDRESS,
+        address,
+        1e6
+    );
+    return balance || 0;
+};
+
+async function getEvmTokenAccountBalance(chainId, contractaddress, address, weight) {
     // Get ERC20-Token Account Balance for TokenContractAddress
     // https://docs.etherscan.io/api-reference/endpoint/tokenbalance
     const apiUrl = `https://api.etherscan.io/v2/api?chainid=${chainId}&module=account&action=tokenbalance&contractaddress=${contractaddress}&address=${address}&tag=latest&apikey=${process.env.ETHERSCAN_API_KEY}`;
@@ -23,7 +34,7 @@ export async function getEvmTokenAccountBalance(chainId, contractaddress, addres
         const data = await response.json();
 
         if (data.status && data.status == '1' && data.result) {
-            return parseInt(parseInt(data.result) / 1e18);
+            return parseInt(parseInt(data.result) / weight);
         } else {
             console.error('API getEvmTokenAccountBalance Pas de données:');
             return 0;

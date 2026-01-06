@@ -1,6 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import { sendStatusMessage } from '../shared/error-handler.js';
 import { getUserPositions } from './polymarket-api.js';
+import { getPolymarketUsdcBalance } from '../shared/alchemy-api.js';
 
 function buildPositionDescription(pos) {
     const sideEmoji = pos.outcome === 'Yes' ? '🟢' : '🔴';
@@ -21,14 +22,17 @@ export async function buildPolymarketPositionsEmbed(discordClient) {
         const franckPositions = await getUserPositions(process.env.FRANCK_POLYMARKET_ADDRESS);
         const NicoPositions = await getUserPositions(process.env.NICO_POLYMARKET_ADDRESS);
         const BobPositions = await getUserPositions(process.env.BOB_POLYMARKET_ADDRESS);
+        const franckCash = await getPolymarketUsdcBalance(process.env.FRANCK_POLYMARKET_ADDRESS);
+        const nicoCash = await getPolymarketUsdcBalance(process.env.NICO_POLYMARKET_ADDRESS);
+        const bobCash = await getPolymarketUsdcBalance(process.env.BOB_POLYMARKET_ADDRESS);
         let embed = new EmbedBuilder()
             .setTitle('📈 Polymarket - Actives Positions')
             .setColor(0x00ff00)
             .setTimestamp();
 
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, franckPositions, 'Franck');
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, NicoPositions, 'Nico');
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, BobPositions, 'Bob');
+        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, franckPositions, franckCash, 'Franck');
+        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, NicoPositions, nicoCash, 'Nico');
+        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, BobPositions, bobCash, 'Bob');
 
         console.log(`Embed length: ${embed.length} characters`);
         if (embed.length > 6000) {
@@ -49,7 +53,7 @@ export async function buildPolymarketPositionsEmbed(discordClient) {
     }
 }
 
-async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positions, userName) {
+async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positions, cash, userName) {
     console.log(`Building positions for ${userName}... | buildPolymarketPositionsEmbedForUser`);
     try {
         embed.addFields({
@@ -65,6 +69,7 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
         embed.addFields({
             name: '📊 Summary',
             value: [
+                `💰 Cash: **${cash.toFixed(2)}$**`,
                 `📌 Positions: **${totalPositions}**`,
                 `💰 Value: **${totalValue.toFixed(2)}$**`,
                 `${totalPnL >= 0 ? '📈' : '📉'} PnL: **${totalPnL.toFixed(2)}$**`,
