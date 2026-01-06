@@ -3,17 +3,16 @@ import { sendStatusMessage } from '../shared/error-handler.js';
 import { getUserPositions } from './polymarket-api.js';
 
 function buildPositionDescription(pos) {
-    const lines = [];
-    const pnlEmoji = pos.cashPnl >= 0 ? '📈' : '📉';
+    const sideEmoji = pos.outcome === 'Yes' ? '🟢' : '🔴';
+    const pnlEmoji = pos.cashPnl >= 10 ? '🚀' : pos.cashPnl >= 0 ? '📈' : '📉';
+    const sizeEmoji = pos.currentValue >= 300 ? '🐳' : pos.currentValue >= 100 ? '🦈' : '🐟';
 
-    lines.push(`🎯 ${pos.outcome} ${(pos.curPrice * 100).toFixed(1)}¢`);
-    lines.push(`📊 ${pos.size.toFixed(1)} shares`);
-    lines.push(`💵 Avg: ${(pos.avgPrice * 100).toFixed(1)}%`);
-    lines.push(`💰 Current: ${pos.currentValue.toFixed(2)}$`);
-    lines.push(`${pnlEmoji} PnL: ${pos.cashPnl.toFixed(2)}$ (${pos.percentPnl.toFixed(2)}%)`);
-    lines.push(`🕒 End: ${new Date(pos.endDate).toLocaleDateString('fr-FR')}`);
-
-    return lines.join('\n');
+    return [
+        `${sideEmoji} **${pos.outcome.toUpperCase()} @ ${(pos.curPrice * 100).toFixed(1)}¢**`,
+        `${pnlEmoji} **${pos.cashPnl.toFixed(2)}$ (${pos.percentPnl.toFixed(2)}%)**`,
+        `${sizeEmoji} ${pos.size.toFixed(1)} sh | 💵 Avg ${(pos.avgPrice * 100).toFixed(1)}%`,
+        `💰 Value ${pos.currentValue.toFixed(2)}$ | 🕒 ${new Date(pos.endDate).toLocaleDateString('fr-FR')}`
+    ].join('\n');
 }
 
 export async function buildPolymarketPositionsEmbed(discordClient) {
@@ -53,14 +52,23 @@ export async function buildPolymarketPositionsEmbed(discordClient) {
 async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positions, userName) {
     console.log(`Building positions for ${userName}... | buildPolymarketPositionsEmbedForUser`);
     try {
+        embed.addFields({
+            name: '━━━━━━━━━━━━━━━━━━━━━━',
+            value: `👤 **${userName.toUpperCase()}**`,
+            inline: false,
+        });
         const totalPositions = positions.length;
         const totalValue = positions.reduce((sum, pos) => sum + pos.currentValue, 0);
         const totalPnL = positions.reduce((sum, pos) => sum + pos.cashPnl, 0);
         console.log(`Total Positions: ${totalPositions}, Total Value: $${totalValue.toFixed(2)}, Total PnL: $${totalPnL.toFixed(2)}`);
 
         embed.addFields({
-            name: `📊 ${userName}`,
-            value: `📈 ${totalPositions} positions\n💰 Current Value: ${totalValue.toFixed(2)}$\n${totalPnL >= 0 ? '📈' : '📉'} PnL: ${totalPnL.toFixed(2)}$`,
+            name: '📊 Summary',
+            value: [
+                `📌 Positions: **${totalPositions}**`,
+                `💰 Value: **${totalValue.toFixed(2)}$**`,
+                `${totalPnL >= 0 ? '📈' : '📉'} PnL: **${totalPnL.toFixed(2)}$**`,
+            ].join('\n'),
             inline: false,
         });
 
@@ -68,7 +76,7 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
             embed.addFields({
                 name: pos.title.substring(0, 100),
                 value: buildPositionDescription(pos),
-                inline: true,
+                inline: false,
             });
         }
 
