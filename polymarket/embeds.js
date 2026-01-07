@@ -30,9 +30,9 @@ export async function buildPolymarketPositionsEmbed(discordClient) {
             .setColor(0x00ff00)
             .setTimestamp();
 
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, franckPositions, franckCash, 'Franck');
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, NicoPositions, nicoCash, 'Nico');
         embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, BobPositions, bobCash, 'Bob');
+        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, NicoPositions, nicoCash, 'Nico');
+        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, franckPositions, franckCash, 'Franck');
 
         console.log(`Embed length: ${embed.length} characters`);
         if (embed.length > 6000) {
