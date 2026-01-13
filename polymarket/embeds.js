@@ -11,7 +11,7 @@ function buildPositionDescription(pos) {
     return [
         `${sideEmoji} **${pos.outcome.toUpperCase()} @ ${(pos.curPrice * 100).toFixed(1)}¢**`,
         `${pnlEmoji} **${pos.cashPnl.toFixed(2)}$ (${pos.percentPnl.toFixed(2)}%)**`,
-        `${sizeEmoji} ${pos.size.toFixed(1)} sh | 💵 Avg ${(pos.avgPrice * 100).toFixed(1)}%`,
+        `${sizeEmoji} ${pos.size.toFixed(1)} sh | Avg ${(pos.avgPrice * 100).toFixed(1)}%`,
         `💰 Value ${pos.currentValue.toFixed(2)}$ | 🕒 ${new Date(pos.endDate).toLocaleDateString('fr-FR')}`
     ].join('\n');
 }
@@ -69,7 +69,7 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
         embed.addFields({
             name: '📊 Summary',
             value: [
-                `💰 Cash: **${cash.toFixed(2)}$**`,
+                `💰 Cash: **${cash}$**`,
                 `📌 Positions: **${totalPositions}**`,
                 `💰 Value: **${totalValue.toFixed(2)}$**`,
                 `${totalPnL >= 0 ? '📈' : '📉'} PnL: **${totalPnL.toFixed(2)}$**`,

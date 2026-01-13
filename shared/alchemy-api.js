@@ -15,7 +15,7 @@ export async function getPolymarketUsdcBalance(address) {
         address,
         1e6
     );
-    return balance || 0;
+    return parseInt(balance || 0);
 };
 
 async function getEvmTokenAccountBalance(chainId, contractaddress, address, weight) {
