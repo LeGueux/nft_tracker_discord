@@ -201,15 +201,15 @@ export function eventBotReady(discordClient) {
                 // const tokenId = '51729';  // Limited
                 // const tokenId = '51565';  // Rare
                 // const tokenId = '51495';  // Epic
-                // const tokenId = '51490';  // Legendary
-                // const data = await getNFTData(tokenId);
-                // const embedSale = await buildSaleListingNFTEmbed(
-                //     data,
-                //     process.env.FRANCK_ADDRESS_1,
-                //     process.env.NICO_ADDRESS_1,
-                //     1000,
-                //     'sale',
-                // );
+                const tokenId = '51490';  // Legendary
+                const data = await getNFTData(tokenId);
+                const embedSale = await buildSaleListingNFTEmbed(
+                    data,
+                    process.env.FRANCK_ADDRESS_1,
+                    process.env.NICO_ADDRESS_1,
+                    1000,
+                    'sale',
+                );
                 // const walletDataEmbed = await buildWalletDataEmbed(process.env.FRANCK_ADDRESS_1, true);
                 // const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
@@ -239,15 +239,15 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [walletDataEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
-                    // await thread.send({
-                    //     content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
-                    //     embeds: [embedSale],
-                    //     allowedMentions: {
-                    //         users: [
-                    //             process.env.FRANCK_DISCORD_USER_ID,
-                    //         ],
-                    //     },
-                    // });
+                    await thread.send({
+                        content: `TEST <@${process.env.FRANCK_DISCORD_USER_ID}>`,
+                        embeds: [embedSale],
+                        allowedMentions: {
+                            users: [
+                                process.env.FRANCK_DISCORD_USER_ID,
+                            ],
+                        },
+                    });
 
                     // POLYMARKET
                     // const row = buildPolymarketActivePositionsButtons();
@@ -257,7 +257,7 @@ export function eventBotReady(discordClient) {
                     // });
                     // await thread.send({ embeds: [polymarketPositionsEmbed], components: row });
 
-                    // process.exit(0);
+                    process.exit(0);
                 }
             } catch (error) {
                 console.error('Erreur envoi test embed :', error);

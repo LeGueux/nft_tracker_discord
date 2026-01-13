@@ -21,9 +21,8 @@ app.listen(PORT, () => {
     );
 });
 
+console.log(`✅ index.js | Bot started at ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
 
 eventBotReady(discordClient);
-// Setup listeners and error handling
-// setupTransferListener(discordClient, contract);
 setupErrorHandlers(discordClient);
 discordClient.login(process.env.DISCORD_BOT_TOKEN);
