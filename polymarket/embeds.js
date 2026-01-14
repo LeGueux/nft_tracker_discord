@@ -9,6 +9,7 @@ function buildPositionDescription(pos) {
     const sizeEmoji = pos.currentValue >= 300 ? '🐳' : pos.currentValue >= 100 ? '🦈' : '🐟';
 
     return [
+        `**[${pos.title.substring(0, 100)}](https://polymarket.com/event/${pos.eventSlug}/${pos.slug})**`,
         `${sideEmoji} **${pos.outcome.toUpperCase()} @ ${(pos.curPrice * 100).toFixed(1)}¢**`,
         `${pnlEmoji} **${pos.cashPnl.toFixed(2)}$ (${pos.percentPnl.toFixed(2)}%)**`,
         `${sizeEmoji} ${pos.size.toFixed(1)} sh | Avg ${(pos.avgPrice * 100).toFixed(1)}%`,
@@ -20,8 +21,8 @@ export async function buildPolymarketPositionsEmbed(discordClient) {
     console.log('Building Polymarket Positions Embed... | buildPolymarketPositionsEmbed');
     try {
         const franckPositions = await getUserPositions(process.env.FRANCK_POLYMARKET_ADDRESS);
-        const NicoPositions = await getUserPositions(process.env.NICO_POLYMARKET_ADDRESS);
-        const BobPositions = await getUserPositions(process.env.BOB_POLYMARKET_ADDRESS);
+        const nicoPositions = await getUserPositions(process.env.NICO_POLYMARKET_ADDRESS);
+        const bobPositions = await getUserPositions(process.env.BOB_POLYMARKET_ADDRESS);
         const franckCash = await getPolymarketUsdcBalance(process.env.FRANCK_POLYMARKET_ADDRESS);
         const nicoCash = await getPolymarketUsdcBalance(process.env.NICO_POLYMARKET_ADDRESS);
         const bobCash = await getPolymarketUsdcBalance(process.env.BOB_POLYMARKET_ADDRESS);
@@ -30,9 +31,9 @@ export async function buildPolymarketPositionsEmbed(discordClient) {
             .setColor(0x00ff00)
             .setTimestamp();
 
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, BobPositions, bobCash, 'Bob');
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, NicoPositions, nicoCash, 'Nico');
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, franckPositions, franckCash, 'Franck');
+        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, bobPositions, bobCash, 'BobyLaPointe');
+        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, nicoPositions, nicoCash, 'SebastienFastoche');
+        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, franckPositions, franckCash, 'FnarckPalloin');
 
         console.log(`Embed length: ${embed.length} characters`);
         if (embed.length > 6000) {
@@ -58,7 +59,7 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
     try {
         embed.addFields({
             name: '━━━━━━━━━━━━━━━━━━━━━━',
-            value: `👤 **${userName.toUpperCase()}**`,
+            value: `👤 **[${userName}](https://polymarket.com/@${userName})**`,
             inline: false,
         });
         const totalPositions = positions.length;
@@ -79,7 +80,7 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
 
         for (const pos of positions.slice(0, 10)) {  // Limiter à 10 positions pour éviter l'overflow
             embed.addFields({
-                name: pos.title.substring(0, 100),
+                name: '',
                 value: buildPositionDescription(pos),
                 inline: false,
             });
