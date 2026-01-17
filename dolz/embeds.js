@@ -231,12 +231,24 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
             const labelPad = 7; // longueur max des libellés (pour aligner les ':')
             const lines = [];
 
+            const priceLines = item.prices.map((price, i) => {
+                const serial = item.serialNumbers?.[i] ?? '-';
+                const nextPrice = item.prices[i + 1];
+                const nextSerial = item.serialNumbers?.[i + 1];
+
+                if (nextPrice) {
+                    const gap = simulatedGaps?.[i];
+                    const gapStr = gap !== undefined ? `+${gap}%` : '';
+                    return `• ${price} (${serial}) ─ ${gapStr} ──▶ ${nextPrice} (${nextSerial ?? '-'})`;
+                }
+
+                return `• ${price} (${serial})`;
+            });
+
             lines.push(
                 `${'FP L'.padEnd(labelPad)}: ${item.floor ?? '-'}`,
                 `${'FP R'.padEnd(labelPad)}: ${item.floorRare ?? '-'}`,
-                `${`$$ (${item.countLimitedBeforeRare})`.padEnd(labelPad)}: ${item.prices.join(', ')}`,
-                `${'Gaps'.padEnd(labelPad)}: ${item.priceGapPercent?.toFixed(1) ?? '-'}%` +
-                (simulatedGaps.length > 0 ? `, ${simulatedGaps.join(', ')}` : '')
+                `${`$$ (${item.countLimitedBeforeRare})`.padEnd(labelPad)}:\n${priceLines.join('\n')}`
             );
 
             // ➕ Ajouter au total si saison < 100

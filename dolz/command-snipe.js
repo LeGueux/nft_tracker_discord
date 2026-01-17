@@ -61,6 +61,7 @@ export async function handleSnipeForSeason(season) {
                 Next: item.next ?? '-',
                 FloorRare: item.floorRare ?? '-',
                 Prices: item.prices.join(', '),
+                SerialNumbers: item.serialNumbers.join(', '),
                 'Gap %': item.priceGapPercent !== null ? item.priceGapPercent.toFixed(2) : '-',
                 'Fragile L1 (+30%)': item.isFragileLevel1,
                 'Fragile L2 (+30%)': item.isFragileLevel2,
@@ -96,7 +97,7 @@ async function analyzeListingsFragility(data, snipeOnly = false, nbMaxGaps = 4) 
         const modelId = asset.cardNumber;
         const keyName = `${name} ${modelId}`;
 
-        if (!grouped[keyName]) grouped[keyName] = { prices: [], modelId };
+        if (!grouped[keyName]) grouped[keyName] = { prices: [], modelId, serialNumber: [] };
 
         const ownerMap = {
             [process.env.FRANCK_ADDRESS_1.toLowerCase()]: '-F1',
@@ -111,6 +112,7 @@ async function analyzeListingsFragility(data, snipeOnly = false, nbMaxGaps = 4) 
         priceDolz = `${priceDolz}${suffix}`;
 
         grouped[keyName].prices.push(priceDolz);
+        grouped[keyName].serialNumber.push(nftData?.serial_number ?? 0);
     }
 
     // 🧩 2️⃣ Récupérer tous les modelId uniques
@@ -130,7 +132,7 @@ async function analyzeListingsFragility(data, snipeOnly = false, nbMaxGaps = 4) 
     // 🧩 4️⃣ Calculs finaux
     const results = [];
 
-    for (const [name, { prices, modelId }] of Object.entries(grouped)) {
+    for (const [name, { prices, modelId, serialNumber }] of Object.entries(grouped)) {
         const cleanPrices = prices.map(price => {
             if (typeof price === 'string') {
                 const cleanedString = price.split('-')[0];
@@ -171,7 +173,8 @@ async function analyzeListingsFragility(data, snipeOnly = false, nbMaxGaps = 4) 
             modelId,
             floor: prices[0],
             next: prices[1] ?? null,
-            prices: prices.slice(0, 10),
+            prices: prices.slice(0, 8),
+            serialNumbers: serialNumber.slice(0, 8),
             countLimitedBeforeRare: filteredPrices.length,
             priceGapPercent: priceGap,
             isFragileLevel1: priceGap !== null && priceGap >= 30,

@@ -191,7 +191,7 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbed6 = await handleSnipeForSeason(6);
                 // const snipeEmbed7 = await handleSnipeForSeason(7);
                 // const snipeEmbed8 = await handleSnipeForSeason(8);
-                // const snipeEmbed9 = await handleSnipeForSeason(9);
+                const snipeEmbed9 = await handleSnipeForSeason(9);
                 // const snipeEmbedAll = await handleSnipeForSeason(100);
                 // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
                 // const snipeEmbedHotS6AndMore = await handleSnipeForSeason(111);
@@ -215,7 +215,7 @@ export function eventBotReady(discordClient) {
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
                 // POLYMARKET
-                const polymarketPositionsEmbed = await buildPolymarketPositionsEmbed(discordClient);
+                // const polymarketPositionsEmbed = await buildPolymarketPositionsEmbed(discordClient);
 
                 const thread = await discordClient.channels.fetch(getThreadIdForToken('default'));
                 if (thread?.isTextBased()) {
@@ -228,7 +228,7 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbed6] });
                     // await thread.send({ embeds: [snipeEmbed7] });
                     // await thread.send({ embeds: [snipeEmbed8] });
-                    // await thread.send({ embeds: [snipeEmbed9] });
+                    await thread.send({ embeds: [snipeEmbed9] });
                     // await thread.send({ embeds: [snipeEmbedAll] });
                     // await thread.send({ embeds: [snipeEmbedAllSeasons] });
                     // await thread.send({ embeds: [snipeEmbedHotS6AndMore] });
@@ -249,8 +249,8 @@ export function eventBotReady(discordClient) {
                     // });
 
                     // POLYMARKET
-                    const row = buildPolymarketActivePositionsButtons();
-                    await thread.send({ embeds: [polymarketPositionsEmbed], components: row });
+                    // const row = buildPolymarketActivePositionsButtons();
+                    // await thread.send({ embeds: [polymarketPositionsEmbed], components: row });
 
                     process.exit(0);
                 }
