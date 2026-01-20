@@ -78,9 +78,9 @@ const commands = [
                 .setName('person')
                 .setDescription('Sélectionne une personne')
                 .addChoices(
-                    { name: 'FnarckPalloin', value: process.env.FRANCK_POLYMARKET_ADDRESS },
-                    { name: 'SebastienFastoche', value: process.env.NICO_POLYMARKET_ADDRESS },
-                    { name: 'BobyLaPointe', value: process.env.BOB_POLYMARKET_ADDRESS },
+                    { name: 'FnarckPalloin', value: 'FnarckPalloin' },
+                    { name: 'SebastienFastoche', value: 'SebastienFastoche' },
+                    { name: 'BobyLaPointe', value: 'BobyLaPointe' },
                 )
                 .setRequired(true)
         )

@@ -356,7 +356,7 @@ export function eventBotReady(discordClient) {
                     ],
                     components: row,
                 });
-                const embed = await buildPolymarketPositionsEmbed(discordClient);
+                const embed = await buildPolymarketPositionsEmbed(discordClient, pmUserName);
                 await interaction.editReply({
                     embeds: [embed],
                     components: row,
