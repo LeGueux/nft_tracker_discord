@@ -28,8 +28,8 @@ function buildPositionDescription(pos) {
 
     return [
         `**[${pos.title.substring(0, 100)}](https://polymarket.com/event/${pos.eventSlug}/${pos.slug})**`,
-        `${EMOJIS.side(pos.outcome)} **${pos.outcome.toUpperCase()} @ ${(pos.curPrice * 100).toFixed(1)}¢** | ${EMOJIS.pnl(pos.cashPnl)} **${pos.cashPnl >= 0 ? '+' : ''}${pos.cashPnl.toFixed(2)}$** (${pos.percentPnl.toFixed(2)}%)`,
-        `${EMOJIS.size(pos.currentValue)} ${pos.currentValue.toFixed(2)}$ • ${pos.size.toFixed(1)} shares`,
+        `${EMOJIS.side(pos.outcome)} **${pos.outcome.toUpperCase()} @ ${(pos.curPrice * 100).toFixed(1)}¢** • ${EMOJIS.pnl(pos.cashPnl)} **${pos.cashPnl >= 0 ? '+' : ''}${pos.cashPnl.toFixed(2)}$** (${pos.percentPnl.toFixed(2)}%)`,
+        `${EMOJIS.size(pos.currentValue)} Value ${pos.currentValue.toFixed(2)}$ • Avg @ ${(pos.avgPrice * 100).toFixed(1)}¢ • ${pos.size.toFixed(1)} shares`,
         endDate ? `⏳ Ends ${endDate}` : null
     ].filter(Boolean).join('\n');
 }
@@ -65,8 +65,8 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
         embed.addFields({
             name: '🏆 Classement',
             value: [
-                `🥇 **PnL:** ${formatNumber(traderLeaderboardPnL.rank)} / ${formatNumber(parseInt(polymarketanalytics.trader_count))} (Top ${getTopTraderPercent(traderLeaderboardPnL.rank, polymarketanalytics.trader_count)}%)`,
-                `📦 **Volume:** ${formatNumber(traderLeaderboardVol.rank)} / ${formatNumber(parseInt(polymarketanalytics.trader_count))} (Top ${getTopTraderPercent(traderLeaderboardVol.rank, polymarketanalytics.trader_count)}%)`,
+                `🥇 **PnL:** ${formatNumber(traderLeaderboardPnL.rank)} / ${formatNumber(parseInt(polymarketanalytics.trader_count))} • Top ${getTopTraderPercent(traderLeaderboardPnL.rank, polymarketanalytics.trader_count)}%`,
+                `📦 **Volume:** ${formatNumber(traderLeaderboardVol.rank)} / ${formatNumber(parseInt(polymarketanalytics.trader_count))} • Top ${getTopTraderPercent(traderLeaderboardVol.rank, polymarketanalytics.trader_count)}%`,
             ].join('\n'),
         });
 
