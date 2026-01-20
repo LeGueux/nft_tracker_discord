@@ -1,39 +1,65 @@
 import { EmbedBuilder } from 'discord.js';
 import { sendStatusMessage } from '../shared/error-handler.js';
-import { getUserPositions } from './polymarket-api.js';
+import { getUserPositions, getPolymarketTraderLeaderboard, getPolymarketAnalytics } from './polymarket-api.js';
 import { getPolymarketUsdcBalance } from '../shared/alchemy-api.js';
 
+const EMOJIS = {
+    pnl: value => value >= 10 ? '🚀' : value >= 0 ? '📈' : '📉',
+    side: outcome => outcome === 'Yes' ? '🟢' : '🔴',
+    size: value => value >= 300 ? '🐳' : value >= 100 ? '🦈' : '🐟',
+};
+
+const formatNumber = (num) => new Intl.NumberFormat('fr-FR').format(num);
+
+function getTopTraderPercent(rank, totalTraders) {
+    if (totalTraders === 0) return 'N/A';
+    const percent = (rank / totalTraders) * 100;
+    return percent.toFixed(2);
+}
+
+function formatEndDate(endDate) {
+    if (!endDate || new Date(endDate).getFullYear() <= 1971) return null;
+    return new Date(endDate).toLocaleDateString('fr-FR');
+}
+
 function buildPositionDescription(pos) {
-    const sideEmoji = pos.outcome === 'Yes' ? '🟢' : '🔴';
-    const pnlEmoji = pos.cashPnl >= 10 ? '🚀' : pos.cashPnl >= 0 ? '📈' : '📉';
-    const sizeEmoji = pos.currentValue >= 300 ? '🐳' : pos.currentValue >= 100 ? '🦈' : '🐟';
+    const endDate = formatEndDate(pos.endDate);
 
     return [
         `**[${pos.title.substring(0, 100)}](https://polymarket.com/event/${pos.eventSlug}/${pos.slug})**`,
-        `${sideEmoji} **${pos.outcome.toUpperCase()} @ ${(pos.curPrice * 100).toFixed(1)}¢**`,
-        `${pnlEmoji} **${pos.cashPnl.toFixed(2)}$ (${pos.percentPnl.toFixed(2)}%)**`,
-        `${sizeEmoji} ${pos.size.toFixed(1)} sh | Avg ${(pos.avgPrice * 100).toFixed(1)}%`,
-        `💰 Value ${pos.currentValue.toFixed(2)}$ | 🕒 ${new Date(pos.endDate).toLocaleDateString('fr-FR')}`
-    ].join('\n');
+        `${EMOJIS.side(pos.outcome)} **${pos.outcome.toUpperCase()} @ ${(pos.curPrice * 100).toFixed(1)}¢** | ${EMOJIS.pnl(pos.cashPnl)} **${pos.cashPnl >= 0 ? '+' : ''}${pos.cashPnl.toFixed(2)}$** (${pos.percentPnl.toFixed(2)}%)`,
+        `${EMOJIS.size(pos.currentValue)} ${pos.currentValue.toFixed(2)}$ • ${pos.size.toFixed(1)} shares`,
+        endDate ? `⏳ Ends ${endDate}` : null
+    ].filter(Boolean).join('\n');
 }
 
 export async function buildPolymarketPositionsEmbed(discordClient) {
     console.log('Building Polymarket Positions Embed... | buildPolymarketPositionsEmbed');
     try {
-        const franckPositions = await getUserPositions(process.env.FRANCK_POLYMARKET_ADDRESS);
-        const nicoPositions = await getUserPositions(process.env.NICO_POLYMARKET_ADDRESS);
-        const bobPositions = await getUserPositions(process.env.BOB_POLYMARKET_ADDRESS);
-        const franckCash = await getPolymarketUsdcBalance(process.env.FRANCK_POLYMARKET_ADDRESS);
-        const nicoCash = await getPolymarketUsdcBalance(process.env.NICO_POLYMARKET_ADDRESS);
-        const bobCash = await getPolymarketUsdcBalance(process.env.BOB_POLYMARKET_ADDRESS);
+        const [franckPositions, nicoPositions, bobPositions, franckCash, nicoCash, bobCash, franckLeaderboardPnL, nicoLeaderboardPnL, bobLeaderboardPnL, franckLeaderboardVol, nicoLeaderboardVol, bobLeaderboardVol, polymarketanalytics] = await Promise.all([
+            await getUserPositions(process.env.FRANCK_POLYMARKET_ADDRESS),
+            await getUserPositions(process.env.NICO_POLYMARKET_ADDRESS),
+            await getUserPositions(process.env.BOB_POLYMARKET_ADDRESS),
+            await getPolymarketUsdcBalance(process.env.FRANCK_POLYMARKET_ADDRESS),
+            await getPolymarketUsdcBalance(process.env.NICO_POLYMARKET_ADDRESS),
+            await getPolymarketUsdcBalance(process.env.BOB_POLYMARKET_ADDRESS),
+            await getPolymarketTraderLeaderboard(process.env.FRANCK_POLYMARKET_ADDRESS),
+            await getPolymarketTraderLeaderboard(process.env.NICO_POLYMARKET_ADDRESS),
+            await getPolymarketTraderLeaderboard(process.env.BOB_POLYMARKET_ADDRESS),
+            await getPolymarketTraderLeaderboard(process.env.FRANCK_POLYMARKET_ADDRESS, 'VOL'),
+            await getPolymarketTraderLeaderboard(process.env.NICO_POLYMARKET_ADDRESS, 'VOL'),
+            await getPolymarketTraderLeaderboard(process.env.BOB_POLYMARKET_ADDRESS, 'VOL'),
+            await getPolymarketAnalytics(),
+        ]);
+
         let embed = new EmbedBuilder()
             .setTitle('📈 Polymarket - Actives Positions')
             .setColor(0x00ff00)
             .setTimestamp();
 
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, bobPositions, bobCash, 'BobyLaPointe');
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, nicoPositions, nicoCash, 'SebastienFastoche');
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, franckPositions, franckCash, 'FnarckPalloin');
+        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, bobPositions, bobCash, bobLeaderboardPnL, bobLeaderboardVol, polymarketanalytics);
+        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, nicoPositions, nicoCash, nicoLeaderboardPnL, nicoLeaderboardVol, polymarketanalytics);
+        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, franckPositions, franckCash, franckLeaderboardPnL, franckLeaderboardVol, polymarketanalytics);
 
         console.log(`Embed length: ${embed.length} characters`);
         if (embed.length > 6000) {
@@ -54,31 +80,43 @@ export async function buildPolymarketPositionsEmbed(discordClient) {
     }
 }
 
-async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positions, cash, userName) {
-    console.log(`Building positions for ${userName}... | buildPolymarketPositionsEmbedForUser`);
+async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positions, cash, traderLeaderboardPnL, traderLeaderboardVol, polymarketanalytics) {
+    console.log(`Building positions for ${traderLeaderboardPnL.userName}... | buildPolymarketPositionsEmbedForUser`);
     try {
         embed.addFields({
             name: '━━━━━━━━━━━━━━━━━━━━━━',
-            value: `👤 **[${userName}](https://polymarket.com/@${userName})**`,
+            value: `👤 **[${traderLeaderboardPnL.userName}](https://polymarket.com/@${traderLeaderboardPnL.userName})**`,
             inline: false,
         });
-        const totalPositions = positions.length;
         const totalValue = positions.reduce((sum, pos) => sum + pos.currentValue, 0);
         const totalPnL = positions.reduce((sum, pos) => sum + pos.cashPnl, 0);
-        console.log(`Total Positions: ${totalPositions}, Total Value: $${totalValue.toFixed(2)}, Total PnL: $${totalPnL.toFixed(2)}`);
 
         embed.addFields({
-            name: '📊 Summary',
+            name: '💼 Portfolio',
             value: [
-                `💰 Cash: **${cash}$**`,
-                `📌 Positions: **${totalPositions}**`,
-                `💰 Value: **${totalValue.toFixed(2)}$**`,
-                `${totalPnL >= 0 ? '📈' : '📉'} PnL: **${totalPnL.toFixed(2)}$**`,
+                `💼 **Total:** ${(cash + totalValue).toFixed(2)}$`,
+                `💵 **Cash:** ${cash.toFixed(2)}$`,
+                `📌 **Positions:** ${totalValue.toFixed(2)}$`,
             ].join('\n'),
-            inline: false,
         });
 
-        for (const pos of positions.slice(0, 10)) {  // Limiter à 10 positions pour éviter l'overflow
+        embed.addFields({
+            name: '📈 Performance',
+            value: [
+                `${EMOJIS.pnl(traderLeaderboardPnL.pnl)} **PnL Total:** ${traderLeaderboardPnL.pnl.toFixed(2)}$`,
+                `${EMOJIS.pnl(totalPnL)} **PnL Positions:** ${totalPnL.toFixed(2)}$`,
+            ].join('\n'),
+        });
+
+        embed.addFields({
+            name: '🏆 Classement',
+            value: [
+                `🥇 **PnL:** ${formatNumber(traderLeaderboardPnL.rank)} / ${formatNumber(parseInt(polymarketanalytics.trader_count))} (Top ${getTopTraderPercent(traderLeaderboardPnL.rank, polymarketanalytics.trader_count)}%)`,
+                `📦 **Volume:** ${formatNumber(traderLeaderboardVol.rank)} / ${formatNumber(parseInt(polymarketanalytics.trader_count))} (Top ${getTopTraderPercent(traderLeaderboardVol.rank, polymarketanalytics.trader_count)}%)`,
+            ].join('\n'),
+        });
+
+        for (const pos of positions.slice(0, 6)) {  // Limiter à 10 positions pour éviter l'overflow
             embed.addFields({
                 name: '',
                 value: buildPositionDescription(pos),
@@ -88,7 +126,7 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
 
         return embed;
     } catch (error) {
-        console.error(`Error building positions for ${userName}:`, error);
+        console.error(`Error building positions for ${traderLeaderboardPnL.userName}:`, error);
         await sendStatusMessage(
             discordClient,
             `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Error building Polymarket Positions Embed : \`${error}\``,
