@@ -2,6 +2,7 @@ import { EmbedBuilder } from 'discord.js';
 import { sendStatusMessage } from '../shared/error-handler.js';
 import { getUserPositions, getPolymarketTraderLeaderboard, getPolymarketAnalytics } from './polymarket-api.js';
 import { getPolymarketUsdcBalance } from '../shared/alchemy-api.js';
+import { POLYMARKET_USERS } from './config.js';
 
 const EMOJIS = {
     pnl: value => value >= 10 ? '🚀' : value >= 0 ? '📈' : '📉',
@@ -31,53 +32,6 @@ function buildPositionDescription(pos) {
         `${EMOJIS.size(pos.currentValue)} ${pos.currentValue.toFixed(2)}$ • ${pos.size.toFixed(1)} shares`,
         endDate ? `⏳ Ends ${endDate}` : null
     ].filter(Boolean).join('\n');
-}
-
-export async function buildPolymarketPositionsEmbed(discordClient) {
-    console.log('Building Polymarket Positions Embed... | buildPolymarketPositionsEmbed');
-    try {
-        const [franckPositions, nicoPositions, bobPositions, franckCash, nicoCash, bobCash, franckLeaderboardPnL, nicoLeaderboardPnL, bobLeaderboardPnL, franckLeaderboardVol, nicoLeaderboardVol, bobLeaderboardVol, polymarketanalytics] = await Promise.all([
-            await getUserPositions(process.env.FRANCK_POLYMARKET_ADDRESS),
-            await getUserPositions(process.env.NICO_POLYMARKET_ADDRESS),
-            await getUserPositions(process.env.BOB_POLYMARKET_ADDRESS),
-            await getPolymarketUsdcBalance(process.env.FRANCK_POLYMARKET_ADDRESS),
-            await getPolymarketUsdcBalance(process.env.NICO_POLYMARKET_ADDRESS),
-            await getPolymarketUsdcBalance(process.env.BOB_POLYMARKET_ADDRESS),
-            await getPolymarketTraderLeaderboard(process.env.FRANCK_POLYMARKET_ADDRESS),
-            await getPolymarketTraderLeaderboard(process.env.NICO_POLYMARKET_ADDRESS),
-            await getPolymarketTraderLeaderboard(process.env.BOB_POLYMARKET_ADDRESS),
-            await getPolymarketTraderLeaderboard(process.env.FRANCK_POLYMARKET_ADDRESS, 'VOL'),
-            await getPolymarketTraderLeaderboard(process.env.NICO_POLYMARKET_ADDRESS, 'VOL'),
-            await getPolymarketTraderLeaderboard(process.env.BOB_POLYMARKET_ADDRESS, 'VOL'),
-            await getPolymarketAnalytics(),
-        ]);
-
-        let embed = new EmbedBuilder()
-            .setTitle('📈 Polymarket - Actives Positions')
-            .setColor(0x00ff00)
-            .setTimestamp();
-
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, bobPositions, bobCash, bobLeaderboardPnL, bobLeaderboardVol, polymarketanalytics);
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, nicoPositions, nicoCash, nicoLeaderboardPnL, nicoLeaderboardVol, polymarketanalytics);
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, franckPositions, franckCash, franckLeaderboardPnL, franckLeaderboardVol, polymarketanalytics);
-
-        console.log(`Embed length: ${embed.length} characters`);
-        if (embed.length > 6000) {
-            console.warn('Embed too large, truncating...');
-            embed.setFields({
-                name: 'Warning',
-                value: `The embed content was too large and has been truncated. Please check the logs for details. ${embed.length} characters`,
-            });
-        }
-
-        return embed;
-    } catch (error) {
-        console.error('Error building Polymarket Positions Embed:', error);
-        await sendStatusMessage(
-            discordClient,
-            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Error building Polymarket Positions Embed : \`${error}\``,
-        );
-    }
 }
 
 async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positions, cash, traderLeaderboardPnL, traderLeaderboardVol, polymarketanalytics) {
@@ -116,7 +70,7 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
             ].join('\n'),
         });
 
-        for (const pos of positions.slice(0, 6)) {  // Limiter à 10 positions pour éviter l'overflow
+        for (const pos of positions.slice(0, 20)) {  // Limiter à 20 positions pour éviter l'overflow
             embed.addFields({
                 name: '',
                 value: buildPositionDescription(pos),
@@ -127,6 +81,44 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
         return embed;
     } catch (error) {
         console.error(`Error building positions for ${traderLeaderboardPnL.userName}:`, error);
+        await sendStatusMessage(
+            discordClient,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Error building Polymarket Positions Embed : \`${error}\``,
+        );
+    }
+}
+
+export async function buildPolymarketPositionsEmbed(discordClient, userName) {
+    console.log(`Building Polymarket Positions Embed for ${userName}... | buildPolymarketPositionsEmbed`);
+    try {
+        const address = POLYMARKET_USERS[userName];
+        const [positions, cash, leaderboardPnL, franckLeaderboardVol, polymarketanalytics] = await Promise.all([
+            await getUserPositions(address),
+            await getPolymarketUsdcBalance(address),
+            await getPolymarketTraderLeaderboard(address),
+            await getPolymarketTraderLeaderboard(address, 'VOL'),
+            await getPolymarketAnalytics(),
+        ]);
+
+        let embed = new EmbedBuilder()
+            .setTitle('📈 Polymarket - Actives Positions')
+            .setColor(0x00ff00)
+            .setTimestamp();
+
+        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, positions, cash, leaderboardPnL, franckLeaderboardVol, polymarketanalytics);
+
+        console.log(`Embed length: ${embed.length} characters`);
+        if (embed.length > 6000) {
+            console.warn('Embed too large, truncating...');
+            embed.setFields({
+                name: 'Warning',
+                value: `The embed content was too large and has been truncated. Please check the logs for details. ${embed.length} characters`,
+            });
+        }
+
+        return embed;
+    } catch (error) {
+        console.error('Error building Polymarket Positions Embed:', error);
         await sendStatusMessage(
             discordClient,
             `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Error building Polymarket Positions Embed : \`${error}\``,

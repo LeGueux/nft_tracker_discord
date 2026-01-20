@@ -115,13 +115,13 @@ function buildSeasonButtons(suffix, currentSeason, includeAllRecap = true, inclu
     return rows;
 }
 
-function buildPolymarketActivePositionsButtons() {
+function buildPolymarketActivePositionsButtons(userName) {
     const rows = [];
     let currentRow = new ActionRowBuilder();
 
     // Off-Season Button ID=130
     const buttonRefresh = new ButtonBuilder()
-        .setCustomId(`refresh_pm_positions`)
+        .setCustomId(`refresh_pm_positions_${userName}`)
         .setLabel(`Refresh`)
         .setEmoji('🔄')
         .setStyle(ButtonStyle.Secondary);
@@ -215,7 +215,7 @@ export function eventBotReady(discordClient) {
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
                 // POLYMARKET
-                const polymarketPositionsEmbed = await buildPolymarketPositionsEmbed(discordClient);
+                const polymarketPositionsEmbed = await buildPolymarketPositionsEmbed(discordClient, 'FnarckPalloin');
 
                 const thread = await discordClient.channels.fetch(getThreadIdForToken('default'));
                 if (thread?.isTextBased()) {
@@ -249,7 +249,7 @@ export function eventBotReady(discordClient) {
                     // });
 
                     // POLYMARKET
-                    const row = buildPolymarketActivePositionsButtons();
+                    const row = buildPolymarketActivePositionsButtons('FnarckPalloin');
                     await thread.send({ embeds: [polymarketPositionsEmbed], components: row });
 
                     process.exit(0);
@@ -316,8 +316,9 @@ export function eventBotReady(discordClient) {
                 const embed = await buildWalletDataEmbed(walletAddress, withFullDetails, basicDataOnly);
                 await interaction.editReply({ embeds: [embed] });
             } else if (interaction.commandName === 'pm_actives_positions') {
-                const embed = await buildPolymarketPositionsEmbed(discordClient);
-                const row = buildPolymarketActivePositionsButtons();
+                const person = interaction.options.getString('person');
+                const embed = await buildPolymarketPositionsEmbed(discordClient, person);
+                const row = buildPolymarketActivePositionsButtons(person);
                 await interaction.editReply({
                     embeds: [embed],
                     components: row,
@@ -332,7 +333,8 @@ export function eventBotReady(discordClient) {
             //     await interaction.editReply(embedWithChart);
         } else if (interaction.isButton()) {
             const match = interaction.customId.match(/select_season_(\d+)_(snipe)/);
-            const isRefreshPmPositions = interaction.customId === 'refresh_pm_positions';
+            const refreshMatch = interaction.customId.match(/^refresh_pm_positions_(.+)$/);
+            const isRefreshPmPositions = !!refreshMatch;
 
             // Aucun bouton reconnu
             if (!match && !isRefreshPmPositions) return;
@@ -342,7 +344,8 @@ export function eventBotReady(discordClient) {
 
             // 🔄 REFRESH POLYMARKET
             if (isRefreshPmPositions) {
-                const row = buildPolymarketActivePositionsButtons();
+                const pmUserName = refreshMatch ? refreshMatch[1] : null;
+                const row = buildPolymarketActivePositionsButtons(pmUserName);
                 await interaction.editReply({
                     embeds: [
                         {

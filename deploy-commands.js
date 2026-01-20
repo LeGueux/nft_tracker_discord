@@ -73,6 +73,16 @@ const commands = [
     new SlashCommandBuilder()
         .setName('pm_actives_positions')
         .setDescription('Affiche les positions actives sur Polymarket pour Franck, Nico et Bob')
+        .addStringOption(option =>
+            option
+                .setName('person')
+                .setDescription('Sélectionne une personne')
+                .addChoices(
+                    { name: 'FnarckPalloin', value: process.env.FRANCK_POLYMARKET_ADDRESS },
+                    { name: 'SebastienFastoche', value: process.env.NICO_POLYMARKET_ADDRESS },
+                    { name: 'BobyLaPointe', value: process.env.BOB_POLYMARKET_ADDRESS },
+                )
+        )
         .toJSON(),
 ];
 
