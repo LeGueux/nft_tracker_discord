@@ -82,6 +82,7 @@ const commands = [
                     { name: 'SebastienFastoche', value: process.env.NICO_POLYMARKET_ADDRESS },
                     { name: 'BobyLaPointe', value: process.env.BOB_POLYMARKET_ADDRESS },
                 )
+                .setRequired(true)
         )
         .toJSON(),
 ];
