@@ -29,7 +29,7 @@ function buildPositionDescription(pos) {
     return [
         `**[${pos.title.substring(0, 100)}](https://polymarket.com/event/${pos.eventSlug}/${pos.slug})**`,
         `${EMOJIS.side(pos.outcome)} **${pos.outcome.toUpperCase()} @ ${(pos.curPrice * 100).toFixed(1)}¢** • ${EMOJIS.pnl(pos.cashPnl)} **${pos.cashPnl >= 0 ? '+' : ''}${pos.cashPnl.toFixed(2)}$** (${pos.percentPnl.toFixed(2)}%)`,
-        `${EMOJIS.size(pos.currentValue)} Value ${pos.currentValue.toFixed(2)}$ • Avg @ ${(pos.avgPrice * 100).toFixed(1)}¢ • ${pos.size.toFixed(1)} shares`,
+        `${EMOJIS.size(pos.currentValue)} Value ${pos.currentValue.toFixed(2)}$ • ${pos.size.toFixed(1)} shares at ${(pos.avgPrice * 100).toFixed(1)}¢`,
         endDate ? `⏳ Ends ${endDate}` : null
     ].filter(Boolean).join('\n');
 }
