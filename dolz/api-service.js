@@ -8,6 +8,22 @@ import {
 } from './utils.js';
 import { sendStatusMessage } from '../shared/error-handler.js';
 
+async function safeJsonResponse(response, context = '') {
+    const text = await response.text();
+
+    if (!text || (!text.startsWith('{') && !text.startsWith('['))) {
+        console.warn(`⚠️ Réponse non JSON (${context})`, text.slice(0, 200));
+        return null;
+    }
+
+    try {
+        return JSON.parse(text);
+    } catch (e) {
+        console.warn(`⚠️ JSON invalide (${context})`, e.message);
+        return null;
+    }
+}
+
 export async function callApiToHandleNFTEvents(discordClient) {
     try {
         console.log(`callApiToHandleNFTEvents à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
@@ -284,8 +300,10 @@ export async function searchCardsByCriteriasV2({
                 },
                 body: JSON.stringify({ ...baseBody, page: 1 }),
             });
+            const data = await safeJsonResponse(response, 'returnOnlyTotal');
 
-            const data = await response.json();
+            if (!data) return returnOnlyTotal ? 0 : { results: [], total: 0 };
+
             return returnOnlyTotal ? (data.total ?? 0) : data;
         }
 
@@ -305,17 +323,20 @@ export async function searchCardsByCriteriasV2({
                 },
                 body: JSON.stringify(body),
             });
+            const data = await safeJsonResponse(response, `page ${currentPage}`);
 
-            const data = await response.json();
+            // 👉 CAS IMPORTANT : aucune donnée = sortie propre
+            if (!data || !Array.isArray(data.results) || data.results.length === 0) {
+                console.log(`📭 Aucune donnée page ${currentPage}, arrêt`);
+                break;
+            }
 
-            if (!data.results || data.results.length === 0) break;
-
-            allResults = allResults.concat(data.results);
+            allResults.push(...data.results);
             total = data.total ?? allResults.length;
 
             console.log(`📄 Page ${currentPage} récupérée (${data.results.length} résultats)`);
 
-            if (allResults.length == data.total) break;
+            if (allResults.length >= total) break;
 
             currentPage++;
         }

@@ -13,13 +13,6 @@ export async function handleNftTrackingForModel(modelId, nbHolders = 15, withAdd
         assetsLimited201To300,
         assetsLimited301To400,
         assetsLimited401To500,
-        assetsLimited501To600,
-        assetsLimited601To700,
-        assetsLimited701To800,
-        assetsLimited801To900,
-        assetsRare1To100,
-        assetsRare101To200,
-        assetsEpicLegendary,
     ] = await Promise.all([
         searchCardsByCriteriasV2({
             attributes: [
@@ -66,6 +59,14 @@ export async function handleNftTrackingForModel(modelId, nbHolders = 15, withAdd
             limit: 100,
             status: 'All',
         }),
+    ]);
+    const [
+        assetsLimited501To600,
+        assetsLimited601To700,
+        assetsLimited701To800,
+        assetsLimited801To900,
+        assetsRare1To100,
+    ] = await Promise.all([
         searchCardsByCriteriasV2({
             attributes: [
                 { 'name': 'Card Number', 'value': [modelId] },
@@ -111,6 +112,11 @@ export async function handleNftTrackingForModel(modelId, nbHolders = 15, withAdd
             limit: 100,
             status: 'All',
         }),
+    ]);
+    const [
+        assetsRare101To200,
+        assetsEpicLegendary,
+    ] = await Promise.all([
         searchCardsByCriteriasV2({
             attributes: [
                 { 'name': 'Card Number', 'value': [modelId] },
@@ -130,6 +136,7 @@ export async function handleNftTrackingForModel(modelId, nbHolders = 15, withAdd
             status: 'All',
         }),
     ]);
+
     // Fusionner tous les tableaux de cartes en un seul
     let dataSearchResults = [
         ...assetsLimited1To100.results,

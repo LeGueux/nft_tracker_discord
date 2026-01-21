@@ -197,7 +197,7 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbedHotS6AndMore = await handleSnipeForSeason(111);
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
                 // const snipeEmbedOS = await handleSnipeForSeason(130);
-                // const nftTrackingEmbed = await handleNftTrackingForModel('g0053', 5, true);
+                const nftTrackingEmbed = await handleNftTrackingForModel('g0065', 15, true);
                 // const tokenId = '51729';  // Limited
                 // const tokenId = '51565';  // Rare
                 // const tokenId = '51495';  // Epic
@@ -215,7 +215,7 @@ export function eventBotReady(discordClient) {
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
                 // POLYMARKET
-                const polymarketPositionsEmbed = await buildPolymarketPositionsEmbed(discordClient, 'FnarckPalloin');
+                // const polymarketPositionsEmbed = await buildPolymarketPositionsEmbed(discordClient, 'FnarckPalloin');
 
                 const thread = await discordClient.channels.fetch(getThreadIdForToken('default'));
                 if (thread?.isTextBased()) {
@@ -234,7 +234,7 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedHotS6AndMore] });
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
-                    // await thread.send({ embeds: [nftTrackingEmbed] });
+                    await thread.send({ embeds: [nftTrackingEmbed] });
                     // await thread.send({ embeds: [walletDataEmbed] });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
@@ -249,8 +249,8 @@ export function eventBotReady(discordClient) {
                     // });
 
                     // POLYMARKET
-                    const row = buildPolymarketActivePositionsButtons('FnarckPalloin');
-                    await thread.send({ embeds: [polymarketPositionsEmbed], components: row });
+                    // const row = buildPolymarketActivePositionsButtons('FnarckPalloin');
+                    // await thread.send({ embeds: [polymarketPositionsEmbed], components: row });
 
                     process.exit(0);
                 }
