@@ -329,13 +329,6 @@ export function eventBotReady(discordClient) {
                     components: row,
                 });
             }
-            // } else if (interaction.commandName === 'get_chart_sales_volume') {
-            //     const embedWithChart = await handleGetChartSalesVolume(false);
-            //     await interaction.editReply(embedWithChart);
-            // } else if (interaction.commandName === 'get_chart_sales_volume_by_wallet') {
-            //     const address = interaction.options.getString('address');
-            //     const embedWithChart = await handleGetChartSalesVolumeBywallet(address);
-            //     await interaction.editReply(embedWithChart);
         } else if (interaction.isButton()) {
             const match = interaction.customId.match(/select_season_(\d+)_(snipe)/);
             const refreshMatch = interaction.customId.match(/^refresh_pm_positions_(.+)$/);
