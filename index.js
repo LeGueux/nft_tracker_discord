@@ -8,6 +8,7 @@ import { IS_TEST_MODE } from './dolz/config.js';
 console.log(`✅ index.js | Boot at ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
 console.log({
     node: process.version,
+    discordJs: (await import('discord.js')).version,
     platform: process.platform,
 });
 

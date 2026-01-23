@@ -288,6 +288,7 @@ export function eventBotReady(discordClient) {
 
     // Slash commands from Discord
     discordClient.on('interactionCreate', async interaction => {
+        console.log(`Interaction reçue : ${interaction.commandName || interaction.customId}`);
         if (interaction.isChatInputCommand()) {
             await interaction.deferReply();
             if (interaction.commandName === 'snipe') {
