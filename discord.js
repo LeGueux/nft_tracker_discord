@@ -170,13 +170,64 @@ export function getThreadIdForToken(type, from) {
     }
 }
 
-// Discord bot clientReady
+// Discord bot ready event with reconnection handling
+let intervalIds = [];
+
+function clearAllIntervals() {
+    intervalIds.forEach(id => clearInterval(id));
+    intervalIds = [];
+    console.log('🧹 Tous les intervalles ont été nettoyés');
+}
+
+function startPeriodicTasks(discordClient) {
+    // Start calling Dolz API with interval
+    intervalIds.push(setInterval(async () => {
+        try {
+            if (discordClient.isReady()) {
+                await callApiToHandleNFTEvents(discordClient);
+            }
+        } catch (error) {
+            console.error('❌ Erreur dans callApiToHandleNFTEvents:', error);
+        }
+    }, DOLZ_API_INTERVAL_MS));
+
+    // Start handling offers for our team with interval
+    intervalIds.push(setInterval(async () => {
+        try {
+            if (discordClient.isReady()) {
+                await handleOffersForOurTeam(discordClient);
+            }
+        } catch (error) {
+            console.error('❌ Erreur dans handleOffersForOurTeam:', error);
+        }
+    }, DOLZ_OFFERS_API_INTERVAL_MS));
+
+    // Alive ping
+    intervalIds.push(setInterval(async () => {
+        try {
+            const now = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
+            console.log(`🟢 Alive - ${now}`);
+            if (discordClient.isReady()) {
+                await sendStatusMessage(discordClient, `🟢 Alive - ${now}`);
+            }
+        } catch (error) {
+            console.error('❌ Erreur dans Alive ping:', error);
+        }
+    }, ALIVE_PING_INTERVAL));
+
+    console.log(`✅ ${intervalIds.length} intervalles de tâches périodiques lancés`);
+}
+
+// Discord bot ready event
 export function eventBotReady(discordClient) {
     discordClient.once('clientReady', async () => {
-        console.log(`✅ Bot démarré à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
+        const now = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
+        console.log(`✅ Bot démarré à ${now}`);
+        console.log(`📊 Status: ${discordClient.user?.username}#${discordClient.user?.discriminator}`);
+        
         await sendStatusMessage(
             discordClient,
-            `✅ Bot démarré à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`,
+            `✅ Bot démarré à ${now}`,
         );
 
         if (IS_TEST_MODE) {
@@ -266,24 +317,48 @@ export function eventBotReady(discordClient) {
         // Start calling Dolz API with interval
         await callApiToHandleNFTEvents(discordClient);
         await handleOffersForOurTeam(discordClient);
-        // Start calling Dolz API for listings and sales with interval
-        setInterval(async () => {
-            await callApiToHandleNFTEvents(discordClient);
-        }, DOLZ_API_INTERVAL_MS);
+        
+        // Start periodic tasks (API calls, alive ping, etc.)
+        startPeriodicTasks(discordClient);
+    });
 
-        // Start handling offers for our team with interval
-        setInterval(async () => {
-            await handleOffersForOurTeam(discordClient);
-        }, DOLZ_OFFERS_API_INTERVAL_MS);
+    // ⚠️ DISCONNECT EVENT - Handle disconnections
+    discordClient.on('disconnect', (wsCloseEvent) => {
+        const now = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
+        console.log(`❌ Bot déconnecté à ${now}`);
+        console.log(`Code: ${wsCloseEvent?.code}, Raison: ${wsCloseEvent?.reason}`);
+        clearAllIntervals();
+        sendStatusMessage(
+            discordClient,
+            `❌ Bot déconnecté à ${now} (Code: ${wsCloseEvent?.code})`,
+        ).catch(err => console.error('Erreur lors du message de déconnexion:', err));
+    });
 
-        // Alive ping
-        setInterval(async () => {
-            console.log(`🟢 Alive - ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
-            await sendStatusMessage(
-                discordClient,
-                `🟢 Alive - ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`,
-            );
-        }, ALIVE_PING_INTERVAL);
+    // ⚠️ ERROR EVENT - Log errors without crashing
+    discordClient.on('error', (error) => {
+        const now = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
+        console.error(`💥 Erreur Discord à ${now}:`, error);
+        sendStatusMessage(
+            discordClient,
+            `💥 Erreur Discord : \`${error.message}\``,
+        ).catch(err => console.error('Erreur lors du message d\'erreur:', err));
+    });
+
+    // ⚠️ WARN EVENT - Log warnings
+    discordClient.on('warn', (info) => {
+        console.warn(`⚠️ Avertissement Discord:`, info);
+    });
+
+    // ⚠️ RECONNECTING EVENT - When bot tries to reconnect
+    discordClient.on('reconnecting', () => {
+        const now = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
+        console.log(`🔄 Bot en reconnexion à ${now}...`);
+    });
+
+    // ⚠️ RATE LIMIT EVENT - When hitting rate limits
+    discordClient.on('rateLimit', (info) => {
+        const now = new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
+        console.warn(`⏱️ Rate limit à ${now}: ${info.timeToReset}ms`);
     });
 
     // Slash commands from Discord
