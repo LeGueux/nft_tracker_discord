@@ -51,6 +51,7 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
                 `💼 **Total:** ${(cash + totalValue).toFixed(2)}$`,
                 `💵 **Cash:** ${cash.toFixed(2)}$`,
                 `📌 **Positions:** ${totalValue.toFixed(2)}$`,
+                `💰 **Volume traded:** ${formatNumber(parseInt(traderLeaderboardVol.vol))}$`,
             ].join('\n'),
         });
 
@@ -92,7 +93,7 @@ export async function buildPolymarketPositionsEmbed(discordClient, userName) {
     console.log(`Building Polymarket Positions Embed for ${userName}... | buildPolymarketPositionsEmbed`);
     try {
         const address = POLYMARKET_USERS[userName];
-        const [positions, cash, leaderboardPnL, franckLeaderboardVol, polymarketanalytics] = await Promise.all([
+        const [positions, cash, leaderboardPnL, leaderboardVol, polymarketanalytics] = await Promise.all([
             await getUserPositions(address),
             await getPolymarketUsdcBalance(address),
             await getPolymarketTraderLeaderboard(address),
@@ -105,7 +106,7 @@ export async function buildPolymarketPositionsEmbed(discordClient, userName) {
             .setColor(0x00ff00)
             .setTimestamp();
 
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, positions, cash, leaderboardPnL, franckLeaderboardVol, polymarketanalytics);
+        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, positions, cash, leaderboardPnL, leaderboardVol, polymarketanalytics);
 
         console.log(`Embed length: ${embed.length} characters`);
         if (embed.length > 6000) {
