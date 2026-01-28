@@ -34,6 +34,7 @@ export async function handleOffersForOurTeam(discordClient) {
             const threadId = getThreadIdForToken('offer', seller);
             const thread = await discordClient.channels.fetch(threadId);
             if (thread?.isTextBased()) {
+                console.log(`Envoi de l'offre dans le thread ${threadId} pour le wallet ${seller}`);
                 await thread.send({
                     content: getDiscordUserToNotifyByWallet(seller),
                     embeds: [embed],
