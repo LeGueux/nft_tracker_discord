@@ -222,11 +222,11 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
         for (const [index, item] of dataFormatted.slice(0, 25).entries()) {
             // Filtrer uniquement les gaps valides
             const simulatedGaps = item.simulatedGaps
-                .map((g, i) => {
+                .map((g) => {
                     const gap = g?.priceGapPercent;
-                    return gap !== null && gap !== undefined ? `${gap.toFixed(1)}%` : null;
-                })
-                .filter(Boolean); // Retire les nulls
+                    // Return numeric gap or null to preserve indices for mapping with prices
+                    return typeof gap === 'number' ? gap : null;
+                }); // Keep nulls to preserve indices
 
             const labelPad = 7; // longueur max des libellés (pour aligner les ':')
             const lines = [];
@@ -237,9 +237,27 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
                 const nextSerial = item.serialNumbers?.[i + 1];
 
                 if (nextPrice) {
-                    const gap = simulatedGaps?.[i];
-                    const gapStr = gap !== undefined ? `+${gap}%` : '';
-                    return `• ${price} (${serial}) ─ ${gapStr} ──▶ ${nextPrice} (${nextSerial ?? '-'})`;
+                    // Align gaps correctly: the initial gap (between prices[0] and prices[1]) is stored
+                    // at item.priceGapPercent. Subsequent simulated gaps correspond to transitions
+                    // between prices[i] and prices[i+1] shifted by one in simulatedGaps (simulateGapAfterPurchases uses prices[i+1] as newFloor).
+                    let gap;
+                    if (i === 0) {
+                        gap = typeof item.priceGapPercent === 'number' ? item.priceGapPercent : simulatedGaps?.[0];
+                    } else {
+                        gap = simulatedGaps?.[i - 1];
+                    }
+
+                    let gapStr = '';
+                    if (typeof gap === 'number') {
+                        const sign = gap > 0 ? '+' : '';
+                        gapStr = `${sign}${gap.toFixed(1)}%`;
+                    }
+
+                    if (gapStr) {
+                        return `• ${price} (${serial}) ─ ${gapStr} ──▶ ${nextPrice} (${nextSerial ?? '-'})`;
+                    }
+
+                    return `• ${price} (${serial}) ──▶ ${nextPrice} (${nextSerial ?? '-'})`;
                 }
 
                 return `• ${price} (${serial})`;
