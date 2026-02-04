@@ -271,8 +271,23 @@ export async function buildSnipeEmbed(dataFormatted, season = 0) {
 
             // ➕ Ajouter au total si saison < 100
             if (season < 100) {
-                if (typeof item.floor === 'number') totalFloorLimited += item.floor;
-                if (typeof item.floorRare === 'number') totalFloorRare += item.floorRare;
+                console.log('Adding to totals...', item.floor, item.floorRare, typeof item.floor, typeof item.floorRare);
+
+                // Convertir les valeurs potentielles (string ou null) en nombre
+                // et n'ajouter que si la conversion donne un nombre fini
+                const floorLimitedVal = Number(item.floor);
+                if (Number.isFinite(floorLimitedVal)) {
+                    totalFloorLimited += floorLimitedVal;
+                } else if (item.floor !== null && item.floor !== undefined && item.floor !== '') {
+                    console.debug(`Ignored non-numeric floor for ${item.name || item.modelId}:`, item.floor);
+                }
+
+                const floorRareVal = Number(item.floorRare);
+                if (Number.isFinite(floorRareVal)) {
+                    totalFloorRare += floorRareVal;
+                } else if (item.floorRare !== null && item.floorRare !== undefined && item.floorRare !== '') {
+                    console.debug(`Ignored non-numeric floorRare for ${item.name || item.modelId}:`, item.floorRare);
+                }
             }
 
             let blocTitle = `${getPrefixNameEmojiBySeason(getNFTSeasonByCardNumber(item.modelId))} ${item.isFragileLevel1 ? '🔥' : '🧊'}${item.isFragileLevel2 ? '🔥' : '🧊'} `;
