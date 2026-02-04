@@ -2,6 +2,7 @@ export const IS_TEST_MODE = process.env.MODE === 'TEST';
 export const DOLZ_API_INTERVAL_SEC = parseInt(process.env.DOLZ_API_INTERVAL || '10', 10) * 60; // en secondes
 export const DOLZ_API_INTERVAL_MS = DOLZ_API_INTERVAL_SEC * 1000; // en ms
 export const DOLZ_OFFERS_API_INTERVAL_MS = DOLZ_API_INTERVAL_MS * 5; // en ms
+export const DOLZ_OFFERS_API_INTERVAL_SEC = DOLZ_OFFERS_API_INTERVAL_MS / 1000; // en secondes
 export const ALIVE_PING_INTERVAL = parseInt(process.env.ALIVE_PING_INTERVAL || '10', 10) * 60 * 1000;
 export const NFT_LIST_BY_SEASON = {
     1: new Set(['g0001', 'g0003', 'g0004', 'g0029', 'g0024', 'g0007', 'g0009', 'g0011', 'g0012', 'g0074', 'g0015', 'g0013']),

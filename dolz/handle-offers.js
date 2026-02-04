@@ -14,6 +14,7 @@ export async function handleOffersForOurTeam(discordClient) {
 
         // 🟢 Fusionne tous les tableaux retournés
         const allNftIdsWithEvents = allResults.flat();
+        console.log('allNftIdsWithEvents:', allNftIdsWithEvents);
 
         for (const nftId of allNftIdsWithEvents) {
             const dataOffers = await getOffersByNFTId(nftId);

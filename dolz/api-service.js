@@ -7,6 +7,7 @@ import {
     getFloorPriceByModelAndRarity,
 } from './utils.js';
 import { sendStatusMessage } from '../shared/error-handler.js';
+import { DOLZ_OFFERS_API_INTERVAL_SEC } from './config.js';
 
 async function safeJsonResponse(response, context = '') {
     const text = await response.text();
@@ -372,7 +373,8 @@ export async function getEventsByWallet(walletAddress, unreadOffersOnly = false,
         });
 
         let data = await response.json();
-        data = unreadOffersOnly ? data.filter(item => item.type === 'New Offer' && !item.read && checkDateIsValidSinceLastOneInterval(item.date)) : data;
+        // Filtrer les notifications pour ne garder que les offres non lues et récentes si demandé
+        data = unreadOffersOnly ? data.filter(item => item.type === 'New Offer' && !item.read && checkDateIsValidSinceLastOneInterval(item.date, DOLZ_OFFERS_API_INTERVAL_SEC)) : data;
         if (returnNFTIdOnly) {
             const nftIds = data?.map(e => e.nftId) || [];
             return nftIds;

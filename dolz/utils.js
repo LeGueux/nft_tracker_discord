@@ -16,17 +16,17 @@ export function getRarityColor(rarity) {
     }
 }
 
-export function checkDateIsValidSinceLastOneInterval(timestamp) {
+export function checkDateIsValidSinceLastOneInterval(timestamp, intervalSec = DOLZ_API_INTERVAL_SEC) {
     const now = Math.floor(Date.now() / 1000);
     const diff = now - timestamp;
     const toleranceSec = 15;
 
-    const isValid = diff <= (DOLZ_API_INTERVAL_SEC + toleranceSec);
+    const isValid = diff <= (intervalSec + toleranceSec);
 
     console.log(
         `[checkDateIsValidSinceLastOneInterval]`,
         `Now: ${now}, Timestamp: ${timestamp}, Diff: ${diff}s,`,
-        `Threshold: ${DOLZ_API_INTERVAL_SEC}s,`,
+        `Threshold: ${intervalSec}s,`,
         `=> ${isValid ? "✅ Valid" : "❌ Too old"}`
     );
 
