@@ -25,30 +25,12 @@ function buildSeasonButtons(suffix, currentSeason, includeAllRecap = true, inclu
     let currentRow = new ActionRowBuilder();
 
     if (includeAllRecap) {
-        // All Season Snipe ONLY Buttons ID=100
-        const buttonAll = new ButtonBuilder()
-            .setCustomId(`select_season_100_${suffix}`)
-            .setEmoji('🔥')
-            .setLabel(`All`)
-            .setStyle(100 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
-
-        if (currentRow.components.length === 5) {
-            rows.push(currentRow);
-            currentRow = new ActionRowBuilder();
-        }
-        currentRow.addComponents(buttonAll);
-
         // All Season Snipe ONLY Buttons ID=110
         const buttonAllSeasonsOnly = new ButtonBuilder()
             .setCustomId(`select_season_110_${suffix}`)
             .setEmoji('🔥')
             .setLabel(`S1-S9`)
             .setStyle(110 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
-
-        if (currentRow.components.length === 5) {
-            rows.push(currentRow);
-            currentRow = new ActionRowBuilder();
-        }
         currentRow.addComponents(buttonAllSeasonsOnly);
 
         // Season 6 and more Snipe ONLY Buttons ID=111
@@ -57,11 +39,6 @@ function buildSeasonButtons(suffix, currentSeason, includeAllRecap = true, inclu
             .setEmoji('🔥')
             .setLabel(`S6+`)
             .setStyle(111 === currentSeason ? ButtonStyle.Primary : ButtonStyle.Secondary);
-
-        if (currentRow.components.length === 5) {
-            rows.push(currentRow);
-            currentRow = new ActionRowBuilder();
-        }
         currentRow.addComponents(buttonSeason6AndMoreOnly);
     }
 
@@ -243,7 +220,6 @@ export function eventBotReady(discordClient) {
                 // const snipeEmbed7 = await handleSnipeForSeason(7);
                 // const snipeEmbed8 = await handleSnipeForSeason(8);
                 // const snipeEmbed9 = await handleSnipeForSeason(9);
-                // const snipeEmbedAll = await handleSnipeForSeason(100);
                 // const snipeEmbedAllSeasons = await handleSnipeForSeason(110);
                 // const snipeEmbedHotS6AndMore = await handleSnipeForSeason(111);
                 // const snipeEmbedSE = await handleSnipeForSeason(120);
@@ -280,7 +256,6 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbed7] });
                     // await thread.send({ embeds: [snipeEmbed8] });
                     // await thread.send({ embeds: [snipeEmbed9] });
-                    // await thread.send({ embeds: [snipeEmbedAll] });
                     // await thread.send({ embeds: [snipeEmbedAllSeasons] });
                     // await thread.send({ embeds: [snipeEmbedHotS6AndMore] });
                     // await thread.send({ embeds: [snipeEmbedSE] });

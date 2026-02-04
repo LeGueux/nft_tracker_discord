@@ -11,7 +11,6 @@ export async function handleSnipeForSeason(season) {
     let nbMaxGaps = 5;
 
     const seasonMap = {
-        100: { seasons: ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'Special Edition', 'Off-Season'], snipe: true, gaps: 2 },
         110: { seasons: ['1', '2', '3', '4', '5', '6', '7', '8', '9'], snipe: true, gaps: 2 },
         111: { seasons: ['6', '7', '8', '9'], snipe: true, gaps: 2 },
         120: { seasons: ['Special Edition'], snipe: true },

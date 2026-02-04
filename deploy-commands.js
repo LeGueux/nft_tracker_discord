@@ -11,7 +11,6 @@ const commands = [
                 .setDescription('Numéro de la saison')
                 .setRequired(true)
                 .addChoices(
-                    { name: 'ALL', value: 100 },
                     { name: 'S1-S9', value: 110 },
                     { name: 'Saison 1', value: 1 },
                     { name: 'Saison 2', value: 2 },
