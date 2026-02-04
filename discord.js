@@ -96,20 +96,39 @@ function buildPolymarketActivePositionsButtons(userName) {
     const rows = [];
     let currentRow = new ActionRowBuilder();
 
-    // Off-Season Button ID=130
     const buttonRefresh = new ButtonBuilder()
         .setCustomId(`refresh_pm_positions_${userName}`)
         .setLabel(`Refresh`)
         .setEmoji('🔄')
         .setStyle(ButtonStyle.Secondary);
 
-    if (currentRow.components.length === 5) {
-        rows.push(currentRow);
-        currentRow = new ActionRowBuilder();
-    }
     currentRow.addComponents(buttonRefresh);
 
     // Push the last row if it has any buttons
+    if (currentRow.components.length > 0) {
+        rows.push(currentRow);
+    }
+
+    return rows;
+}
+
+// Build a refresh button row for the wallet data embed. We encode the parameters
+// (address, withFullDetails, basicDataOnly) into the customId so the interaction
+// handler can reconstruct the correct request when the button is clicked.
+function buildWalletDataButtons(address, withFullDetails = false, basicDataOnly = false) {
+    const rows = [];
+    let currentRow = new ActionRowBuilder();
+
+    const fullFlag = withFullDetails ? '1' : '0';
+    const basicFlag = basicDataOnly ? '1' : '0';
+    const buttonRefresh = new ButtonBuilder()
+        .setCustomId(`refresh_wallet_data_${address}_${fullFlag}_${basicFlag}`)
+        .setLabel(`Refresh`)
+        .setEmoji('🔄')
+        .setStyle(ButtonStyle.Secondary);
+
+    currentRow.addComponents(buttonRefresh);
+
     if (currentRow.components.length > 0) {
         rows.push(currentRow);
     }
@@ -237,12 +256,12 @@ export function eventBotReady(discordClient) {
                 //     1000,
                 //     'sale',
                 // );
-                // const walletDataEmbed = await buildWalletDataEmbed(process.env.FRANCK_ADDRESS_1, true);
+                const walletDataEmbed = await buildWalletDataEmbed(process.env.COCH_ADDRESS_1, true);
                 // const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
                 // POLYMARKET
-                const polymarketPositionsEmbed = await buildPolymarketPositionsEmbed(discordClient, 'FnarckPalloin');
+                // const polymarketPositionsEmbed = await buildPolymarketPositionsEmbed(discordClient, 'FnarckPalloin');
 
                 const thread = await discordClient.channels.fetch(getThreadIdForToken('default'));
                 if (thread?.isTextBased()) {
@@ -261,7 +280,8 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
                     // await thread.send({ embeds: [nftTrackingEmbed] });
-                    // await thread.send({ embeds: [walletDataEmbed] });
+                    const row = buildWalletDataButtons(process.env.COCH_ADDRESS_1, true, false);
+                    await thread.send({ embeds: [walletDataEmbed], components: row });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
                     // await thread.send({
@@ -275,8 +295,8 @@ export function eventBotReady(discordClient) {
                     // });
 
                     // POLYMARKET
-                    const row = buildPolymarketActivePositionsButtons('FnarckPalloin');
-                    await thread.send({ embeds: [polymarketPositionsEmbed], components: row });
+                    // const row = buildPolymarketActivePositionsButtons('FnarckPalloin');
+                    // await thread.send({ embeds: [polymarketPositionsEmbed], components: row });
 
                     process.exit(0);
                 }
@@ -370,7 +390,8 @@ export function eventBotReady(discordClient) {
                     return interaction.reply({ content: '⚠️ Tu dois renseigner une adresse ou choisir une personne.', ephemeral: true });
                 }
                 const embed = await buildWalletDataEmbed(walletAddress, withFullDetails, basicDataOnly);
-                await interaction.editReply({ embeds: [embed] });
+                const row = buildWalletDataButtons(walletAddress, withFullDetails, basicDataOnly);
+                await interaction.editReply({ embeds: [embed], components: row });
             } else if (interaction.commandName === 'pm_actives_positions') {
                 const person = interaction.options.getString('person');
                 const embed = await buildPolymarketPositionsEmbed(discordClient, person);
@@ -385,8 +406,12 @@ export function eventBotReady(discordClient) {
             const refreshMatch = interaction.customId.match(/^refresh_pm_positions_(.+)$/);
             const isRefreshPmPositions = !!refreshMatch;
 
+            // Refresh wallet data button: customId format -> refresh_wallet_data_<address>_<fullFlag>_<basicFlag>
+            const refreshWalletMatch = interaction.customId.match(/^refresh_wallet_data_(.+)_(0|1)_(0|1)$/);
+            const isRefreshWalletData = !!refreshWalletMatch;
+
             // Aucun bouton reconnu
-            if (!match && !isRefreshPmPositions) return;
+            if (!match && !isRefreshPmPositions && !isRefreshWalletData) return;
 
             // 1️⃣ Toujours defer pour éviter timeout
             await interaction.deferUpdate();
@@ -406,6 +431,29 @@ export function eventBotReady(discordClient) {
                     components: row,
                 });
                 const embed = await buildPolymarketPositionsEmbed(discordClient, pmUserName);
+                await interaction.editReply({
+                    embeds: [embed],
+                    components: row,
+                });
+            } else if (isRefreshWalletData) {
+                // 🔄 REFRESH WALLET DATA
+                const walletAddress = refreshWalletMatch ? refreshWalletMatch[1] : null;
+                const withFullDetailsFlag = refreshWalletMatch ? refreshWalletMatch[2] === '1' : false;
+                const basicDataOnlyFlag = refreshWalletMatch ? refreshWalletMatch[3] === '1' : false;
+
+                const row = buildWalletDataButtons(walletAddress, withFullDetailsFlag, basicDataOnlyFlag);
+                await interaction.editReply({
+                    embeds: [
+                        {
+                            title: "🔄 Chargement...",
+                            description: `Récupération des données en cours.`,
+                            color: 0xcccccc,
+                        }
+                    ],
+                    components: row,
+                });
+
+                const embed = await buildWalletDataEmbed(walletAddress, withFullDetailsFlag, basicDataOnlyFlag);
                 await interaction.editReply({
                     embeds: [embed],
                     components: row,
