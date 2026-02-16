@@ -256,12 +256,12 @@ export function eventBotReady(discordClient) {
                 //     1000,
                 //     'sale',
                 // );
-                const walletDataEmbed = await buildWalletDataEmbed(process.env.COCH_ADDRESS_1, true);
+                // const walletDataEmbed = await buildWalletDataEmbed(process.env.COCH_ADDRESS_1, true);
                 // const chartSalesVolumeEmbed = await handleGetChartSalesVolume(false);
                 // const chartSalesVolumeByWalletEmbed = await handleGetChartSalesVolumeBywallet(process.env.FRANCK_ADDRESS_1);
 
                 // POLYMARKET
-                // const polymarketPositionsEmbed = await buildPolymarketPositionsEmbed(discordClient, 'FnarckPalloin');
+                const polymarketPositionsEmbed = await buildPolymarketPositionsEmbed(discordClient, 'FnarckPalloin');
 
                 const thread = await discordClient.channels.fetch(getThreadIdForToken('default'));
                 if (thread?.isTextBased()) {
@@ -280,8 +280,8 @@ export function eventBotReady(discordClient) {
                     // await thread.send({ embeds: [snipeEmbedSE] });
                     // await thread.send({ embeds: [snipeEmbedOS] });
                     // await thread.send({ embeds: [nftTrackingEmbed] });
-                    const row = buildWalletDataButtons(process.env.COCH_ADDRESS_1, true, false);
-                    await thread.send({ embeds: [walletDataEmbed], components: row });
+                    // const row = buildWalletDataButtons(process.env.COCH_ADDRESS_1, true, false);
+                    // await thread.send({ embeds: [walletDataEmbed], components: row });
                     // await thread.send(chartSalesVolumeEmbed);
                     // await thread.send(chartSalesVolumeByWalletEmbed);
                     // await thread.send({
@@ -295,8 +295,8 @@ export function eventBotReady(discordClient) {
                     // });
 
                     // POLYMARKET
-                    // const row = buildPolymarketActivePositionsButtons('FnarckPalloin');
-                    // await thread.send({ embeds: [polymarketPositionsEmbed], components: row });
+                    const row = buildPolymarketActivePositionsButtons('FnarckPalloin');
+                    await thread.send({ embeds: [polymarketPositionsEmbed], components: row });
 
                     process.exit(0);
                 }

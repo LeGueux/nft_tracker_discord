@@ -45,12 +45,16 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
         const totalValue = positions.reduce((sum, pos) => sum + pos.currentValue, 0);
         const totalPnL = positions.reduce((sum, pos) => sum + pos.cashPnl, 0);
 
+        const portfolioTotal = cash + totalValue;
+        const allocationCashPercent = (cash / portfolioTotal) * 100;
+        const allocationPositionsPercent = (totalValue / portfolioTotal) * 100;
+
         embed.addFields({
             name: '💼 Portfolio',
             value: [
-                `💼 **Total:** ${(cash + totalValue).toFixed(2)}$`,
-                `💵 **Cash:** ${cash.toFixed(2)}$`,
-                `📌 **Positions:** ${totalValue.toFixed(2)}$`,
+                `💼 **Total:** ${portfolioTotal.toFixed(2)}$`,
+                `💵 **Cash:** ${cash.toFixed(2)}$ (${allocationCashPercent.toFixed(1)}%)`,
+                `📌 **Positions:** ${totalValue.toFixed(2)}$ (${allocationPositionsPercent.toFixed(1)}%)`,
                 `💰 **Volume traded:** ${formatNumber(parseInt(traderLeaderboardVol.vol))}$`,
             ].join('\n'),
         });
@@ -100,6 +104,7 @@ export async function buildPolymarketPositionsEmbed(discordClient, userName) {
             await getPolymarketTraderLeaderboard(address, 'VOL'),
             await getPolymarketAnalytics(),
         ]);
+        // console.log('Positions:', positions);
 
         let embed = new EmbedBuilder()
             .setTitle('📈 Polymarket - Actives Positions')
