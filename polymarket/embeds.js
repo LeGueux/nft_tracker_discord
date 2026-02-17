@@ -98,11 +98,11 @@ export async function buildPolymarketPositionsEmbed(discordClient, userName) {
     try {
         const address = POLYMARKET_USERS[userName];
         const [positions, cash, leaderboardPnL, leaderboardVol, polymarketanalytics] = await Promise.all([
-            await getUserPositions(address),
+            await getUserPositions(discordClient, address),
             await getPolymarketUsdcBalance(address),
-            await getPolymarketTraderLeaderboard(address),
-            await getPolymarketTraderLeaderboard(address, 'VOL'),
-            await getPolymarketAnalytics(),
+            await getPolymarketTraderLeaderboard(discordClient, address),
+            await getPolymarketTraderLeaderboard(discordClient, address, 'VOL'),
+            await getPolymarketAnalytics(discordClient),
         ]);
         // console.log('Positions:', positions);
 

@@ -1,6 +1,7 @@
 import { sendStatusMessage } from '../shared/error-handler.js';
+import dns from 'dns';
 
-export async function getPolymarketTraderLeaderboard(address, orderBy = 'PNL') {
+export async function getPolymarketTraderLeaderboard(discordClient, address, orderBy = 'PNL') {
     console.log(`getPolymarketTraderLeaderboard à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
     // https://docs.polymarket.com/api-reference/core/get-trader-leaderboard-rankings
     var apiUrl = `https://data-api.polymarket.com/v1/leaderboard?timePeriod=ALL&orderBy=${orderBy}&user=${address}`;
@@ -28,7 +29,7 @@ export async function getPolymarketTraderLeaderboard(address, orderBy = 'PNL') {
         } else {
             return "Erreur getPolymarketTraderLeaderboard: Pas de données";
         }
-    } catch (e) {
+    } catch (error) {
         console.error('Erreur API getPolymarketTraderLeaderboard:', error);
         await sendStatusMessage(
             discordClient,
@@ -37,7 +38,7 @@ export async function getPolymarketTraderLeaderboard(address, orderBy = 'PNL') {
     }
 }
 
-export async function getUserPositions(address) {
+export async function getUserPositions(discordClient, address) {
     console.log(`getUserPositions à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
     // https://docs.polymarket.com/api-reference/core/get-current-positions-for-a-user
     var apiUrl = `https://data-api.polymarket.com/positions?sortBy=CURRENT&sortDirection=DESC&user=${address}`;
@@ -49,7 +50,7 @@ export async function getUserPositions(address) {
 
         const data = await response.json();
         return data;
-    } catch (e) {
+    } catch (error) {
         console.error('Erreur API getUserPositions:', error);
         await sendStatusMessage(
             discordClient,
@@ -58,9 +59,10 @@ export async function getUserPositions(address) {
     }
 }
 
-export async function getPolymarketAnalytics() {
+export async function getPolymarketAnalytics(discordClient) {
     console.log(`getPolymarketAnalytics à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
     var apiUrl = `https://polymarketanalytics.com/api/overall-counts`;
+    dns.setDefaultResultOrder('ipv4first');
 
     try {
         const response = await fetch(apiUrl, {
@@ -69,7 +71,7 @@ export async function getPolymarketAnalytics() {
 
         const data = await response.json();
         return data;
-    } catch (e) {
+    } catch (error) {
         console.error('Erreur API getPolymarketAnalytics:', error);
         await sendStatusMessage(
             discordClient,

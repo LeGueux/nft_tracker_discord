@@ -124,8 +124,8 @@ export async function getFloorPricesByModelAndRarity(pairs = [], concurrency = 1
             console.log(`Recherche FP pour key ${key}`);
             const price = await getFloorPriceByModelAndRarity(modelId, rarity);
             return { key, price: price ?? 0 };
-        } catch (e) {
-            console.error(`Erreur pour key ${key} :`, e);
+        } catch (error) {
+            console.error(`Erreur pour key ${key} :`, error.message);
             return { key, price: 0 };
         }
     });

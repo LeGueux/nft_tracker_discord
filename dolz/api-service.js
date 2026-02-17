@@ -19,8 +19,8 @@ async function safeJsonResponse(response, context = '') {
 
     try {
         return JSON.parse(text);
-    } catch (e) {
-        console.warn(`⚠️ JSON invalide (${context})`, e.message);
+    } catch (error) {
+        console.warn(`⚠️ JSON invalide (${context})`, error);
         return null;
     }
 }

@@ -39,8 +39,8 @@ async function getEvmTokenAccountBalance(chainId, contractaddress, address, weig
             console.error('API getEvmTokenAccountBalance Pas de données:');
             return 0;
         }
-    } catch (e) {
-        console.error(e.message);
+    } catch (error) {
+        console.error(error.message);
         console.error('API getEvmTokenAccountBalance Erreur:');
         return 0;
     }

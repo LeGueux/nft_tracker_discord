@@ -16,8 +16,8 @@ console.log({
 process.on('unhandledRejection', (reason) => {
     console.error('UNHANDLED_REJECTION', reason);
 });
-process.on('uncaughtException', (err) => {
-    console.error('UNCAUGHT_EXCEPTION', err);
+process.on('uncaughtException', (error) => {
+    console.error('UNCAUGHT_EXCEPTION', error);
 });
 
 if (!IS_TEST_MODE) {
@@ -61,7 +61,7 @@ console.log({
         console.log('Discord | login...');
         await discordClient.login(process.env.DISCORD_BOT_TOKEN);
         console.log('Discord | login OK');
-    } catch (err) {
-        console.error('Discord | login FAILED', err);
+    } catch (error) {
+        console.error('Discord | login FAILED', error);
     }
 })();

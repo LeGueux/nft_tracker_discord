@@ -16,17 +16,17 @@ export async function sendStatusMessage(discordClient, content) {
                 },
             });
         }
-    } catch (e) {
-        console.error("Erreur d'envoi du message de statut :", e);
+    } catch (error) {
+        console.error("Erreur d'envoi du message de statut :", error.message);
     }
 }
 
 export function setupErrorHandlers(discordClient) {
-    process.on('uncaughtException', async (err) => {
-        console.error('Uncaught Exception:', err);
+    process.on('uncaughtException', async (error) => {
+        console.error('Uncaught Exception:', error);
         await sendStatusMessage(
             discordClient,
-            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Exception : \`${err.message}\``,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Exception : \`${error.message}\``,
         );
         process.exit(1);
     });

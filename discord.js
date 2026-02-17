@@ -326,7 +326,7 @@ export function eventBotReady(discordClient) {
         sendStatusMessage(
             discordClient,
             `❌ Bot déconnecté à ${now} (Code: ${wsCloseEvent?.code})`,
-        ).catch(err => console.error('Erreur lors du message de déconnexion:', err));
+        ).catch(error => console.error('Erreur lors du message de déconnexion:', error));
     });
 
     // ⚠️ ERROR EVENT - Log errors without crashing
@@ -336,7 +336,7 @@ export function eventBotReady(discordClient) {
         sendStatusMessage(
             discordClient,
             `💥 Erreur Discord : \`${error.message}\``,
-        ).catch(err => console.error('Erreur lors du message d\'erreur:', err));
+        ).catch(error => console.error('Erreur lors du message d\'erreur:', error));
     });
 
     // ⚠️ WARN EVENT - Log warnings
