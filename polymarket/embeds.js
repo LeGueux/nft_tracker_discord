@@ -18,19 +18,11 @@ function getTopTraderPercent(rank, totalTraders) {
     return percent.toFixed(2);
 }
 
-function formatEndDate(endDate) {
-    if (!endDate || new Date(endDate).getFullYear() <= 1971) return null;
-    return new Date(endDate).toLocaleDateString('fr-FR');
-}
-
 function buildPositionDescription(pos) {
-    const endDate = formatEndDate(pos.endDate);
-
     return [
         `**[${pos.title.substring(0, 100)}](https://polymarket.com/event/${pos.eventSlug}/${pos.slug})**`,
         `${EMOJIS.side(pos.outcome)} **${pos.outcome.toUpperCase()} @ ${(pos.curPrice * 100).toFixed(1)}¢** • ${EMOJIS.pnl(pos.cashPnl)} **${pos.cashPnl >= 0 ? '+' : ''}${pos.cashPnl.toFixed(2)}$** (${pos.percentPnl.toFixed(2)}%)`,
         `${EMOJIS.size(pos.currentValue)} Value ${pos.currentValue.toFixed(2)}$ • ${pos.size.toFixed(1)} shares at ${(pos.avgPrice * 100).toFixed(1)}¢`,
-        endDate ? `⏳ Ends ${endDate}` : null
     ].filter(Boolean).join('\n');
 }
 
@@ -38,7 +30,7 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
     console.log(`Building positions for ${traderLeaderboardPnL.userName}... | buildPolymarketPositionsEmbedForUser`);
     try {
         embed.addFields({
-            name: '━━━━━━━━━━━━━━━━━━━━━━',
+            name: '',
             value: `👤 **[${traderLeaderboardPnL.userName}](https://polymarket.com/@${traderLeaderboardPnL.userName})**`,
             inline: false,
         });
@@ -50,26 +42,14 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
         const allocationPositionsPercent = (totalValue / portfolioTotal) * 100;
 
         embed.addFields({
-            name: '💼 Portfolio',
+            name: '',
             value: [
-                `💼 **Total:** ${portfolioTotal.toFixed(2)}$`,
-                `💵 **Cash:** ${cash.toFixed(2)}$ (${allocationCashPercent.toFixed(1)}%)`,
+                `💼 **Total:** ${formatNumber(parseInt(portfolioTotal))}$`,
+                `💵 **Cash:** ${formatNumber(parseInt(cash))}$ (${allocationCashPercent.toFixed(1)}%)`,
                 `📌 **Positions:** ${totalValue.toFixed(2)}$ (${allocationPositionsPercent.toFixed(1)}%)`,
                 `💰 **Volume traded:** ${formatNumber(parseInt(traderLeaderboardVol.vol))}$`,
-            ].join('\n'),
-        });
-
-        embed.addFields({
-            name: '📈 Performance',
-            value: [
-                `${EMOJIS.pnl(traderLeaderboardPnL.pnl)} **PnL Total:** ${traderLeaderboardPnL.pnl.toFixed(2)}$`,
-                `${EMOJIS.pnl(totalPnL)} **PnL Positions:** ${totalPnL.toFixed(2)}$`,
-            ].join('\n'),
-        });
-
-        embed.addFields({
-            name: '🏆 Classement',
-            value: [
+                `${EMOJIS.pnl(traderLeaderboardPnL.pnl)} **PnL Total:** ${formatNumber(parseInt(traderLeaderboardPnL.pnl))}$`,
+                `${EMOJIS.pnl(totalPnL)} **PnL Positions:** ${formatNumber(parseInt(totalPnL))}$`,
                 `🥇 **PnL:** ${formatNumber(traderLeaderboardPnL.rank)} / ${formatNumber(parseInt(polymarketanalytics.trader_count))} • Top ${getTopTraderPercent(traderLeaderboardPnL.rank, polymarketanalytics.trader_count)}%`,
                 `📦 **Volume:** ${formatNumber(traderLeaderboardVol.rank)} / ${formatNumber(parseInt(polymarketanalytics.trader_count))} • Top ${getTopTraderPercent(traderLeaderboardVol.rank, polymarketanalytics.trader_count)}%`,
             ].join('\n'),
@@ -97,14 +77,17 @@ export async function buildPolymarketPositionsEmbed(discordClient, userName) {
     console.log(`Building Polymarket Positions Embed for ${userName}... | buildPolymarketPositionsEmbed`);
     try {
         const address = POLYMARKET_USERS[userName];
-        const [positions, cash, leaderboardPnL, leaderboardVol, polymarketanalytics] = await Promise.all([
+        let [positions, cash, leaderboardPnL, leaderboardVol, polymarketanalytics] = await Promise.all([
             await getUserPositions(discordClient, address),
             await getPolymarketUsdcBalance(address),
             await getPolymarketTraderLeaderboard(discordClient, address),
             await getPolymarketTraderLeaderboard(discordClient, address, 'VOL'),
             await getPolymarketAnalytics(discordClient),
         ]);
-        // console.log('Positions:', positions);
+
+        // Filtrer les positions pour n'afficher que celles avec une valeur actuelle > 0
+        positions = positions.filter(pos => pos.curPrice > 0);
+        // console.log('Positions:', positions);process.exit(0);
 
         let embed = new EmbedBuilder()
             .setTitle('📈 Polymarket - Actives Positions')
