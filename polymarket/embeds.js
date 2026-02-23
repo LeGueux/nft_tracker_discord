@@ -1,6 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import { sendStatusMessage } from '../shared/error-handler.js';
-import { getUserPositions, getPolymarketTraderLeaderboard, getPolymarketAnalytics } from './polymarket-api.js';
+import { getUserPositions, getPolymarketTraderLeaderboard, getPolymarketAnalytics, getPolymarketAthPnL } from './polymarket-api.js';
 import { getPolymarketUsdcBalance } from '../shared/alchemy-api.js';
 import { POLYMARKET_USERS } from './config.js';
 
@@ -26,7 +26,7 @@ function buildPositionDescription(pos) {
     ].filter(Boolean).join('\n');
 }
 
-async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positions, cash, traderLeaderboardPnL, traderLeaderboardVol, polymarketanalytics) {
+async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positions, cash, traderLeaderboardPnL, traderLeaderboardVol, polymarketanalytics, athPnL) {
     console.log(`Building positions for ${traderLeaderboardPnL.userName}... | buildPolymarketPositionsEmbedForUser`);
     try {
         embed.addFields({
@@ -48,7 +48,7 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
                 `💵 **Cash:** ${formatNumber(parseInt(cash))}$ • ${allocationCashPercent.toFixed(1)}%`,
                 `📌 **Positions:** ${formatNumber(parseInt(totalValue))}$ • ${allocationPositionsPercent.toFixed(1)}%`,
                 `💰 **Volume traded:** ${formatNumber(parseInt(traderLeaderboardVol.vol))}$`,
-                `${EMOJIS.pnl(traderLeaderboardPnL.pnl)} **PnL Total:** ${formatNumber(parseInt(traderLeaderboardPnL.pnl))}$`,
+                `${EMOJIS.pnl(traderLeaderboardPnL.pnl)} **PnL Total:** ${formatNumber(parseInt(traderLeaderboardPnL.pnl))}$ • **ATH** ${formatNumber(parseInt(athPnL))}$`,
                 `${EMOJIS.pnl(totalPnL)} **PnL Positions:** ${formatNumber(parseInt(totalPnL))}$`,
                 `🥇 **PnL:** ${formatNumber(traderLeaderboardPnL.rank)} / ${formatNumber(parseInt(polymarketanalytics.trader_count))} • Top ${getTopTraderPercent(traderLeaderboardPnL.rank, polymarketanalytics.trader_count)}%`,
                 `📦 **Volume:** ${formatNumber(traderLeaderboardVol.rank)} / ${formatNumber(parseInt(polymarketanalytics.trader_count))} • Top ${getTopTraderPercent(traderLeaderboardVol.rank, polymarketanalytics.trader_count)}%`,
@@ -77,12 +77,13 @@ export async function buildPolymarketPositionsEmbed(discordClient, userName) {
     console.log(`Building Polymarket Positions Embed for ${userName}... | buildPolymarketPositionsEmbed`);
     try {
         const address = POLYMARKET_USERS[userName];
-        let [positions, cash, leaderboardPnL, leaderboardVol, polymarketanalytics] = await Promise.all([
+        let [positions, cash, leaderboardPnL, leaderboardVol, polymarketanalytics, athPnL] = await Promise.all([
             await getUserPositions(discordClient, address),
             await getPolymarketUsdcBalance(address),
             await getPolymarketTraderLeaderboard(discordClient, address),
             await getPolymarketTraderLeaderboard(discordClient, address, 'VOL'),
             await getPolymarketAnalytics(discordClient),
+            await getPolymarketAthPnL(discordClient, address),
         ]);
 
         // Filtrer les positions pour n'afficher que celles avec une valeur actuelle > 0
@@ -94,7 +95,7 @@ export async function buildPolymarketPositionsEmbed(discordClient, userName) {
             .setColor(0x00ff00)
             .setTimestamp();
 
-        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, positions, cash, leaderboardPnL, leaderboardVol, polymarketanalytics);
+        embed = await buildPolymarketPositionsEmbedForUser(discordClient, embed, positions, cash, leaderboardPnL, leaderboardVol, polymarketanalytics, athPnL);
 
         console.log(`Embed length: ${embed.length} characters`);
         if (embed.length > 6000) {

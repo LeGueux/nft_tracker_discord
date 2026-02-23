@@ -79,3 +79,36 @@ export async function getPolymarketAnalytics(discordClient) {
         );
     }
 }
+
+export async function getPolymarketAthPnL(discordClient, address) {
+    console.log(`getPolymarketAthPnL à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
+    var apiUrl = `https://user-pnl-api.polymarket.com/user-pnl?user_address=${address}&interval=all&fidelity=12h`;
+    dns.setDefaultResultOrder('ipv4first');
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+        });
+
+        const data = await response.json();
+        // data is expected to be an array of objects with a 'p' field
+        if (Array.isArray(data) && data.length > 0) {
+            const maxP = data.reduce((max, item) => {
+                if (item && typeof item.p === 'number' && item.p > max) {
+                    return item.p;
+                }
+                return max;
+            }, -Infinity);
+            return maxP;
+        } else {
+            // no data or unexpected format
+            return 0;
+        }
+    } catch (error) {
+        console.error('Erreur API getPolymarketAthPnL:', error);
+        await sendStatusMessage(
+            discordClient,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur API getPolymarketAthPnL : \`${error}\``,
+        );
+    }
+}
