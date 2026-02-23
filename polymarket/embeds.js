@@ -45,8 +45,8 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
             name: '',
             value: [
                 `💼 **Total:** ${formatNumber(parseInt(portfolioTotal))}$`,
-                `💵 **Cash:** ${formatNumber(parseInt(cash))}$ (${allocationCashPercent.toFixed(1)}%)`,
-                `📌 **Positions:** ${totalValue.toFixed(2)}$ (${allocationPositionsPercent.toFixed(1)}%)`,
+                `💵 **Cash:** ${formatNumber(parseInt(cash))}$ • ${allocationCashPercent.toFixed(1)}%`,
+                `📌 **Positions:** ${formatNumber(parseInt(totalValue))}$ • ${allocationPositionsPercent.toFixed(1)}%`,
                 `💰 **Volume traded:** ${formatNumber(parseInt(traderLeaderboardVol.vol))}$`,
                 `${EMOJIS.pnl(traderLeaderboardPnL.pnl)} **PnL Total:** ${formatNumber(parseInt(traderLeaderboardPnL.pnl))}$`,
                 `${EMOJIS.pnl(totalPnL)} **PnL Positions:** ${formatNumber(parseInt(totalPnL))}$`,
