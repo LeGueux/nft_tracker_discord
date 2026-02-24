@@ -29,14 +29,8 @@ function buildPositionDescription(pos) {
 async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positions, cash, traderLeaderboardPnL, traderLeaderboardVol, polymarketanalytics, athPnL) {
     console.log(`Building positions for ${traderLeaderboardPnL.userName}... | buildPolymarketPositionsEmbedForUser`);
     try {
-        embed.addFields({
-            name: '',
-            value: `👤 **[${traderLeaderboardPnL.userName}](https://polymarket.com/@${traderLeaderboardPnL.userName})**`,
-            inline: false,
-        });
         const totalValue = positions.reduce((sum, pos) => sum + pos.currentValue, 0);
         const totalPnL = positions.reduce((sum, pos) => sum + pos.cashPnl, 0);
-
         const portfolioTotal = cash + totalValue;
         const allocationCashPercent = (cash / portfolioTotal) * 100;
         const allocationPositionsPercent = (totalValue / portfolioTotal) * 100;
@@ -44,6 +38,7 @@ async function buildPolymarketPositionsEmbedForUser(discordClient, embed, positi
         embed.addFields({
             name: '',
             value: [
+                `👤 **[${traderLeaderboardPnL.userName}](https://polymarket.com/@${traderLeaderboardPnL.userName})**`,
                 `💼 **Total:** ${formatNumber(parseInt(portfolioTotal))}$`,
                 `💵 **Cash:** ${formatNumber(parseInt(cash))}$ • ${allocationCashPercent.toFixed(1)}%`,
                 `📌 **Positions:** ${formatNumber(parseInt(totalValue))}$ • ${allocationPositionsPercent.toFixed(1)}%`,
