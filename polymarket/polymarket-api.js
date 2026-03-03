@@ -80,8 +80,8 @@ export async function getPolymarketAnalytics(discordClient) {
     }
 }
 
-export async function getPolymarketAthPnL(discordClient, address) {
-    console.log(`getPolymarketAthPnL à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
+export async function getPolymarketAthAtlPnL(discordClient, address) {
+    console.log(`getPolymarketAthAtlPnL à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
     var apiUrl = `https://user-pnl-api.polymarket.com/user-pnl?user_address=${address}&interval=all&fidelity=12h`;
     dns.setDefaultResultOrder('ipv4first');
 
@@ -93,22 +93,54 @@ export async function getPolymarketAthPnL(discordClient, address) {
         const data = await response.json();
         // data is expected to be an array of objects with a 'p' field
         if (Array.isArray(data) && data.length > 0) {
-            const maxP = data.reduce((max, item) => {
-                if (item && typeof item.p === 'number' && item.p > max) {
-                    return item.p;
+            // compute max and min PnL values
+            let maxP = -Infinity;
+            let minP = Infinity;
+            data.forEach(item => {
+                if (item && typeof item.p === 'number') {
+                    if (item.p > maxP) maxP = item.p;
+                    if (item.p < minP) minP = item.p;
                 }
-                return max;
-            }, -Infinity);
-            return maxP;
+            });
+
+            const n = data.length;
+            let diffLastDay = null;
+            let diffLastWeek = null;
+            let diffLastMonth = null;
+            if (n >= 1) {
+                const last = data[n - 1];
+                const tenthDailyFromEnd = n >= 2 ? data[n - 3] : null;
+                if (last && typeof last.p === 'number' && tenthDailyFromEnd && typeof tenthDailyFromEnd.p === 'number') {
+                    diffLastDay = last.p - tenthDailyFromEnd.p;
+                }
+                const tenthWeeklyFromEnd = n >= 14 ? data[n - 15] : null;
+                if (last && typeof last.p === 'number' && tenthWeeklyFromEnd && typeof tenthWeeklyFromEnd.p === 'number') {
+                    diffLastWeek = last.p - tenthWeeklyFromEnd.p;
+                }
+                const tenthMonthlyFromEnd = n >= 60 ? data[n - 60] : null;
+                if (last && typeof last.p === 'number' && tenthMonthlyFromEnd && typeof tenthMonthlyFromEnd.p === 'number') {
+                    diffLastMonth = last.p - tenthMonthlyFromEnd.p;
+                }
+            }
+
+            return {
+                maxP,
+                minP,
+                diffLastDay,
+                diffLastWeek,
+                diffLastMonth,
+                // original array included in case callers need raw data
+                raw: data,
+            };
         } else {
             // no data or unexpected format
-            return 0;
+            return { maxP: 0, minP: 0, diffLastDay: null, diffLastWeek: null, diffLastMonth: null, raw: data };
         }
     } catch (error) {
-        console.error('Erreur API getPolymarketAthPnL:', error);
+        console.error('Erreur API getPolymarketAthAtlPnL:', error);
         await sendStatusMessage(
             discordClient,
-            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur API getPolymarketAthPnL : \`${error}\``,
+            `💥 <@${process.env.FRANCK_DISCORD_USER_ID}> Erreur API getPolymarketAthAtlPnL : \`${error}\``,
         );
     }
 }
