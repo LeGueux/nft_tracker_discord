@@ -105,6 +105,7 @@ async function analyzeListingsFragility(data, snipeOnly = false, nbMaxGaps = 4) 
             [process.env.NICO_ADDRESS_2.toLowerCase()]: '-N2',
             [process.env.BOB_ADDRESS_1.toLowerCase()]: '-B1',
             [process.env.COCH_ADDRESS_1.toLowerCase()]: '-C1',
+            [process.env.PORTOS_ADDRESS_1.toLowerCase()]: '-P1',
         };
 
         const suffix = ownerMap[nftData?.owner?.toLowerCase()] ?? '';

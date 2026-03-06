@@ -58,6 +58,7 @@ const commands = [
                     { name: 'Nico', value: process.env.NICO_ADDRESS_1 },
                     { name: 'Bob', value: process.env.BOB_ADDRESS_1 },
                     { name: 'Coch', value: process.env.COCH_ADDRESS_1 },
+                    { name: 'Portos', value: process.env.PORTOS_ADDRESS_1 },
                 )
         )
         .addBooleanOption(option =>

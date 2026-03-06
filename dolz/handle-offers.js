@@ -45,6 +45,7 @@ export async function handleOffersForOurTeam(discordClient) {
                             process.env.NICO_DISCORD_USER_ID,
                             process.env.BOB_DISCORD_USER_ID,
                             process.env.COCH_DISCORD_USER_ID,
+                            process.env.PORTOS_DISCORD_USER_ID,
                         ],
                     },
                 });

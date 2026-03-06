@@ -48,6 +48,7 @@ export function getContentTagsDependsOnNFT(data, price, type) {
     const NICO = `<@${process.env.NICO_DISCORD_USER_ID}>`;
     const BOB = `<@${process.env.BOB_DISCORD_USER_ID}>`;
     const COCH = `<@${process.env.COCH_DISCORD_USER_ID}>`;
+    const PORTOS = `<@${process.env.PORTOS_DISCORD_USER_ID}>`;
 
     const isListing = type === 'listing';
     const isSale = type === 'sale';
@@ -182,6 +183,7 @@ export function getDiscordUserToNotifyByWallet(walletAddress) {
     const NICO = `<@${process.env.NICO_DISCORD_USER_ID}>`;
     const BOB = `<@${process.env.BOB_DISCORD_USER_ID}>`;
     const COCH = `<@${process.env.COCH_DISCORD_USER_ID}>`;
+    const PORTOS = `<@${process.env.PORTOS_DISCORD_USER_ID}>`;
 
     const ownerMap = {
         [process.env.FRANCK_ADDRESS_1.toLowerCase()]: FRANCK,
@@ -190,6 +192,7 @@ export function getDiscordUserToNotifyByWallet(walletAddress) {
         [process.env.NICO_ADDRESS_2.toLowerCase()]: NICO,
         [process.env.BOB_ADDRESS_1.toLowerCase()]: BOB,
         [process.env.COCH_ADDRESS_1.toLowerCase()]: COCH,
+        [process.env.PORTOS_ADDRESS_1.toLowerCase()]: PORTOS,
     };
 
     return ownerMap[walletAddress.toLowerCase()] ?? '';

@@ -78,6 +78,7 @@ export async function callApiToHandleNFTEvents(discordClient) {
                                 process.env.NICO_DISCORD_USER_ID,
                                 process.env.BOB_DISCORD_USER_ID,
                                 process.env.COCH_DISCORD_USER_ID,
+                                process.env.PORTOS_DISCORD_USER_ID,
                             ],
                         },
                     });
@@ -144,6 +145,7 @@ export async function getBabyDolzBalance(address) {
 
         // Parsing de la réponse JSON
         const data = await response.json();
+        console.log(`Balance de BabyDolz pour ${address}:`, data);
 
         // Conversion de la donnée retournée en entier
         return parseInt(data);

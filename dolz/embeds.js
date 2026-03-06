@@ -109,6 +109,11 @@ export async function buildSaleListingNFTEmbed(data, from, to, price, type) {
     ].includes(from.toLowerCase())) {
         const tpInDolz = price * parseFloat(process.env.COCH_TP_RATIO) / 100;
         priceString += `\nTP ${process.env.COCH_TP_RATIO}%: ${getPriceStringFormatted(tpInDolz, dolzPrice)}\n`;
+    } else if ([
+        process.env.PORTOS_ADDRESS_1.toLowerCase(),
+    ].includes(from.toLowerCase())) {
+        const tpInDolz = price * parseFloat(process.env.PORTOS_TP_RATIO) / 100;
+        priceString += `\nTP ${process.env.PORTOS_TP_RATIO}%: ${getPriceStringFormatted(tpInDolz, dolzPrice)}\n`;
     }
 
     const totalListedAssetsSellerForThisModel = structuredClone(assetsSellerForThisModel).results.filter(item => item.listing !== null).length;

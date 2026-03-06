@@ -24,4 +24,5 @@ export const WALLETS_TEAM = [
     process.env.NICO_ADDRESS_2,
     process.env.BOB_ADDRESS_1,
     process.env.COCH_ADDRESS_1,
+    process.env.PORTOS_ADDRESS_1,
 ];
