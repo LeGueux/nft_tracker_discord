@@ -109,15 +109,15 @@ export async function getPolymarketAthAtlPnL(discordClient, address) {
             let diffLastMonth = null;
             if (n >= 1) {
                 const last = data[n - 1];
-                const tenthDailyFromEnd = n >= 2 ? data[n - 3] : null;
+                const tenthDailyFromEnd = n >= 11 ? data[n - 12] : null;
                 if (last && typeof last.p === 'number' && tenthDailyFromEnd && typeof tenthDailyFromEnd.p === 'number') {
                     diffLastDay = last.p - tenthDailyFromEnd.p;
                 }
-                const tenthWeeklyFromEnd = n >= 14 ? data[n - 15] : null;
+                const tenthWeeklyFromEnd = n >= 59 ? data[n - 60] : null;
                 if (last && typeof last.p === 'number' && tenthWeeklyFromEnd && typeof tenthWeeklyFromEnd.p === 'number') {
                     diffLastWeek = last.p - tenthWeeklyFromEnd.p;
                 }
-                const tenthMonthlyFromEnd = n >= 60 ? data[n - 60] : null;
+                const tenthMonthlyFromEnd = n >= 239 ? data[n - 240] : null;
                 if (last && typeof last.p === 'number' && tenthMonthlyFromEnd && typeof tenthMonthlyFromEnd.p === 'number') {
                     diffLastMonth = last.p - tenthMonthlyFromEnd.p;
                 }
