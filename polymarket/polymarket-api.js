@@ -82,7 +82,7 @@ export async function getPolymarketAnalytics(discordClient) {
 
 export async function getPolymarketAthAtlPnL(discordClient, address) {
     console.log(`getPolymarketAthAtlPnL à ${new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })}`);
-    var apiUrl = `https://user-pnl-api.polymarket.com/user-pnl?user_address=${address}&interval=all&fidelity=12h`;
+    var apiUrl = `https://user-pnl-api.polymarket.com/user-pnl?user_address=${address}&interval=all&fidelity=3h`;
     dns.setDefaultResultOrder('ipv4first');
 
     try {
